@@ -15,9 +15,9 @@ Parse `$ARGUMENTS` to extract:
 - `company-marker` (required, first positional arg, e.g. `assurantauto`)
 - `--branch` (optional GACS branch, default: `draft`)
 - `--tags` (optional tag filter, default: `e2e`)
-- `--output` (optional output dir, default: `customer-scenario-outputs/<company-marker>/e2e_full_<YYYYMMDD>`)
+- `--output` (optional output dir, default: `$PWD/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>`)
 
-Infer the scenarios directory as `customer-scenarios/<company-marker>/E2E`.
+The scenarios directory is always `$PWD/scenarios/E2E` (this repo's checked-in scenario definitions).
 
 ## Step 2: Run the Scenarios
 
@@ -26,15 +26,16 @@ All commands must be run from the `voice-genagent` repo. Set `VOICE_GENAGENT_DIR
 **Try running this yourself first:**
 
 ```bash
+_REPO=$PWD   # this repo (assurantauto-testing)
 _VG=${VOICE_GENAGENT_DIR:-$HOME/code/voice-genagent}
 cd "$_VG" && env -u ALL_PROXY -u all_proxy poetry run python -m tools.scenario_runner.run voice \
-  customer-scenarios/<company-marker>/E2E \
+  "$_REPO/scenarios/E2E" \
   --voice-provider vapi \
   --tr \
   --chunk 10 \
   --tags <tags> \
   --gacs-branch <branch> \
-  --output <output-dir>
+  --output "$_REPO/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>"
 ```
 
 If the command fails (permission error, module not found, network error), present the exact command to the user and ask them to run it from their terminal, then wait for them to confirm it's running.
@@ -84,13 +85,14 @@ for e in errored:
 Find the YAML file for each missing scenario and re-run it individually:
 
 ```bash
+_REPO=$PWD
 _VG=${VOICE_GENAGENT_DIR:-$HOME/code/voice-genagent}
 cd "$_VG" && env -u ALL_PROXY -u all_proxy poetry run python -m tools.scenario_runner.run voice \
-  <path-to-scenario.yaml> \
+  "$_REPO/scenarios/E2E/<path-to-scenario.yaml>" \
   --voice-provider vapi \
   --tr \
   --gacs-branch <branch> \
-  --output <output-dir>
+  --output "$_REPO/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>"
 ```
 
 Run each missing scenario file as a separate command (the `file` argument only accepts one path at a time).
@@ -109,11 +111,12 @@ Compare to the expected total. Re-check every few minutes. When the count matche
 
 Once all scenarios have completed, generate the HTML report using the **system Python** (not poetry) to avoid proxy issues:
 
+Run from this repo's root (`$PWD`):
+
 ```bash
-env -u ALL_PROXY -u all_proxy python3 \
-  generate_report.py \
-  <output-dir> \
-  --output customer-scenario-outputs/<company-marker>/draft_<YYYYMMDD>_report.html
+env -u ALL_PROXY -u all_proxy python3 generate_report.py \
+  scenario-runs/<company-marker>/e2e_full_<YYYYMMDD> \
+  --output reports/<company-marker>_e2e_full_<YYYYMMDD>_report.html
 ```
 
 Report the path of the generated HTML file to the user.

@@ -7,8 +7,8 @@ Usage:
 
 Example:
     python generate_report.py \
-        customer-scenario-outputs/assurantauto/sandbox_20260406_run1 \
-        --output customer-scenario-outputs/assurantauto/sandbox_report.html
+        scenario-runs/assurantauto/e2e_full_20260423 \
+        --output reports/assurantauto_e2e_full_20260423_report.html
 """
 
 import argparse

@@ -78,8 +78,8 @@ def fetch_voice_conversation(company_marker: str, conversation_id: str, team: st
             print("ERROR: No conversations found!")
             return None
 
-        # Save to file
-        output_dir = os.path.join(os.getcwd(), "fetched_conversations")
+        # Save to fetched_conversations/ inside this repo, regardless of cwd
+        output_dir = str(project_root / "fetched_conversations")
         os.makedirs(output_dir, exist_ok=True)
 
         customer_id = merged_data["model_input"].get("customer_id", "")

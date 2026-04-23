@@ -156,10 +156,10 @@ env -u ALL_PROXY -u all_proxy \
 
 ```bash
 # From this repo root:
-python3 generate_report.py scenario-runs/e2e_full_20260423 \
-    --output reports/e2e_full_20260423_report.html
+python3 generate_report.py scenario-runs/assurantauto/e2e_full_20260423 \
+    --output reports/assurantauto_e2e_full_20260423_report.html
 
-open reports/e2e_full_20260423_report.html
+open reports/assurantauto_e2e_full_20260423_report.html
 ```
 
 The report includes per-scenario pass/fail status, turn timelines, dead-air analysis, and links to individual scenario details.
@@ -281,8 +281,8 @@ scenario-runs/<run-name>/
 Pre-generated HTML reports are in `reports/`. To regenerate from stored runs:
 
 ```bash
-python3 generate_report.py scenario-runs/e2e_full_20260423 \
-    --output reports/e2e_full_20260423_report.html
+python3 generate_report.py scenario-runs/assurantauto/e2e_full_20260423 \
+    --output reports/assurantauto_e2e_full_20260423_report.html
 ```
 
 ---

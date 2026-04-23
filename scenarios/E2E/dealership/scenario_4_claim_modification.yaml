@@ -1,0 +1,197 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-004
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Dealership
+  - When offered the portal, say you prefer to handle it over the phone
+  - Explain that you need to add additional parts to an existing claim — the technician found a related component that also
+    needs replacement
+  - Accept being transferred to someone who can process the modification
+  knowledge: You are calling from Riverside Honda. You have an existing claim (37030004A, contract VSC300004) for a water
+    pump replacement on a 2019 Honda CR-V (VIN 2HKRW2H88KH300004, last 8 KH300004). After disassembly, the technician found
+    the thermostat housing also needs replacement. You need to add this to the claim. If asked your caller type, say Dealership.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Experienced service advisor. Explains the situation clearly. Understands escalation may be needed and will cooperate.
+description: Dealership needs to modify an existing claim to add additional parts — agent escalates to claims team
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealership
+- rules:
+  - Agent categorizes the inquiry as a claim modification
+- rules:
+  - Agent looks up the claim using an available claim lookup function
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr to process the modification, OR informs the customer that agents are
+    not currently available due to business hours
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'UPDATECLAIM'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Dealership: CARRENTAL,
+    CLAIMS, CLAIMSTATUS, NEWCLAIM, UPDATECLAIM, COVERAGEINFO, GAP, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+id: e2e_dealership_claim_modification
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        breakdownMileage: 73000
+        createdOn: '2026-02-17'
+        repairShopName: Riverside Honda
+        repairShopId: 000CA062
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    - params: {}
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        breakdownMileage: 73000
+        createdOn: '2026-02-17'
+        repairShopName: Riverside Honda
+        repairShopId: 000CA062
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        createdOn: '2026-02-17'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    - params: {}
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        createdOn: '2026-02-17'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        createdOn: '2026-02-17'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    - params: {}
+      response:
+        claimNumber: 37030004A
+        VIN: 2HKRW2H88KH300004
+        contractNumber: VSC300004
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Water Pump Replacement
+        createdOn: '2026-02-17'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 480.0
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551300004'
+    - params: {}
+      response:
+        PhoneNumber: '5551300004'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551300004'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551300004'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- existing_claim
+- modification
+- escalation

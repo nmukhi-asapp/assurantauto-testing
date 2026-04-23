@@ -1,0 +1,211 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-021
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - Tell the agent your car has a mechanical issue and you need to get it repaired
+  - Ask where you should take your car for repairs
+  knowledge: If asked to identify yourself as a caller type, say you are a Contract Holder. Start by saying 'I have a mechanical
+    issue with my car. I'm not sure where I should take it for repairs.'
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Cooperative and open to suggestions. Wants clear guidance on how to proceed.
+description: Customer asking where to take car for repair — agent must recommend returning to the selling dealer first before
+  suggesting a repair facility; must not say 'vehicle service contract'
+evaluations:
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a Contract Holder
+- rules:
+  - Agent calls get_contract_and_claims_data_ivr before answering the customer's questions
+- rules:
+  - Agent recommends the selling dealer as the first option for repairs before mentioning independent repair facilities
+- rules:
+  - Agent does NOT say 'vehicle service contract' — must refer to it simply as 'contract' or 'coverage'
+- rules:
+  - Agent provides the selling dealer name or contact information from the contract data
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Contract Holder:
+    CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO, GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE,
+    RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_journey1_selling_dealer_first_recommendation
+mock_user:
+  current_timestamp: '2026-03-19'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 1G1BE5SM0H7100021
+              contractNumber: VSC100021
+              customerFirstName: Sandra
+              customerLastName: Nguyen
+              customerEmail: sandra.nguyen@test.assurant.com
+              customerAddress1: 600 Oak Park Ave
+              customerCity: Denver
+              customerCountry: USA
+              customerStateCode: CO
+              customerPostalCode: '80201'
+              customerHomePhone: '5551000021'
+              expirationDate: '2028-01-15'
+              status: Active
+              dealerId: 000CO009
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 95000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-01-15'
+              sellingDealerName: Rocky Mountain Chevrolet
+              sellingDealerAddress: 900 Colfax Ave, Denver, CO, 80201
+              sellingDealerPhone: '3035550190'
+              model: CRUZE
+              make: CHEVROLET
+              vehicleYear: 2021
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Gold
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-01-15'
+              customerMobilePhone: '5551000021'
+    - params: {}
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 1G1BE5SM0H7100021
+              contractNumber: VSC100021
+              customerFirstName: Sandra
+              customerLastName: Nguyen
+              customerEmail: sandra.nguyen@test.assurant.com
+              customerAddress1: 600 Oak Park Ave
+              customerCity: Denver
+              customerCountry: USA
+              customerStateCode: CO
+              customerPostalCode: '80201'
+              customerHomePhone: '5551000021'
+              expirationDate: '2028-01-15'
+              status: Active
+              dealerId: 000CO009
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 95000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-01-15'
+              sellingDealerName: Rocky Mountain Chevrolet
+              sellingDealerAddress: 900 Colfax Ave, Denver, CO, 80201
+              sellingDealerPhone: '3035550190'
+              model: CRUZE
+              make: CHEVROLET
+              vehicleYear: 2021
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Gold
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-01-15'
+              customerMobilePhone: '5551000021'
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000021'
+    - params: {}
+      response:
+        PhoneNumber: '5551000021'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551000021'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551000021'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- journey1
+- mechanical_repair
+- selling_dealer
+- terminology
+- regression
+- CAa1325513170d0fc38b6d22e8fd5ed4c8

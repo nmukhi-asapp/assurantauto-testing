@@ -1,0 +1,90 @@
+company_marker: assurantauto
+customer:
+  customer_id: RT-002
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are an Assurant Employee
+  - Explain that you are testing the IVR system from the internal employee line
+  knowledge: You are an Assurant employee testing the IVR system from an internal number. When the agent asks what type of
+    caller you are, say you are an Assurant Employee. You are testing the employee routing path of the CallerIdentification
+    task.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Professional internal tester. Gives brief, direct answers. Cooperative with the IVR system's prompts.
+description: Assurant employee calling — CallerIdentification should identify and route to Employee flow
+evaluations:
+- rules:
+  - Agent does not route to RepairShopIssues (is_repair_facility returns false)
+- rules:
+  - Agent asks the caller to identify their caller type (Contract Holder, Dealership, or Assurant Employee)
+- rules:
+  - Agent routes to the Employee service flow or escalates appropriately for employee callers
+id: e2e_routing_employee_caller
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551200002'
+    - params: {}
+      response:
+        PhoneNumber: '5551200002'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551200002'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551200002'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- routing
+- employee
+- caller_identification

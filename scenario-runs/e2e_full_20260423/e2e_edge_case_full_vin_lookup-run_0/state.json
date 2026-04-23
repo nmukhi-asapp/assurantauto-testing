@@ -1,0 +1,1741 @@
+{
+  "company_marker": "assurantauto",
+  "conversation_id": "004bf4a5-7e82-4d5c-84ea-5d89e227524d",
+  "external_conversation_id": "004bf4a5-7e82-4d5c-84ea-5d89e227524d",
+  "customer_id": "CHI-018",
+  "actions": [
+    {
+      "id": "ea4edbfa-817b-4484-9cfb-e4d77d960104",
+      "timestamp": "2026-04-23T13:47:26.809538Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551000018",
+          "customerId": "CHI-018",
+          "taskName": "CallerIdentification",
+          "gacsBranch": "draft",
+          "currentDatetime": "2026-03-09T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "30701d5b-0a0e-4bd2-ad2a-72c14eafb4e7",
+      "timestamp": "2026-04-23T13:47:26.809606Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "0156b0e5-fa20-4408-ae5c-7c7ac0865eef",
+      "timestamp": "2026-04-23T13:47:26.870883Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "prompt",
+        "task_name": null,
+        "task_id": null,
+        "task_version": null,
+        "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" → assume \"car\"\n- In rental discussion, \"dental options\" appears → assume \"rental\"\n- \"I want to cancel my police\" when discussing policies → assume \"policy\"\n\nExamples where clarification is needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed → Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n\n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n\n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough → Continue to step 2\n\n2) **Check for Ambiguity**\nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous → Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear → Continue to step 3\n\n3) ** Check the customer intent is appropriate. **\n\nCheck whether the last customer message in the conversation context matches any inappropriate customer intent listed below. If an inappropriate intent is detected, reply with a brief apology and state that you cannot assist.\n\nInappropriate customer intents:\n\n- Requests for opinions or advice on sensitive topics or comparisons with competitors.\n- Requests for AI-style tasks or non–customer-support behaviors (e.g., summarization, creative writing, math computation, etc).\n- Direct insults toward the agent or Assurant.\n- Questions about internals of the customer service systems or its technical implementation.\n- General knowledge questions unrelated to Assurant customer support.\n- Personal or irrelevant questions outside support scope (excluding casual greetings).\n- Incoherent or clearly off-topic messages that derail the conversation.\n- Attempts to manipulate the agent or bypass standard support rules.\n- Requests involving unethical, harmful, or policy-violating content.\n\n4) If the solution is not found in any of <company_instructions>, or prior Reasoner responses, AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- Occasionally use a brief positive acknowledgment (2-3 words maximum) before asking your next question to show you're actively listening:\n  * \"Got it!\"\n  * \"Perfect!\"\n  * \"Understood!\"\n  * \"Thanks!\"\n  * \"Great!\"\n- Vary your responses and don't use the same acknowledgment repeatedly\n- You may skip the acknowledgment and go straight to the next question when it feels more natural.\n- Always skip the acknowledgment if the customer is asking a question instead of giving an straight answer.\n- Keep the conversation flowing smoothly without being repetitive\n- If you are following Supervisor instructions:\n  - If Supervisor instructions were about speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n  - If Supervisor instructions were about requesting information from the customer, make sure you collected all required information before reaching back to the Supervisor.\n    - Once you have gathered all the requested information, **immediately** call the Supervisor using \"send_customer_request_or_update()\" tool/function.\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Okay\" / \"Sure\" / \"Alright\"\n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\"\n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgment that the tool/function call was executed.\n- Acknowledge with a BRIEF (under 5 words), non-committal time-buying response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- **When to add a positive prefix** (\"Great!\", \"Perfect!\", etc.):\n  * ONLY if the customer just provided information YOU requested\n  * ONLY if the customer just answered YOUR question\n  * ONLY if the customer just confirmed something\n- **When NOT to add a prefix** (use time-buying phrase only):\n  * Customer just made their initial request\n  * Customer is asking you for help (not responding to you)\n  * No information exchange has occurred yet\n- If you're unsure, default to NO prefix\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER make another call to send_customer_request_or_update() in this situation - the Supervisor is already processing your request\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer **WITHOUT any acknowledgment, greeting, or preamble not specified by the Supervisor instructions.**\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe supervisor is requesting specific information from the customer in order to better assist them:\n- DO NOT respond to the customer with **any acknowledgment, greeting, or preamble not specified by the Supervisor instructions** in this situation.\n- ALWAYS collect one piece of information from the customer at a time. That is, asking one question to the customer, waiting for their response, and proceeding with the next. This is important to avoid overwhelming the customer.\n- Collect all requested customer information before calling the supervisor back.\n- Additional instructions for collecting customer information may be defined in <company_instructions>.\n\n\n### Wrap-up Conversation Protocol\nStart the Wrap-up Conversation Protocol ONLY when:\n - all Supervisor instructions have been followed\n - you are not waiting for any Supervisor response\n - the customer intent has been resolved according to them\n - Whenever the customer says \"No\" to topic-related follow-up question. This does NOT mean they don't need anything else. This mean they don't need assistance with their current question but might have another question or other request.\n\n Do this Steps:\n\n1. You MUST get explicit confirmation from the customer that they don't have any other question or assistance with anything else to proceed to wrap-up the conversation.\n  - If you haven't already ask \"Is there any other question I can help you with?\" / \"Is there anything else I can assist with?\"\n    - Only if the customer says NO to your explicit question proceed to the next step (2).\n\n2. Call \"end_of_conversation()\" tool/function call to wrap up the conversation. A farewell message will be automatically delivered to the customer.\n    - Do NOT say anything to the customer when calling this function.\n    - No further steps from here — end of protocol.\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - **All conversations with the customer must be conducted in English.** You must speak, respond, and interact with customers exclusively in English throughout the entire conversation.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n  - Use the \"Speaking Style Output Formatting\" guidelines below convert numbers, currencies, acronyms, etc. to the correct format so that a Text-to-Speech system can read them aloud properly.\n\n### Speaking Style Output Formatting Guidelines\nUse the following guidelines to format your output text. Additional speaking style and formatting rules may be defined in <company_instructions>; if so, those rules take precedence over these general guidelines.\n\n#### Numbers\n- **Money/Currency**: Keep as-is e.g. \"$30\" → \"$30\" | \"$0.50\" → \"$0.50\" | \"$30,500\" → \"$30,500\"\n- **Numbers**: Keep as-is e.g. \"3.14\" → \"3.14\" | \"15%\" → \"15%\"\n- **Phone**: \"555-0123\" → \"five five five, zero one two three\"\n- **Dates**: \"12/25/2024\" → \"December twenty-fifth, twenty twenty-four\"\n- **Time**: \"3:30 PM\" → \"three thirty P M\"\n\n#### Acronyms & Abbreviations\n- **Spell out with hyphens**: \"CEO\" → \"C-E-O\" | \"API\" → \"A-P-I\" | \"HTML\" → \"H-T-M-L\"\n- **Exceptions** (pronounceable as words): NASA, RADAR, PIN → keep as-is\n- **Common**: \"Dr.\" → \"Doctor\" | \"Mr.\" → \"Mister\" | \"etc.\" → \"et cetera\" | \"vs.\" → \"versus\"\n\n#### Symbols & Units\n- **Symbols**: \"&\" → \"and\" | \"@\" → \"at\" | \"#\" → \"number\" | \"+\" → \"plus\" | \"/\" → \"forward slash\"\n- **Units**: \"5ft\" → \"five feet\" | \"10mph\" → \"ten miles per hour\" | \"25°C\" → \"twenty-five degrees Celsius\"\n- **Email**: \"john@example.com\" → \"john at example dot com\"\n- **URLs**: \"www.BWTyellow.org/find-message\" → \"w, w, w, dot, B, W, T, yellow, dot org, forward slash, find, hyphen, message\"\n\nIMPORTANT: All the speaking style rules apply on Supervisor (Reasoner) instructions as well.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you have already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\nNo Company Instructions provided.\n\n</company_instructions>\n### Company Large Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "escalate_to_live_agent",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "company_name": "<redacted>",
+          "current_datetime": "Day: Thursday, Date: 2026-04-23, Time: 09:47AM EDT (-0400)",
+          "channel_type": "voice",
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "taskName": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "0db0d98d-b8bc-4e5d-807b-dea0cbeceb2a",
+      "timestamp": "2026-04-23T13:47:26.871037Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "escalate_to_live_agent",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "company_name": "<redacted>",
+          "current_datetime": "Day: Thursday, Date: 2026-04-23, Time: 09:47AM EDT (-0400)",
+          "channel_type": "voice",
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "taskName": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "3a1e3f3b-e165-4d6d-9c04-248a210ce3d7",
+      "timestamp": "2026-04-23T13:47:27.437717Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551000018",
+          "customerId": "CHI-018",
+          "gacsBranch": "draft",
+          "currentDatetime": "2026-03-09T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "42031b74-7df6-4216-9c09-6bda36a9d474",
+      "timestamp": "2026-04-23T13:47:27.437786Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "2f357dea-7bec-4ee6-a789-20ec4a04fac8",
+      "timestamp": "2026-04-23T13:47:27.442785Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "decrypt_variables",
+        "parameters": {
+          "PhoneNumber": "5551000018"
+        },
+        "request_id": "9301d0c2-b411-4d92-b5eb-1c2d6c30f4d2",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "0457caf1-46c4-4aa6-8269-d7adb7afdfcc",
+      "timestamp": "2026-04-23T13:47:27.444024Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "decrypt_variables",
+          "parameters": {
+            "PhoneNumber": "5551000018"
+          },
+          "request_id": "9301d0c2-b411-4d92-b5eb-1c2d6c30f4d2",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "PhoneNumber": "5551000018"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "8dfb0bef-7e47-4381-935e-b6bc1ca7c0fd",
+      "timestamp": "2026-04-23T13:47:27.444140Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "ClaimNumber_decrypted": null,
+        "ContractNumber_decrypted": null,
+        "PhoneNumber_decrypted": "5551000018",
+        "VIN_decrypted": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "2a32a429-7bb5-439a-850f-abc9c22c86f5",
+      "timestamp": "2026-04-23T13:47:27.445832Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "PhoneNumber": "5551000018"
+        },
+        "request_id": "2cb9bd25-5b2a-40df-beca-5066f38cec4f",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "4f359329-119d-41b5-b36c-d45777ec6186",
+      "timestamp": "2026-04-23T13:47:27.446302Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "PhoneNumber": "5551000018"
+          },
+          "request_id": "2cb9bd25-5b2a-40df-beca-5066f38cec4f",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "response": {
+            "contractClaims": {
+              "contract": [
+                {
+                  "VIN": "1HGCV1F30KA100018",
+                  "contractNumber": "VSC100018",
+                  "customerFirstName": "Daniel",
+                  "customerLastName": "Park",
+                  "customerEmail": "daniel.park@test.assurant.com",
+                  "customerAddress1": "100 Lake View Dr",
+                  "customerCity": "Chicago",
+                  "customerCountry": "USA",
+                  "customerStateCode": "IL",
+                  "customerPostalCode": "60601",
+                  "customerHomePhone": "5551000018",
+                  "expirationDate": "2028-03-15",
+                  "status": "Active",
+                  "dealerId": "000IL022",
+                  "accountType": "Dealer",
+                  "productName": "Service Contract",
+                  "productType": "WAR",
+                  "administrator": "Automotive Warranty Services, Inc.",
+                  "expirationMiles": 90000,
+                  "deductible": 100,
+                  "deductibleOutOfNetwork": 100,
+                  "inServiceDate": "2022-03-15",
+                  "sellingDealerName": "Chicago Honda Center",
+                  "sellingDealerAddress": "200 Michigan Ave, Chicago, IL, 60601",
+                  "sellingDealerPhone": "3125550200",
+                  "model": "CIVIC",
+                  "make": "HONDA",
+                  "vehicleYear": 2021,
+                  "isFE": false,
+                  "rentalIndicator": "Y",
+                  "roadsideMaxPerServiceCall": 100,
+                  "roadsideAdministrator": "VAS",
+                  "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+                  "specCoveragePlanCode": "Platinum",
+                  "termsStructuredText": "Vehicle Service Contract For New & Pre-Owned Vehicles.\nFor Emergency Roadside Assistance: Toll-free 1-866-603-5420\nTo File a Claim: Visit us at www.mrclaims.net",
+                  "claims": [],
+                  "formNumber": "RAMAONTBTFS0517",
+                  "accountTypeNumber": "Mech1",
+                  "tieBackDistance": 40,
+                  "classificationCode": "LW",
+                  "productCode": "MAO2",
+                  "dealerType": "Primary",
+                  "expirationType": "AOTAOM",
+                  "effectiveDate": "2022-03-15",
+                  "customerMobilePhone": "5551000018"
+                }
+              ]
+            }
+          }
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "dab61d2a-c25d-44a3-bb0f-935d3c43c091",
+      "timestamp": "2026-04-23T13:47:27.446409Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "VIN_out": "1HGCV1F30KA100018",
+        "ContractNumber_out": "VSC100018",
+        "ClaimNumber_out": null,
+        "success": null,
+        "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+        "salesforceID": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "e63d497d-d4df-43a4-8103-f75f77d4c4c4",
+      "timestamp": "2026-04-23T13:47:27.447242Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "is_repair_facility",
+        "parameters": {
+          "PhoneNumber": "5551000018"
+        },
+        "request_id": "c751cebc-8ff8-4d4c-ae8f-c1aa946b746d",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "81cf6c16-ae7e-4f1c-8537-0b297f56bf47",
+      "timestamp": "2026-04-23T13:47:27.450111Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "is_repair_facility",
+          "parameters": {
+            "PhoneNumber": "5551000018"
+          },
+          "request_id": "c751cebc-8ff8-4d4c-ae8f-c1aa946b746d",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "repairFacilityOrSellingDealer": false
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "b39b5ac3-8b4d-4872-8fd5-11afabac1dc7",
+      "timestamp": "2026-04-23T13:47:27.482827Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\nThanks for calling Assurant! How can I help you today?\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "4d5d4b4f-b863-44ff-beb0-44c259532b05",
+      "timestamp": "2026-04-23T13:47:27.483397Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"\n\nThanks for calling Assurant! How can I help you today?\n\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "4f847574-1fe3-4d6e-bf9d-c4267a204984",
+      "timestamp": "2026-04-23T13:47:27.483470Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\nThanks for calling Assurant! How can I help you today?\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "bd5c7a2a-0792-4f72-8f93-3bd8272d6e9b",
+      "timestamp": "2026-04-23T13:47:30.362470Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": ". Thanks for calling Assurant! How can I help you today?.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 2879
+    },
+    {
+      "id": "83643375-1ad9-46da-9179-7ef2e5eb2cf4",
+      "timestamp": "2026-04-23T13:47:36.253206Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, uh, I need to check on my contract.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "52010e54-06be-474a-b909-19263f39a41f",
+      "timestamp": "2026-04-23T13:47:38.542000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Could you please clarify what you would like to check about your contract?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "da4c9eea-2d44-472c-983d-2d07a023caa7",
+      "timestamp": "2026-04-23T13:47:42.164000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Could you please clarify what you would like to check about your contract?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3622
+    },
+    {
+      "id": "108ab7c4-60e3-45d0-a048-d1ecac6e464f",
+      "timestamp": "2026-04-23T13:47:45.003449Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Whether it's still active.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "d0ca7e92-5535-4334-90b2-2b4e806e90d6",
+      "timestamp": "2026-04-23T13:47:46.096507Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Customer wants to check if their contract is still active."
+        },
+        "request_id": "call_YMrcPNHsOMkKuMaMtbGNirwG",
+        "external_request_id": "73353480-e531-426d-9826-9d0fbd663f29",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "568062e7-a279-45f4-bc56-e0c3005f1f06",
+      "timestamp": "2026-04-23T13:47:46.099591Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Customer wants to check if their contract is still active.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "2ed784d6-faae-446f-8fa0-e2f0f3a656b6",
+      "timestamp": "2026-04-23T13:47:46.108368Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Immediately call set_customer_type with the appropriate caller type, then call change_task to change to the appropriate task following the instrutions that appear below. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n# Escalation Requests During Identification\nIf the caller requests to speak to a live agent or representative (also known as \"rep\") at any point during this task:\n- Do NOT attempt to escalate from this task. This task does not have escalation capability.\n- Complete caller identification and routing first using the available data (do not ask the caller why they are calling):\n  - If caller type can be determined from `is_repair_facility` / `get_contract_and_claims_data_ivr` results, call `set_customer_type(...)` and `change_task(...)` immediately.\n  - If caller type is still unknown (data not yet available or ambiguous), ask the caller their type, then route.\n- The destination task will handle the escalation immediately upon arrival.\n\n**CORRECT:**\n  Customer: \"Representative\"\n  → Determine caller type from available data or ask, then call `set_customer_type(...)` and `change_task(...)`. Do not attempt to escalate here.\n\n**WRONG:**\n  Customer: \"Representative\"\n  → Try to escalate or transfer from CallerIdentification. This task has no escalation function.\n\n# Step 1 — Routing Based on Caller Type\n\nYou MUST ask the caller: \"To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\"\n  - If the customer states that they are a repair facility then\n      Call `set_customer_type(\"repairFacility\")`\n      Call `change_task(task_name=\"RepairShopIssues\")`\n  - If the customer states that they are a dealership then\n      Call `set_customer_type(\"dealership\")`\n      Call `change_task(task_name=\"DealershipIssues\")`\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 2 — If Caller Does Not Understand the Options/ Asks Something else\n- If the caller says their caller type is \"Service\"\n    Ask them whether they are a repair facility or calling from a dealership\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_customer_type(\"other\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller asks a question, ask them for patience while you look up the information needed to help them.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "set_customer_type",
+          "decrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": "<redacted>",
+            "ContractNumber_out": "<redacted>",
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": "<redacted>",
+            "salesforceID": null
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>"
+          },
+          "current_datetime": "Day: Sunday, Date: 2026-03-08, Time: 08:00PM EDT (-0400)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": false
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "24b46536-bbc7-47f1-ab3e-bad25cd3f00e",
+      "timestamp": "2026-04-23T13:47:46.706000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "09a34d7d-7b3d-4546-abed-32296de58c5e",
+      "timestamp": "2026-04-23T13:47:47.777735Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5393,
+        "num_output_tokens": 95,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_9899bb3e2caf4af0a451e99825c1d204",
+        "llm_id": "litellm",
+        "cost": 0.008473999999999999,
+        "call_duration": 1650,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "a03ec85c-d4aa-4909-a3a0-8b27e86f2213",
+      "timestamp": "2026-04-23T13:47:47.778134Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(1.1) The customer wants to check if their contract is still active. (1.2) The goal is clear and specific. (2.1) The solution must follow the task instructions, which prohibit answering contract questions in this task and require routing based on caller type. (2.2) My next action requires using APIs to set the customer type and change the task."
+    },
+    {
+      "id": "5975840e-76b6-4a8b-b8e2-aa5e95897df6",
+      "timestamp": "2026-04-23T13:47:47.778884Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "set_customer_type",
+        "parameters": {
+          "user_type": "contractHolder"
+        },
+        "request_id": "c732d857-5388-4483-8cd6-67c148752f72",
+        "external_request_id": null,
+        "function_type": "set_context",
+        "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "51a1c184-64d9-4287-ad53-d9ac24c8236b",
+      "timestamp": "2026-04-23T13:47:47.782802Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "set_customer_type",
+          "parameters": {
+            "user_type": "contractHolder"
+          },
+          "request_id": "c732d857-5388-4483-8cd6-67c148752f72",
+          "external_request_id": null,
+          "function_type": "set_context",
+          "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "customer_type": {
+            "value": "contractHolder",
+            "description": "The customer type for this call"
+          }
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "019de2eb-dcf7-49fc-b3eb-044f4e08b5d9",
+      "timestamp": "2026-04-23T13:47:47.782877Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "customer_type": "contractHolder"
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "42807f8d-b1c1-4236-a469-36e66aefcb39",
+      "timestamp": "2026-04-23T13:47:47.804056Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Immediately call set_customer_type with the appropriate caller type, then call change_task to change to the appropriate task following the instrutions that appear below. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n# Escalation Requests During Identification\nIf the caller requests to speak to a live agent or representative (also known as \"rep\") at any point during this task:\n- Do NOT attempt to escalate from this task. This task does not have escalation capability.\n- Complete caller identification and routing first using the available data (do not ask the caller why they are calling):\n  - If caller type can be determined from `is_repair_facility` / `get_contract_and_claims_data_ivr` results, call `set_customer_type(...)` and `change_task(...)` immediately.\n  - If caller type is still unknown (data not yet available or ambiguous), ask the caller their type, then route.\n- The destination task will handle the escalation immediately upon arrival.\n\n**CORRECT:**\n  Customer: \"Representative\"\n  → Determine caller type from available data or ask, then call `set_customer_type(...)` and `change_task(...)`. Do not attempt to escalate here.\n\n**WRONG:**\n  Customer: \"Representative\"\n  → Try to escalate or transfer from CallerIdentification. This task has no escalation function.\n\n# Step 1 — Routing Based on Caller Type\n\nYou MUST ask the caller: \"To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\"\n  - If the customer states that they are a repair facility then\n      Call `set_customer_type(\"repairFacility\")`\n      Call `change_task(task_name=\"RepairShopIssues\")`\n  - If the customer states that they are a dealership then\n      Call `set_customer_type(\"dealership\")`\n      Call `change_task(task_name=\"DealershipIssues\")`\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 2 — If Caller Does Not Understand the Options/ Asks Something else\n- If the caller says their caller type is \"Service\"\n    Ask them whether they are a repair facility or calling from a dealership\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_customer_type(\"other\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller asks a question, ask them for patience while you look up the information needed to help them.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "set_customer_type",
+          "decrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": "<redacted>",
+            "ContractNumber_out": "<redacted>",
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": "<redacted>",
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>"
+          },
+          "current_datetime": "Day: Sunday, Date: 2026-03-08, Time: 08:00PM EDT (-0400)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": false
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "5c221012-7f0a-4b58-84a9-1a2932c17751",
+      "timestamp": "2026-04-23T13:47:47.913000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "One moment please. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1207
+    },
+    {
+      "id": "0c178468-3736-4b26-b3b7-814fc31ff3c0",
+      "timestamp": "2026-04-23T13:47:48.712796Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5575,
+        "num_output_tokens": 58,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_16e597b0e6ed4fc7b03ccef3d914c031",
+        "llm_id": "litellm",
+        "cost": 0.008542000000000001,
+        "call_duration": 892,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "3b0ceb38-0131-4b66-9b36-ce66d57b28cb",
+      "timestamp": "2026-04-23T13:47:48.713393Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.5) The API call to set the customer type was successful. (4.1) My next action is to change the task to \"ContractHolderIssues\" as required by the task instructions."
+    },
+    {
+      "id": "5036e3f2-e380-4dea-a1d5-944110a9f03e",
+      "timestamp": "2026-04-23T13:47:48.722099Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "change_task",
+        "parameters": {
+          "task_name": "ContractHolderIssues"
+        },
+        "request_id": "0aee693c-8762-49ca-8989-74bae8b9b88b",
+        "external_request_id": null,
+        "function_type": "system",
+        "function_id": "system_fn__change_task",
+        "function_version": "1",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "fbb325ed-d928-4fb4-bf14-7415de5dffb6",
+      "timestamp": "2026-04-23T13:47:48.725194Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "change_task",
+          "parameters": {
+            "task_name": "ContractHolderIssues"
+          },
+          "request_id": "0aee693c-8762-49ca-8989-74bae8b9b88b",
+          "external_request_id": null,
+          "function_type": "system",
+          "function_id": "system_fn__change_task",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "answer": "Switching to task: ContractHolderIssues"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "7cbd407c-782b-4c30-8f1b-677e08f664a6",
+      "timestamp": "2026-04-23T13:47:48.725291Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "exit_task",
+      "task_name": "ContractHolderIssues",
+      "task_metadata": {
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "54d9b8cf-a7ce-4022-afe6-533e20a32be7",
+      "timestamp": "2026-04-23T13:47:48.725330Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "ContractHolderIssues",
+      "task_metadata": {
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "enable_core_prompt_override": true
+      }
+    },
+    {
+      "id": "629fbbe6-a782-4514-ab62-901591099fcd",
+      "timestamp": "2026-04-23T13:47:48.726891Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "7e7b0e0a-4300-4b12-aee7-66a318d6be0d",
+      "timestamp": "2026-04-23T13:47:48.727186Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to check if their contract is still active."
+          },
+          "request_id": "call_YMrcPNHsOMkKuMaMtbGNirwG",
+          "external_request_id": "73353480-e531-426d-9826-9d0fbd663f29",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "I'm checking any contracts or claims you may have with us",
+        "last_action_id": "629fbbe6-a782-4514-ab62-901591099fcd",
+        "error": null
+      }
+    },
+    {
+      "id": "1e2bca13-e99f-4f5a-8da5-ae3a67bc9aa9",
+      "timestamp": "2026-04-23T13:47:48.727316Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "PhoneNumber": "5551000018"
+        },
+        "request_id": "2378c047-851b-4f02-88d6-fb13cbb2e323",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "2a693a69-a1c3-4515-b0f9-5cf4cc652263",
+      "timestamp": "2026-04-23T13:47:48.727685Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "PhoneNumber": "5551000018"
+          },
+          "request_id": "2378c047-851b-4f02-88d6-fb13cbb2e323",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "response": {
+            "contractClaims": {
+              "contract": [
+                {
+                  "VIN": "1HGCV1F30KA100018",
+                  "contractNumber": "VSC100018",
+                  "customerFirstName": "Daniel",
+                  "customerLastName": "Park",
+                  "customerEmail": "daniel.park@test.assurant.com",
+                  "customerAddress1": "100 Lake View Dr",
+                  "customerCity": "Chicago",
+                  "customerCountry": "USA",
+                  "customerStateCode": "IL",
+                  "customerPostalCode": "60601",
+                  "customerHomePhone": "5551000018",
+                  "expirationDate": "2028-03-15",
+                  "status": "Active",
+                  "dealerId": "000IL022",
+                  "accountType": "Dealer",
+                  "productName": "Service Contract",
+                  "productType": "WAR",
+                  "administrator": "Automotive Warranty Services, Inc.",
+                  "expirationMiles": 90000,
+                  "deductible": 100,
+                  "deductibleOutOfNetwork": 100,
+                  "inServiceDate": "2022-03-15",
+                  "sellingDealerName": "Chicago Honda Center",
+                  "sellingDealerAddress": "200 Michigan Ave, Chicago, IL, 60601",
+                  "sellingDealerPhone": "3125550200",
+                  "model": "CIVIC",
+                  "make": "HONDA",
+                  "vehicleYear": 2021,
+                  "isFE": false,
+                  "rentalIndicator": "Y",
+                  "roadsideMaxPerServiceCall": 100,
+                  "roadsideAdministrator": "VAS",
+                  "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+                  "specCoveragePlanCode": "Platinum",
+                  "termsStructuredText": "Vehicle Service Contract For New & Pre-Owned Vehicles.\nFor Emergency Roadside Assistance: Toll-free 1-866-603-5420\nTo File a Claim: Visit us at www.mrclaims.net",
+                  "claims": [],
+                  "formNumber": "RAMAONTBTFS0517",
+                  "accountTypeNumber": "Mech1",
+                  "tieBackDistance": 40,
+                  "classificationCode": "LW",
+                  "productCode": "MAO2",
+                  "dealerType": "Primary",
+                  "expirationType": "AOTAOM",
+                  "effectiveDate": "2022-03-15",
+                  "customerMobilePhone": "5551000018"
+                }
+              ]
+            }
+          }
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "44ee7db9-3c0f-45f1-8f19-d5a9b040647a",
+      "timestamp": "2026-04-23T13:47:48.727792Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "VIN_out": "1HGCV1F30KA100018",
+        "ContractNumber_out": "VSC100018",
+        "ClaimNumber_out": null,
+        "success": null,
+        "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+        "salesforceID": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "a65edf6d-a2ce-4cf8-b10a-1a9261b67ccf",
+      "timestamp": "2026-04-23T13:47:48.728197Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_sms_to_phone",
+        "parameters": {},
+        "request_id": "ccc51af3-b822-4c1d-8a6c-2323c445ba17",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "715dd5c4-2e4a-4aa1-983d-3ab8b08bdf62",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "7322dd3e-c669-446c-b195-882052d8e8cb",
+      "timestamp": "2026-04-23T13:47:48.728450Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_sms_to_phone",
+          "parameters": {},
+          "request_id": "ccc51af3-b822-4c1d-8a6c-2323c445ba17",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "715dd5c4-2e4a-4aa1-983d-3ab8b08bdf62",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "success": true,
+          "message": "SMS sent successfully."
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "88c1dc6d-f60c-48fa-ba85-338ac570d5d2",
+      "timestamp": "2026-04-23T13:47:48.815502Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n# Workflow & Execution Rules\n**CRITICAL:** You are a strict, step-by-step agent. You must evaluate the conversation history before responding to determine your current step. You are physically prohibited from answering contract or coverage questions until Step 2 is fully complete.\n\n\n\n## Step 3: Journey Routing\n\n- Once you have identified the customer's contract, acknowledge their vehicle naturally in your first substantive response. For example: \"I can see you have a 2021 HONDA CIVIC on file.\" Only include fields that are non-empty.\n\n\n## Journey 1: Mechanical Issue / Repair Needed\n\nCustomer's vehicle needs mechanical repair under their Assurant service contract.\n\n- First, recommend the **selling dealer** as the preferred starting point:\n  \"I'd recommend starting with your selling dealer, Chicago Honda Center, who can be reached at 3125550200. They're familiar with your contract and can work directly with Assurant on your behalf.\"\n- If the selling dealer is unavailable or the customer prefers another shop, let them know \"Your contract may require you to return to your selling dealer. To confirm, you can view your contract and acceptable repair locations at vehicle care plan dot com.\" \n- Inform the customer that the repair facility (not the customer) must contact Assurant to initiate and authorize the claim process **before** repairs begin.\n- Guide them through the basic steps:\n  1. Take the vehicle to a repair facility (selling dealer preferred, or any repair location found on vehicle care plan dot com).\n  2. The repair facility contacts Assurant to get the claim authorized.\n  3. Assurant reviews and authorizes covered repairs.\n- Do NOT confirm that any specific repair is covered — coverage is determined case-by-case at claim authorization.\n- If the customer needs help locating a repair facility, let them know that they can locate one online at vehicle care plan dot com. If they insist on talking to a human agent to locate a repair facility or need related guidance → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n- If the customer wants to speak to an agent, first ask what specific help they need. If they need to check claim status, ask about car rentals or have contract-related questions, follow the journey instructions for each of those. If they ask about something else or you cannot help them, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol**.\n\n\n## Journey 2: Claim Status\n\nCustomer wants to know the status of their existing claim.\n- No active claim was found for this customer's contract.\n- Inform the customer: if they need to file a claim, the repair facility must contact Assurant to initiate the process. Customers cannot initiate claims themselves.\n\n\n## Journey 3: Car Rental Inquiry\n\n- Customer has questions about rental car benefits while their vehicle is being repaired.\n- Only a human agent can answer this question. Let the customer know that they will need to work with an agent for help with rental questions. Proceed to **Unified Escalation Protocol** with `GAIntent = 'CARRENTAL'`.\n\n\n## Journey 4: Contract Questions or Cancellation\n\nCustomer wants to understand, modify, cancel, or obtain a copy of their service contract.\n\n### General Contract Questions\n- Use `termsStructuredText` to answer questions about coverage terms, expiration, and exclusions.\n- Do NOT confirm specific repairs are covered.\n- If the question is not clearly answered by `termsStructuredText`, let the customer know that they will need to work with an agent to get further help on their question → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n\n### Contract Status / Expiry Check\n- Before confirming whether the contract is active or expired, you MUST first ask the customer for their **current odometer reading**.\n- The contract expires at whichever threshold comes first: the expiration date (2028-03-15) OR the expiration mileage (90000 miles).\n- Do NOT confirm the contract is active or expired without the customer's current mileage.\n\n### Requesting a Copy of the Contract\n- To **view the contract online**: Direct the customer to the Vehicle Care Plan portal — vehicle care plan dot com. Offer to send the link by text.\n- For a **signed physical copy**: Direct the customer to return to Chicago Honda Center, where they originally purchased the contract.\n\n### Account Holder / Co-Owner Information\n- If the customer asks who is listed on the contract or if there is a co-owner/co-buyer:\n  - The API response does NOT include co-owner or secondary account holder information.\n  - YOU MUST SAY: \"I'm unable to provide secondary account holder details. To view who is listed on your contract, please check your full contract online at vehicle care plan dot com. Is there anything else I can help you with?\"\n  - If customer chooses to view online → Direct them to the portal and ask if there's anything else you can help with.\n  - If customer chooses to speak with an agent → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n  - DO NOT immediately escalate without first offering the self-service option.\n  \n### Cancellations\n- Do NOT immediately escalate. First, advise: \"Cancellations need to be initiated at the dealership where you purchased your contract — Chicago Honda Center. You can reach them at 3125550200.\"\n- Ask: \"Have you already contacted Chicago Honda Center about the cancellation?\"\n  - **No** → Advise them to start there. Do not escalate.\n  - **Yes** → Ask if it has been more than 30 days since they contacted the dealer without resolution. If yes, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CANCELLATION'`.\n\n### Contract Modifications\n- If the customer is asking about extending their contract, say EXACTLY:\n  \"Contract extensions are not available at this time. Is there anything else I can help you with?\"\n- For all other contract modifications, let the customer know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CONTRACTCHANGES'`.\n\n### GAP Contract Issues\n- Tell the customer: You will need to work with an agent for this. Let me transfer you. Proceed to **Unified Escalation Protocol** with `GAIntent = 'GAP'`.\n\n\n## Journey 5: Repair / Coverage Questions\n\nCustomer wants to understand what is covered under their contract before bringing their vehicle in.\n\n- Use `termsStructuredText` to answer coverage-related questions.\n- Follow this format when answering coverage questions:\n  1. State what the contract says about the component/repair from `termsStructuredText`\n  2. Then add: \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **NEVER** confirm that a specific repair IS definitively covered or not covered.\n- If the customer wants a definitive coverage answer, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n- For questions about where to take their vehicle, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n\n## Journey 6: Roadside Assistance\n\nDetermine which of the two scenarios below applies before responding.\n\n### 6A: Customer Needs Immediate Roadside Help\n**Triggers:** customer is stranded, vehicle is inoperable, or they need active dispatch (tow, flat tire, lockout, dead battery, fuel delivery, etc.)\n\n- Let the customer know that you will connect them with their roadside assistance company VAS.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n- **Do NOT follow the Unified Escalation Protocol — skip chat deflection entirely.**\n\n### 6B: Customer Has Questions About Roadside Coverage\n**Triggers:** customer is asking what is covered, how to use the benefit, eligibility, limits, or reimbursement for roadside.\n\n- Check `termsStructuredText` for roadside coverage details specific to this contract and answer the customer's question.\n- If the answer is not in `termsStructuredText` → let the customer know that they will need to work with an agent and proceed to **Unified Escalation Protocol** with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n\n\n## Journey 7: Reimbursement Questions\n\nCustomer wants to get reimbursed for their car repair or related expenses.\n\nAttempt to answer the customer's questions using this policy: \"We understand that emergencies can happen, but we highly encourage you to have your vehicle repaired through our normal process. We work directly with the repair facilities to negotiate the best cost and labor rates and advocate on your behalf to ensure the repair is correctly diagnosed. \nEmergency Repair Instructions: If the Administrator’s office is closed and emergency repairs are necessary because your vehicle is inoperable or unsafe to drive, you may proceed with the repairs without prior authorization. However, you or the repair facility must notify the Administrator as soon as the office reopens and submit repair details within 30 days. Reimbursement will follow your contract terms. Parts must be available for inspection when the office reopens.\"\n\nIf they want to understand the status of their reimbursement or how to start the process, inform the customer that they can start as well as check on reimbursement online at vehicle care plan dot com.\n\nIf they have questions that cannot be answered using this information, let them know that they will need to work with an agent for further help on this topic  → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Journey 8: New Claim \n\nCustomer wants to file a new claim.\n\nThis process is the same as the customer calling because they want to get a mechanical issue fixed (Journey 1). Please follow the instructions in Journey 1.\n\n\n## Journey 9: Other / Unknown\n\nCustomer's need doesn't match any of the above journeys.\n\n- Acknowledge the customer's question and attempt to assist using available contract and claims data. Note that customers cannot start a claim themselves, they must contact their selling dealer, or an independent repair facility who can start a claim on their behalf.\n- If you cannot provide a complete resolution, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer's Answer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n    - If they say no or indicate they don't need further help: Proceed to end the conversation via `end_of_conversation`.\n- **If they decline the chat offer or repeat their request for a phone agent** (e.g., they say \"No,\" \"No thanks,\" \"I'd rather wait,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative\", \"Rep\", or \"Get me a human\"):\n  - **CRITICAL: The customer still needs to speak to a phone agent. Do NOT ask \"Is there anything else I can help you with?\" and do NOT end the conversation. The customer's original escalation need has not been resolved — they simply declined the chat alternative.**\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": "<redacted>",
+            "ContractNumber_out": "<redacted>",
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": "<redacted>",
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": "<redacted>"
+          },
+          "current_datetime": "Day: Sunday, Date: 2026-03-08, Time: 08:00PM EDT (-0400)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": false
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "2bcde491-ba4c-40f6-84f8-1a0f72663bda",
+      "timestamp": "2026-04-23T13:47:50.286016Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"I'm checking any contracts or claims you may have with us\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "a9557328-fe7e-445e-b084-e585375492ec",
+      "timestamp": "2026-04-23T13:47:50.286237Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "e0a6d613-cd5b-4d09-94ed-e7dbc84218db",
+      "timestamp": "2026-04-23T13:47:51.627488Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 11643,
+        "num_output_tokens": 165,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_26df9c3da27048209795442049135296",
+        "llm_id": "litellm",
+        "cost": 0.021533999999999998,
+        "call_duration": 2799,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "0fde48e9-b078-43c7-9894-29ed90c86dd1",
+      "timestamp": "2026-04-23T13:47:51.627857Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(4.1) The self-service portal message has not yet been communicated to the customer, which is a mandatory first step per task instructions. My next action is to instruct the Talker to deliver the required self-service portal message verbatim before proceeding to answer the contract status question."
+    },
+    {
+      "id": "a3a38fd8-f191-422f-88db-380b9d46e425",
+      "timestamp": "2026-04-23T13:47:51.627858Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say EXACTLY: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\" After delivering this, ask the customer for their current odometer reading so we can determine if their contract is still active. Call me back with their odometer reading so I can proceed.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "28aec8b4-6a9c-453c-8c51-4d1ed80994e4",
+      "timestamp": "2026-04-23T13:47:51.628083Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to check if their contract is still active."
+          },
+          "request_id": "call_YMrcPNHsOMkKuMaMtbGNirwG",
+          "external_request_id": "73353480-e531-426d-9826-9d0fbd663f29",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Say EXACTLY: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\" After delivering this, ask the customer for their current odometer reading so we can determine if their contract is still active. Call me back with their odometer reading so I can proceed.",
+        "last_action_id": "a3a38fd8-f191-422f-88db-380b9d46e425",
+        "error": null
+      }
+    },
+    {
+      "id": "ed6023c6-ab47-4dd1-9910-ae4754e06895",
+      "timestamp": "2026-04-23T13:47:53.490237Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3204
+    },
+    {
+      "id": "5c352678-97f3-4c61-b29f-cfd261ab71fa",
+      "timestamp": "2026-04-23T13:47:56.289576Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Say EXACTLY: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\" After delivering this, ask the customer for their current odometer reading so we can determine if their contract is still active. Call me back with their odometer reading so I can proceed.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "259af9d7-dd34-4c3d-9cac-68a6e2caeaca",
+      "timestamp": "2026-04-23T13:47:57.584000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today? Could you please provide your current odometer reading?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "15b71e88-7bf3-48db-8fcb-ebffb16493b8",
+      "timestamp": "2026-04-23T13:48:18.343000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today? Could you please provide your current odometer reading?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 20759
+    },
+    {
+      "id": "62c71341-fe6b-435d-8f55-0b86c2cd1e59",
+      "timestamp": "2026-04-23T13:48:24.675915Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Uh, I need my contract looked up first. Don't have the odometer info right now.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "f7c3fcec-1228-410f-9fe2-cfd426aa7d78",
+      "timestamp": "2026-04-23T13:48:25.588206Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Customer does not have their odometer reading right now and wants their contract looked up first."
+        },
+        "request_id": "call_2sZa6kTQlkoslBGkVMWz7Kzo",
+        "external_request_id": "1665723a-e93a-46af-922d-a7d19c106974",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "7f002a3f-18c9-46fc-8696-c4891ec18455",
+      "timestamp": "2026-04-23T13:48:25.591789Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Customer does not have their odometer reading right now and wants their contract looked up first.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "533ab7c8-122e-4bdc-9746-de7e12bc43d5",
+      "timestamp": "2026-04-23T13:48:25.691259Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n# Workflow & Execution Rules\n**CRITICAL:** You are a strict, step-by-step agent. You must evaluate the conversation history before responding to determine your current step. You are physically prohibited from answering contract or coverage questions until Step 2 is fully complete.\n\n\n\n## Step 3: Journey Routing\n\n- Once you have identified the customer's contract, acknowledge their vehicle naturally in your first substantive response. For example: \"I can see you have a 2021 HONDA CIVIC on file.\" Only include fields that are non-empty.\n\n\n## Journey 1: Mechanical Issue / Repair Needed\n\nCustomer's vehicle needs mechanical repair under their Assurant service contract.\n\n- First, recommend the **selling dealer** as the preferred starting point:\n  \"I'd recommend starting with your selling dealer, Chicago Honda Center, who can be reached at 3125550200. They're familiar with your contract and can work directly with Assurant on your behalf.\"\n- If the selling dealer is unavailable or the customer prefers another shop, let them know \"Your contract may require you to return to your selling dealer. To confirm, you can view your contract and acceptable repair locations at vehicle care plan dot com.\" \n- Inform the customer that the repair facility (not the customer) must contact Assurant to initiate and authorize the claim process **before** repairs begin.\n- Guide them through the basic steps:\n  1. Take the vehicle to a repair facility (selling dealer preferred, or any repair location found on vehicle care plan dot com).\n  2. The repair facility contacts Assurant to get the claim authorized.\n  3. Assurant reviews and authorizes covered repairs.\n- Do NOT confirm that any specific repair is covered — coverage is determined case-by-case at claim authorization.\n- If the customer needs help locating a repair facility, let them know that they can locate one online at vehicle care plan dot com. If they insist on talking to a human agent to locate a repair facility or need related guidance → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n- If the customer wants to speak to an agent, first ask what specific help they need. If they need to check claim status, ask about car rentals or have contract-related questions, follow the journey instructions for each of those. If they ask about something else or you cannot help them, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol**.\n\n\n## Journey 2: Claim Status\n\nCustomer wants to know the status of their existing claim.\n- No active claim was found for this customer's contract.\n- Inform the customer: if they need to file a claim, the repair facility must contact Assurant to initiate the process. Customers cannot initiate claims themselves.\n\n\n## Journey 3: Car Rental Inquiry\n\n- Customer has questions about rental car benefits while their vehicle is being repaired.\n- Only a human agent can answer this question. Let the customer know that they will need to work with an agent for help with rental questions. Proceed to **Unified Escalation Protocol** with `GAIntent = 'CARRENTAL'`.\n\n\n## Journey 4: Contract Questions or Cancellation\n\nCustomer wants to understand, modify, cancel, or obtain a copy of their service contract.\n\n### General Contract Questions\n- Use `termsStructuredText` to answer questions about coverage terms, expiration, and exclusions.\n- Do NOT confirm specific repairs are covered.\n- If the question is not clearly answered by `termsStructuredText`, let the customer know that they will need to work with an agent to get further help on their question → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n\n### Contract Status / Expiry Check\n- Before confirming whether the contract is active or expired, you MUST first ask the customer for their **current odometer reading**.\n- The contract expires at whichever threshold comes first: the expiration date (2028-03-15) OR the expiration mileage (90000 miles).\n- Do NOT confirm the contract is active or expired without the customer's current mileage.\n\n### Requesting a Copy of the Contract\n- To **view the contract online**: Direct the customer to the Vehicle Care Plan portal — vehicle care plan dot com. Offer to send the link by text.\n- For a **signed physical copy**: Direct the customer to return to Chicago Honda Center, where they originally purchased the contract.\n\n### Account Holder / Co-Owner Information\n- If the customer asks who is listed on the contract or if there is a co-owner/co-buyer:\n  - The API response does NOT include co-owner or secondary account holder information.\n  - YOU MUST SAY: \"I'm unable to provide secondary account holder details. To view who is listed on your contract, please check your full contract online at vehicle care plan dot com. Is there anything else I can help you with?\"\n  - If customer chooses to view online → Direct them to the portal and ask if there's anything else you can help with.\n  - If customer chooses to speak with an agent → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n  - DO NOT immediately escalate without first offering the self-service option.\n  \n### Cancellations\n- Do NOT immediately escalate. First, advise: \"Cancellations need to be initiated at the dealership where you purchased your contract — Chicago Honda Center. You can reach them at 3125550200.\"\n- Ask: \"Have you already contacted Chicago Honda Center about the cancellation?\"\n  - **No** → Advise them to start there. Do not escalate.\n  - **Yes** → Ask if it has been more than 30 days since they contacted the dealer without resolution. If yes, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CANCELLATION'`.\n\n### Contract Modifications\n- If the customer is asking about extending their contract, say EXACTLY:\n  \"Contract extensions are not available at this time. Is there anything else I can help you with?\"\n- For all other contract modifications, let the customer know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CONTRACTCHANGES'`.\n\n### GAP Contract Issues\n- Tell the customer: You will need to work with an agent for this. Let me transfer you. Proceed to **Unified Escalation Protocol** with `GAIntent = 'GAP'`.\n\n\n## Journey 5: Repair / Coverage Questions\n\nCustomer wants to understand what is covered under their contract before bringing their vehicle in.\n\n- Use `termsStructuredText` to answer coverage-related questions.\n- Follow this format when answering coverage questions:\n  1. State what the contract says about the component/repair from `termsStructuredText`\n  2. Then add: \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **NEVER** confirm that a specific repair IS definitively covered or not covered.\n- If the customer wants a definitive coverage answer, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n- For questions about where to take their vehicle, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n\n## Journey 6: Roadside Assistance\n\nDetermine which of the two scenarios below applies before responding.\n\n### 6A: Customer Needs Immediate Roadside Help\n**Triggers:** customer is stranded, vehicle is inoperable, or they need active dispatch (tow, flat tire, lockout, dead battery, fuel delivery, etc.)\n\n- Let the customer know that you will connect them with their roadside assistance company VAS.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n- **Do NOT follow the Unified Escalation Protocol — skip chat deflection entirely.**\n\n### 6B: Customer Has Questions About Roadside Coverage\n**Triggers:** customer is asking what is covered, how to use the benefit, eligibility, limits, or reimbursement for roadside.\n\n- Check `termsStructuredText` for roadside coverage details specific to this contract and answer the customer's question.\n- If the answer is not in `termsStructuredText` → let the customer know that they will need to work with an agent and proceed to **Unified Escalation Protocol** with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n\n\n## Journey 7: Reimbursement Questions\n\nCustomer wants to get reimbursed for their car repair or related expenses.\n\nAttempt to answer the customer's questions using this policy: \"We understand that emergencies can happen, but we highly encourage you to have your vehicle repaired through our normal process. We work directly with the repair facilities to negotiate the best cost and labor rates and advocate on your behalf to ensure the repair is correctly diagnosed. \nEmergency Repair Instructions: If the Administrator’s office is closed and emergency repairs are necessary because your vehicle is inoperable or unsafe to drive, you may proceed with the repairs without prior authorization. However, you or the repair facility must notify the Administrator as soon as the office reopens and submit repair details within 30 days. Reimbursement will follow your contract terms. Parts must be available for inspection when the office reopens.\"\n\nIf they want to understand the status of their reimbursement or how to start the process, inform the customer that they can start as well as check on reimbursement online at vehicle care plan dot com.\n\nIf they have questions that cannot be answered using this information, let them know that they will need to work with an agent for further help on this topic  → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Journey 8: New Claim \n\nCustomer wants to file a new claim.\n\nThis process is the same as the customer calling because they want to get a mechanical issue fixed (Journey 1). Please follow the instructions in Journey 1.\n\n\n## Journey 9: Other / Unknown\n\nCustomer's need doesn't match any of the above journeys.\n\n- Acknowledge the customer's question and attempt to assist using available contract and claims data. Note that customers cannot start a claim themselves, they must contact their selling dealer, or an independent repair facility who can start a claim on their behalf.\n- If you cannot provide a complete resolution, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer's Answer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n    - If they say no or indicate they don't need further help: Proceed to end the conversation via `end_of_conversation`.\n- **If they decline the chat offer or repeat their request for a phone agent** (e.g., they say \"No,\" \"No thanks,\" \"I'd rather wait,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative\", \"Rep\", or \"Get me a human\"):\n  - **CRITICAL: The customer still needs to speak to a phone agent. Do NOT ask \"Is there anything else I can help you with?\" and do NOT end the conversation. The customer's original escalation need has not been resolved — they simply declined the chat alternative.**\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": "<redacted>",
+            "ContractNumber_out": "<redacted>",
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": "<redacted>",
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": "<redacted>"
+          },
+          "current_datetime": "Day: Sunday, Date: 2026-03-08, Time: 08:00PM EDT (-0400)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": false
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "f7890dba-b013-4cc1-a0da-c57134da6797",
+      "timestamp": "2026-04-23T13:48:26.178000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Let me check on that for you.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "33913a4f-0e84-4771-ae81-fe70909ffeee",
+      "timestamp": "2026-04-23T13:48:27.757000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Let me check on that for you.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1579
+    },
+    {
+      "id": "e6f6a8c0-7f3c-43a9-b7a7-e61dfa945c78",
+      "timestamp": "2026-04-23T13:48:28.345459Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 11834,
+        "num_output_tokens": 155,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_2c63b87872f54f90b9297abc4fc60171",
+        "llm_id": "litellm",
+        "cost": 0.021836,
+        "call_duration": 2640,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "c8713699-8c95-419b-8c9e-1d437c5b2f5e",
+      "timestamp": "2026-04-23T13:48:28.345798Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(2.1) The customer wants to know if their contract is still active, but per task instructions, I cannot confirm contract status without the current odometer reading. (2.2) My next action does not require an API call, but requires instructing the Talker to explain why the odometer reading is needed and to ask the customer to provide it when available."
+    },
+    {
+      "id": "c9c0e847-d20a-434b-b8a6-d0bea2248493",
+      "timestamp": "2026-04-23T13:48:28.345799Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Inform the customer that to confirm whether their contract is still active, we need their current odometer reading because the contract expires at whichever comes first: the expiration date (March 15, 2028) or 90,000 miles. Ask them to provide their current odometer reading when they have it, so we can proceed to check their contract status.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "e9141a16-5c51-482c-b34f-c465b59e7f13",
+      "timestamp": "2026-04-23T13:48:28.345977Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer does not have their odometer reading right now and wants their contract looked up first."
+          },
+          "request_id": "call_2sZa6kTQlkoslBGkVMWz7Kzo",
+          "external_request_id": "1665723a-e93a-46af-922d-a7d19c106974",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Inform the customer that to confirm whether their contract is still active, we need their current odometer reading because the contract expires at whichever comes first: the expiration date (March 15, 2028) or 90,000 miles. Ask them to provide their current odometer reading when they have it, so we can proceed to check their contract status.",
+        "last_action_id": "c9c0e847-d20a-434b-b8a6-d0bea2248493",
+        "error": null
+      }
+    },
+    {
+      "id": "c4c0c004-1362-44a7-9159-13850293f27b",
+      "timestamp": "2026-04-23T13:48:30.102012Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Inform the customer that to confirm whether their contract is still active, we need their current odometer reading because the contract expires at whichever comes first: the expiration date (March 15, 2028) or 90,000 miles. Ask them to provide their current odometer reading when they have it, so we can proceed to check their contract status.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "1b538677-ea87-4634-9a8b-5778d5ed1831",
+      "timestamp": "2026-04-23T13:48:32.009000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "To confirm whether your contract is still active, I need your current odometer reading since your contract expires on whichever comes first: the expiration date, March fifteenth, twenty twenty-eight, or ninety thousand miles. Please provide your odometer reading when you have it so we can proceed. Is there anything else I can assist with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "c04c31c0-96ba-4f8f-bc9b-e0ed08e03541",
+      "timestamp": "2026-04-23T13:48:51.792000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "To confirm whether your contract is still active, I need your current odometer reading since your contract expires on whichever comes first: the expiration date, March fifteenth, twenty twenty-eight, or ninety thousand miles. Please provide your odometer reading when you have it so we can proceed. Is there anything else I can assist with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 19783
+    },
+    {
+      "id": "ebcc7d52-5cb8-4d83-9a57-ae7885c2e8fb",
+      "timestamp": "2026-04-23T13:48:54.546291Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, uh, I need to give you my VIN first to look up the contract. Don't have the odometer right now.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "15fd8e3b-4412-4bea-a32f-4a41c94abc81",
+      "timestamp": "2026-04-23T13:48:56.112000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I understand you want to provide your Vin to look up the contract, but I still need your current odometer reading to confirm if your contract is active. When you have your odometer reading, please let me know so I can assist you further. Is there anything else I can help you with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "c6c3e8da-0fcc-49b8-821f-181161dd5e90",
+      "timestamp": "2026-04-23T13:49:11.438000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "I understand you want to provide your Vin to look up the contract, but I still need your current odometer reading to confirm if your contract is active. When you have your odometer reading, please let me know so I can assist you further. Is there anything else I can help you with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 15326
+    },
+    {
+      "id": "2ca2b790-3219-44d3-bc64-cce0b2209781",
+      "timestamp": "2026-04-23T13:49:14.356446Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Uh, look, I got my VIN right here. Let me just give it to you so you can pull up my contract. 1HGCV1F30KA100018.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "58d17213-59e1-405f-b26c-6b0abd476a2e",
+      "timestamp": "2026-04-23T13:49:16.346000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I appreciate you providing your Vin. However, I still require your current odometer reading to determine if your contract is active. When you have your odometer reading, please let me know so I can continue assisting you. Is there anything else I can assist with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "8565d90b-082d-463c-b1d4-d9f2cc7c030d",
+      "timestamp": "2026-04-23T13:49:32.135000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "I appreciate you providing your Vin. However, I still require your current odometer reading to determine if your contract is active. When you have your odometer reading, please let me know so I can continue assisting you. Is there anything else I can assist with?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 15789
+    },
+    {
+      "id": "691ef674-ba3a-4ba3-97b7-bc08d43b5287",
+      "timestamp": "2026-04-23T13:49:35.523801Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, uh, one sec. Let me check the odometer. Got it — ninety-two thousand miles.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "f7f32132-cd88-4bee-8b34-2a3575db6c53",
+      "timestamp": "2026-04-23T13:49:36.685001Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Customer provided odometer reading of ninety-two thousand miles. Please check if their contract is still active."
+        },
+        "request_id": "call_i3AlgAUlTdaoUgTJocmer4vw",
+        "external_request_id": "3335808d-f8bf-4915-a142-d95a260c573e",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "75baad9a-81ca-4d5f-b186-b4e314caef90",
+      "timestamp": "2026-04-23T13:49:36.686359Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Customer provided odometer reading of ninety-two thousand miles. Please check if their contract is still active.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "33e62a36-1a6f-42d7-bb6a-a0391aa344e1",
+      "timestamp": "2026-04-23T13:49:36.756385Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. I've texted the link to you. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n# Workflow & Execution Rules\n**CRITICAL:** You are a strict, step-by-step agent. You must evaluate the conversation history before responding to determine your current step. You are physically prohibited from answering contract or coverage questions until Step 2 is fully complete.\n\n\n\n## Step 3: Journey Routing\n\n- Once you have identified the customer's contract, acknowledge their vehicle naturally in your first substantive response. For example: \"I can see you have a 2021 HONDA CIVIC on file.\" Only include fields that are non-empty.\n\n\n## Journey 1: Mechanical Issue / Repair Needed\n\nCustomer's vehicle needs mechanical repair under their Assurant service contract.\n\n- First, recommend the **selling dealer** as the preferred starting point:\n  \"I'd recommend starting with your selling dealer, Chicago Honda Center, who can be reached at 3125550200. They're familiar with your contract and can work directly with Assurant on your behalf.\"\n- If the selling dealer is unavailable or the customer prefers another shop, let them know \"Your contract may require you to return to your selling dealer. To confirm, you can view your contract and acceptable repair locations at vehicle care plan dot com.\" \n- Inform the customer that the repair facility (not the customer) must contact Assurant to initiate and authorize the claim process **before** repairs begin.\n- Guide them through the basic steps:\n  1. Take the vehicle to a repair facility (selling dealer preferred, or any repair location found on vehicle care plan dot com).\n  2. The repair facility contacts Assurant to get the claim authorized.\n  3. Assurant reviews and authorizes covered repairs.\n- Do NOT confirm that any specific repair is covered — coverage is determined case-by-case at claim authorization.\n- If the customer needs help locating a repair facility, let them know that they can locate one online at vehicle care plan dot com. If they insist on talking to a human agent to locate a repair facility or need related guidance → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n- If the customer wants to speak to an agent, first ask what specific help they need. If they need to check claim status, ask about car rentals or have contract-related questions, follow the journey instructions for each of those. If they ask about something else or you cannot help them, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol**.\n\n\n## Journey 2: Claim Status\n\nCustomer wants to know the status of their existing claim.\n- No active claim was found for this customer's contract.\n- Inform the customer: if they need to file a claim, the repair facility must contact Assurant to initiate the process. Customers cannot initiate claims themselves.\n\n\n## Journey 3: Car Rental Inquiry\n\n- Customer has questions about rental car benefits while their vehicle is being repaired.\n- Only a human agent can answer this question. Let the customer know that they will need to work with an agent for help with rental questions. Proceed to **Unified Escalation Protocol** with `GAIntent = 'CARRENTAL'`.\n\n\n## Journey 4: Contract Questions or Cancellation\n\nCustomer wants to understand, modify, cancel, or obtain a copy of their service contract.\n\n### General Contract Questions\n- Use `termsStructuredText` to answer questions about coverage terms, expiration, and exclusions.\n- Do NOT confirm specific repairs are covered.\n- If the question is not clearly answered by `termsStructuredText`, let the customer know that they will need to work with an agent to get further help on their question → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n\n### Contract Status / Expiry Check\n- Before confirming whether the contract is active or expired, you MUST first ask the customer for their **current odometer reading**.\n- The contract expires at whichever threshold comes first: the expiration date (2028-03-15) OR the expiration mileage (90000 miles).\n- Do NOT confirm the contract is active or expired without the customer's current mileage.\n\n### Requesting a Copy of the Contract\n- To **view the contract online**: Direct the customer to the Vehicle Care Plan portal — vehicle care plan dot com. Offer to send the link by text.\n- For a **signed physical copy**: Direct the customer to return to Chicago Honda Center, where they originally purchased the contract.\n\n### Account Holder / Co-Owner Information\n- If the customer asks who is listed on the contract or if there is a co-owner/co-buyer:\n  - The API response does NOT include co-owner or secondary account holder information.\n  - YOU MUST SAY: \"I'm unable to provide secondary account holder details. To view who is listed on your contract, please check your full contract online at vehicle care plan dot com. Is there anything else I can help you with?\"\n  - If customer chooses to view online → Direct them to the portal and ask if there's anything else you can help with.\n  - If customer chooses to speak with an agent → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n  - DO NOT immediately escalate without first offering the self-service option.\n  \n### Cancellations\n- Do NOT immediately escalate. First, advise: \"Cancellations need to be initiated at the dealership where you purchased your contract — Chicago Honda Center. You can reach them at 3125550200.\"\n- Ask: \"Have you already contacted Chicago Honda Center about the cancellation?\"\n  - **No** → Advise them to start there. Do not escalate.\n  - **Yes** → Ask if it has been more than 30 days since they contacted the dealer without resolution. If yes, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CANCELLATION'`.\n\n### Contract Modifications\n- If the customer is asking about extending their contract, say EXACTLY:\n  \"Contract extensions are not available at this time. Is there anything else I can help you with?\"\n- For all other contract modifications, let the customer know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'CONTRACTCHANGES'`.\n\n### GAP Contract Issues\n- Tell the customer: You will need to work with an agent for this. Let me transfer you. Proceed to **Unified Escalation Protocol** with `GAIntent = 'GAP'`.\n\n\n## Journey 5: Repair / Coverage Questions\n\nCustomer wants to understand what is covered under their contract before bringing their vehicle in.\n\n- Use `termsStructuredText` to answer coverage-related questions.\n- Follow this format when answering coverage questions:\n  1. State what the contract says about the component/repair from `termsStructuredText`\n  2. Then add: \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **NEVER** confirm that a specific repair IS definitively covered or not covered.\n- If the customer wants a definitive coverage answer, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'COVERAGEINFO'`.\n- For questions about where to take their vehicle, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'LOCATE_RF'`.\n\n## Journey 6: Roadside Assistance\n\nDetermine which of the two scenarios below applies before responding.\n\n### 6A: Customer Needs Immediate Roadside Help\n**Triggers:** customer is stranded, vehicle is inoperable, or they need active dispatch (tow, flat tire, lockout, dead battery, fuel delivery, etc.)\n\n- Let the customer know that you will connect them with their roadside assistance company VAS.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n- **Do NOT follow the Unified Escalation Protocol — skip chat deflection entirely.**\n\n### 6B: Customer Has Questions About Roadside Coverage\n**Triggers:** customer is asking what is covered, how to use the benefit, eligibility, limits, or reimbursement for roadside.\n\n- Check `termsStructuredText` for roadside coverage details specific to this contract and answer the customer's question.\n- If the answer is not in `termsStructuredText` → let the customer know that they will need to work with an agent and proceed to **Unified Escalation Protocol** with `GAIntent = 'ROADSIDE_ASSISTANCE'`.\n\n\n## Journey 7: Reimbursement Questions\n\nCustomer wants to get reimbursed for their car repair or related expenses.\n\nAttempt to answer the customer's questions using this policy: \"We understand that emergencies can happen, but we highly encourage you to have your vehicle repaired through our normal process. We work directly with the repair facilities to negotiate the best cost and labor rates and advocate on your behalf to ensure the repair is correctly diagnosed. \nEmergency Repair Instructions: If the Administrator’s office is closed and emergency repairs are necessary because your vehicle is inoperable or unsafe to drive, you may proceed with the repairs without prior authorization. However, you or the repair facility must notify the Administrator as soon as the office reopens and submit repair details within 30 days. Reimbursement will follow your contract terms. Parts must be available for inspection when the office reopens.\"\n\nIf they want to understand the status of their reimbursement or how to start the process, inform the customer that they can start as well as check on reimbursement online at vehicle care plan dot com.\n\nIf they have questions that cannot be answered using this information, let them know that they will need to work with an agent for further help on this topic  → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Journey 8: New Claim \n\nCustomer wants to file a new claim.\n\nThis process is the same as the customer calling because they want to get a mechanical issue fixed (Journey 1). Please follow the instructions in Journey 1.\n\n\n## Journey 9: Other / Unknown\n\nCustomer's need doesn't match any of the above journeys.\n\n- Acknowledge the customer's question and attempt to assist using available contract and claims data. Note that customers cannot start a claim themselves, they must contact their selling dealer, or an independent repair facility who can start a claim on their behalf.\n- If you cannot provide a complete resolution, let them know that they will need to work with an agent for further help on this topic → Proceed to **Unified Escalation Protocol** with `GAIntent = 'ALLOTHER_QUESTIONS'`.\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer's Answer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n    - If they say no or indicate they don't need further help: Proceed to end the conversation via `end_of_conversation`.\n- **If they decline the chat offer or repeat their request for a phone agent** (e.g., they say \"No,\" \"No thanks,\" \"I'd rather wait,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative\", \"Rep\", or \"Get me a human\"):\n  - **CRITICAL: The customer still needs to speak to a phone agent. Do NOT ask \"Is there anything else I can help you with?\" and do NOT end the conversation. The customer's original escalation need has not been resolved — they simply declined the chat alternative.**\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\nThe Customer Service Agent queue is currently closed. You MUST say EXACTLY:\n\"Our support team is currently unavailable. Our business hours are Monday to Friday from 7:00 AM to 10:00 PM ET, and Saturday from 8:00 AM to 8:00 PM ET. We are closed on Sundays. Please contact us again during those hours. In the meantime, can I help you with anything else today.\"\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": "<redacted>",
+            "ContractNumber_out": "<redacted>",
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": "<redacted>",
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": "<redacted>"
+          },
+          "current_datetime": "Day: Sunday, Date: 2026-03-08, Time: 08:00PM EDT (-0400)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": false
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "009239bf-1222-4c73-aca1-f8affbdcb067",
+      "timestamp": "2026-04-23T13:49:37.963000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Perfect! One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "6fb1433f-a66d-4e93-9247-6e2e53a33ba3",
+      "timestamp": "2026-04-23T13:49:39.604805Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 12017,
+        "num_output_tokens": 164,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_bea628f6496c49298bc8f15166d74a1b",
+        "llm_id": "litellm",
+        "cost": 0.022274,
+        "call_duration": 2835,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "d3b1509d-1fa0-474d-bc6d-22146ae47cad",
+      "timestamp": "2026-04-23T13:49:39.607854Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(2.1) The customer has now provided their odometer reading (92,000 miles). (2.2) The solution can be determined from the contract data and task instructions: the contract expires at the earlier of March 15, 2028 or 90,000 miles. The odometer reading exceeds 90,000 miles, so the contract is expired. (4.1) My next action is to instruct the Talker to inform the customer that their contract is no longer active because the mileage limit has been exceeded."
+    },
+    {
+      "id": "18dc4f57-8b6b-4336-8a42-48bf42244455",
+      "timestamp": "2026-04-23T13:49:39.607855Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Inform the customer that their contract is no longer active because their current odometer reading of 92,000 miles exceeds the contract's mileage limit of 90,000 miles. Ask if there is anything else you can help them with today.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "13821155-1e37-493f-88fa-cd86d392d8f7",
+      "timestamp": "2026-04-23T13:49:39.609021Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer provided odometer reading of ninety-two thousand miles. Please check if their contract is still active."
+          },
+          "request_id": "call_i3AlgAUlTdaoUgTJocmer4vw",
+          "external_request_id": "3335808d-f8bf-4915-a142-d95a260c573e",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Inform the customer that their contract is no longer active because their current odometer reading of 92,000 miles exceeds the contract's mileage limit of 90,000 miles. Ask if there is anything else you can help them with today.",
+        "last_action_id": "18dc4f57-8b6b-4336-8a42-48bf42244455",
+        "error": null
+      }
+    },
+    {
+      "id": "1bb5fff4-cead-46fa-ac3d-254ddf99fac0",
+      "timestamp": "2026-04-23T13:49:39.821000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Perfect! One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1858
+    },
+    {
+      "id": "1ffb86f7-b37e-4300-b372-d165e4d4075a",
+      "timestamp": "2026-04-23T13:49:42.149712Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Inform the customer that their contract is no longer active because their current odometer reading of 92,000 miles exceeds the contract's mileage limit of 90,000 miles. Ask if there is anything else you can help them with today.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "90217295-bcbb-422b-8a1d-0235ae39bcae",
+      "timestamp": "2026-04-23T13:49:43.477000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Your contract is no longer active because your current odometer reading of ninety-two thousand miles exceeds the contract's mileage limit of ninety thousand miles. Is there anything else I can help you with today?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "a5e25885-446b-45a3-a1a8-5da36be05094",
+      "timestamp": "2026-04-23T13:49:58.928302Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, uh, that answers it. Thanks for checking.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    }
+  ],
+  "current_datetime": null,
+  "generative_agent_version": null,
+  "conversation_type": "voice"
+}

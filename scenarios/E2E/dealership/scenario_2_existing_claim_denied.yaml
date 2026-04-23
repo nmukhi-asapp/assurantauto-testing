@@ -1,0 +1,198 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-002
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Dealership
+  - When offered the portal, say you prefer to handle it over the phone
+  - Ask about the status of your claim — you received a denial notice and want to understand why
+  - If the agent cannot resolve it, accept being transferred to a specialist
+  knowledge: You are calling from Sunset Chevrolet. A customer's claim (37030002A) on contract VSC300002 was denied. The VIN
+    is 1C4BJWDG5HL300002 (last 8 are HL300002). You want to understand why the claim was denied and what options exist. If
+    asked your caller type, say Dealership.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Professional but frustrated. Wants a clear explanation. Will cooperate with the agent but expects to be transferred to someone who can help.
+description: Dealership calling about a denied claim — agent looks up status and escalates to specialist
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealership
+- rules:
+  - Agent asks for a claim identifier and looks up the claim using an available claim lookup function
+- rules:
+  - Agent identifies the claim status as Denied and communicates the longVerbiageStatus to the caller
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr, OR informs the customer that agents are not currently available due
+    to business hours
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'CLAIMSTATUS'
+- rules:
+  - ClaimStatus is set to 'ClaimNotAuthorized'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Dealership: CARRENTAL,
+    CLAIMS, CLAIMSTATUS, NEWCLAIM, UPDATECLAIM, COVERAGEINFO, GAP, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+id: e2e_dealership_existing_claim_denied
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        breakdownMileage: 68000
+        createdOn: '2026-02-10'
+        repairShopName: Sunset Chevrolet
+        repairShopId: 000AZ055
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    - params: {}
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        breakdownMileage: 68000
+        createdOn: '2026-02-10'
+        repairShopName: Sunset Chevrolet
+        repairShopId: 000AZ055
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        createdOn: '2026-02-10'
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    - params: {}
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        createdOn: '2026-02-10'
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        createdOn: '2026-02-10'
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    - params: {}
+      response:
+        claimNumber: 37030002A
+        VIN: 1C4BJWDG5HL300002
+        contractNumber: VSC300002
+        status: Denied
+        claimRecordType: Mechanical
+        repairDescription: Engine Oil Consumption
+        createdOn: '2026-02-10'
+        longVerbiageStatus: This claim has been reviewed and the requested repairs were determined to be outside the scope
+          of the service contract coverage. For more information on the specific exclusion, please speak with a claims specialist.
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551300002'
+    - params: {}
+      response:
+        PhoneNumber: '5551300002'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551300002'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551300002'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- existing_claim
+- denied
+- escalation

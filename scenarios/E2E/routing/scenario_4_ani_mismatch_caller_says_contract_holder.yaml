@@ -1,0 +1,185 @@
+company_marker: assurantauto
+customer:
+  customer_id: RT-004
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a repair facility, dealer, or calling about a personal contract, say you are calling
+    about your personal vehicle service contract
+  - Ask about your warranty coverage for your personal vehicle
+  knowledge: Your phone number is registered as a repair facility in the Assurant system, but you are calling about a personal
+    vehicle service contract (you are both a shop owner and a contract holder for your personal car). When asked to identify
+    yourself during the disambiguation step, say you are calling about your personal contract — not that you are a repair
+    facility or dealer.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Shop owner who also has a personal vehicle service contract. Cooperative with whatever flow the agent starts. When given the disambiguation options, clearly states they are calling about their personal contract.
+description: ANI identifies caller as repair facility but caller identifies as personal contract holder — agent should route
+  to ContractHolderIssues
+evaluations:
+- rules:
+  - After switching to ContractHolderIssues, agent offers the self-service portal website before addressing the caller's request
+- rules:
+  - When is_repair_facility returns true but caller identifies as a personal contract holder during disambiguation, agent
+    routes to ContractHolderIssues
+- rules:
+  - Agent does NOT route to RepairShopIssues when the caller identifies as calling about a personal contract
+id: e2e_routing_ani_mismatch
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 2HGFC2F56MH200004
+              contractNumber: VSC120004
+              customerFirstName: Marcus
+              customerLastName: Rivera
+              customerEmail: marcus.rivera@test.assurant.com
+              customerAddress1: 812 Industrial Way
+              customerCity: Phoenix
+              customerCountry: USA
+              customerStateCode: AZ
+              customerPostalCode: '85001'
+              customerHomePhone: '5551200004'
+              customerMobilePhone: '5551200004'
+              expirationDate: '2027-09-30'
+              status: Active
+              dealerId: 000AZ055
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 80000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-09-30'
+              sellingDealerName: Desert Sun Auto
+              sellingDealerAddress: 500 Camelback Rd, Phoenix, AZ, 85001
+              sellingDealerPhone: '6025550199'
+              model: CIVIC
+              make: HONDA
+              vehicleYear: 2021
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Gold
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-09-30'
+    - params: {}
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 2HGFC2F56MH200004
+              contractNumber: VSC120004
+              customerFirstName: Marcus
+              customerLastName: Rivera
+              customerEmail: marcus.rivera@test.assurant.com
+              customerAddress1: 812 Industrial Way
+              customerCity: Phoenix
+              customerCountry: USA
+              customerStateCode: AZ
+              customerPostalCode: '85001'
+              customerHomePhone: '5551200004'
+              customerMobilePhone: '5551200004'
+              expirationDate: '2027-09-30'
+              status: Active
+              dealerId: 000AZ055
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 80000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-09-30'
+              sellingDealerName: Desert Sun Auto
+              sellingDealerAddress: 500 Camelback Rd, Phoenix, AZ, 85001
+              sellingDealerPhone: '6025550199'
+              model: CIVIC
+              make: HONDA
+              vehicleYear: 2021
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Gold
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-09-30'
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551200004'
+    - params: {}
+      response:
+        PhoneNumber: '5551200004'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551200004'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551200004'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- routing
+- ani_mismatch
+- repair_facility
+- caller_identification

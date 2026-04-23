@@ -1,0 +1,211 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-035
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - Start by saying you need to speak to a human agent
+  - When the agent asks what you need help with, say you cannot log into the VCP portal to view your contract
+  knowledge: If asked to identify yourself as a caller type, say you are a Contract Holder. You are unable to log into the
+    Vehicle Care Plan portal. Start by saying 'I need to speak with a human agent please.'
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Polite but firm. Does not want to be deflected. States portal login issue only when asked why they want a human.
+description: Contract holder opens with 'I need a human agent' without stating a reason. Agent should ask what they need help
+  with (not blindly escalate). Customer then explains they cannot log into the VCP portal. Portal login issues are explicitly
+  listed as an escalation trigger in ContractHolderIssues. Agent must recognize this is outside its scope and escalate via
+  Unified Escalation Protocol, rather than attempting to troubleshoot login directly.
+evaluations:
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a Contract Holder
+- rules:
+  - Agent calls get_contract_and_claims_data_ivr and successfully retrieves the customer's contract
+- rules:
+  - Agent asks the customer what they need help with before escalating, rather than blindly escalating on the request alone
+- rules:
+  - Customer states they cannot log into the VCP portal
+- rules:
+  - Agent does NOT attempt to troubleshoot the portal login directly
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr, OR informs the customer that agents are not currently available due
+    to business hours
+- rules:
+  - Agent informs the customer they will be connected to the appropriate team, OR informs the customer that agents are not
+    currently available due to business hours
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Contract Holder:
+    CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO, GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE,
+    RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_edge_case_ch_human_request_portal_login
+mock_user:
+  current_timestamp: '2026-03-26'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 1G1BE5SM0G7100035
+              contractNumber: VSC100035
+              customerFirstName: James
+              customerLastName: Chen
+              customerEmail: james.chen@test.assurant.com
+              customerAddress1: 88 River Rd
+              customerCity: Chicago
+              customerCountry: USA
+              customerStateCode: IL
+              customerPostalCode: '60601'
+              customerHomePhone: '5551000035'
+              expirationDate: '2027-11-15'
+              status: Active
+              dealerId: 000IL031
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 90000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-11-15'
+              sellingDealerName: Chicago Chevy World
+              sellingDealerAddress: 200 Lake Shore Dr, Chicago, IL, 60601
+              sellingDealerPhone: '3125550200'
+              model: CRUZE
+              make: CHEVROLET
+              vehicleYear: 2020
+              isFE: false
+              rentalIndicator: N
+              roadsideMaxPerServiceCall: 75
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-11-15'
+              customerMobilePhone: '5551000035'
+    - params: {}
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 1G1BE5SM0G7100035
+              contractNumber: VSC100035
+              customerFirstName: James
+              customerLastName: Chen
+              customerEmail: james.chen@test.assurant.com
+              customerAddress1: 88 River Rd
+              customerCity: Chicago
+              customerCountry: USA
+              customerStateCode: IL
+              customerPostalCode: '60601'
+              customerHomePhone: '5551000035'
+              expirationDate: '2027-11-15'
+              status: Active
+              dealerId: 000IL031
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 90000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-11-15'
+              sellingDealerName: Chicago Chevy World
+              sellingDealerAddress: 200 Lake Shore Dr, Chicago, IL, 60601
+              sellingDealerPhone: '3125550200'
+              model: CRUZE
+              make: CHEVROLET
+              vehicleYear: 2020
+              isFE: false
+              rentalIndicator: N
+              roadsideMaxPerServiceCall: 75
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-11-15'
+              customerMobilePhone: '5551000035'
+    send_sms_to_phone:
+    - params: {}
+      response:
+        success: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000035'
+    - params: {}
+      response:
+        PhoneNumber: '5551000035'
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551000035'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551000035'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- edge_case
+- human_request
+- escalation
+- portal_login
+- out_of_scope

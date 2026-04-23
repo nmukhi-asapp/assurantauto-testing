@@ -1,0 +1,107 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-020
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - Get help with your service contract even though the system is having technical issues
+  knowledge: If asked to identify yourself as a caller type, say you are a Contract Holder. Start by saying 'I need help with
+    my service contract.'
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Patient initially but becomes frustrated if not helped. Expects professional service recovery.
+description: API call to get_contract_and_claims_data_ivr returns an error response
+evaluations:
+- rules:
+  - Agent offers the self-service portal website to the caller
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a Contract Holder
+- rules:
+  - Agent attempts to call get_contract_and_claims_data_ivr before answering the customer's substantive questions
+- rules:
+  - Agent receives an error or failure response from the API
+- rules:
+  - Agent acknowledges the technical issue professionally
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr function
+- rules:
+  - TransferReason indicates a system or API error
+- rules:
+  - Agent apologizes for the inconvenience and ensures the customer will be helped by a specialist
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Contract Holder: CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO, GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE, RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS, DEFAULT"
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_edge_case_api_failure
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '5551000020'
+      response:
+        error: Service temporarily unavailable
+        status: 503
+        message: Unable to retrieve contract information at this time.
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: SystemError
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000020'
+    - params: {}
+      response:
+        PhoneNumber: '5551000020'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551000020'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551000020'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- edge_case
+- api_failure
+- error_handling

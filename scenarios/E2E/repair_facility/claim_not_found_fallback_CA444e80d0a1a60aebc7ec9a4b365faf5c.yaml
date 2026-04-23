@@ -1,0 +1,182 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-007
+  evaluation_goals: null
+  goals:
+  - You are a repair facility. When the agent asks your caller type, say you are a repair facility
+  - Ask for the status of claim number 47263316
+  - If the agent says the claim was not found, offer to provide the contract number instead (VSC200007)
+  knowledge: You are calling from Precision Auto Repair. You are asking about claim 47263316. The contract number for this
+    vehicle is VSC200007 and the last 8 of the VIN is KF100007. If the claim lookup fails, you can provide the contract number
+    or last 8 VIN.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Patient but persistent. Will provide alternative identifiers if asked.
+description: Repair facility asking for claim status — when claim number lookup fails, agent must clearly inform the caller
+  the claim was not found and offer alternative lookup options (contract number or last 8 VIN), not keep re-asking for the
+  same claim number
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent attempts claim lookup using the provided claim number
+- rules:
+  - When the claim is not found, agent clearly tells the caller the claim could not be found
+- rules:
+  - After a failed claim lookup, agent offers to look up using an alternative identifier — contract number OR last 8 digits
+    of VIN
+- rules:
+  - Agent does NOT repeatedly ask the caller to restate the same claim number without offering alternative identifiers
+- rules:
+  - Agent successfully retrieves the claim when provided the contract number as an alternative identifier
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Repair Facility:
+    CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT, UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT,
+    RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_claim_not_found_fallback
+mock_user:
+  current_timestamp: '2026-03-19'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claim:
+        - claimStatus: error
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: '47263316'
+        VIN: 1G1ZD5ST6KF100007
+        contractNumber: VSC200007
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        breakdownMileage: 55000
+        createdOn: '2026-03-10'
+        repairShopName: Precision Auto Repair
+        repairShopId: RF007
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+          Please proceed with the covered repairs.
+        authorizationAmount: 1200.0
+    - params: {}
+      response:
+        claimNumber: '47263316'
+        VIN: 1G1ZD5ST6KF100007
+        contractNumber: VSC200007
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        breakdownMileage: 55000
+        createdOn: '2026-03-10'
+        repairShopName: Precision Auto Repair
+        repairShopId: RF007
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+          Please proceed with the covered repairs.
+        authorizationAmount: 1200.0
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claimNumber: '47263316'
+        VIN: 1G1ZD5ST6KF100007
+        contractNumber: VSC200007
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        createdOn: '2026-03-10'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+          Please proceed with the covered repairs.
+        authorizationAmount: 1200.0
+    - params: {}
+      response:
+        claimNumber: '47263316'
+        VIN: 1G1ZD5ST6KF100007
+        contractNumber: VSC200007
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        createdOn: '2026-03-10'
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+          Please proceed with the covered repairs.
+        authorizationAmount: 1200.0
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551100007'
+    - params: {}
+      response:
+        PhoneNumber: '5551100007'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551100007'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551100007'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- claim_status
+- claim_not_found
+- fallback
+- regression
+- CA444e80d0a1a60aebc7ec9a4b365faf5c

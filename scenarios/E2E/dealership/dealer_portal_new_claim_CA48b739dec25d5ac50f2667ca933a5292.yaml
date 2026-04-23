@@ -1,0 +1,110 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-006
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Dealership
+  - Tell the agent you want to start a new claim for a customer vehicle
+  - If offered the portal, say you prefer to handle it over the phone
+  - When told you need to have the Repair Order and VIN ready, confirm you understand and agree to be transferred
+  knowledge: You are calling from Midwest Ford. A customer (VIN 1FTFW1E56MKD00006, last 8 MKD00006, contract VSC300006) brought in their 2021 Ford F-150 for a failing water pump. You need to start a new claim. If asked your caller type, say Dealership.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Professional service advisor. Cooperative but prefers phone over portal.
+description: Dealership starting a new claim — agent must refer to autorepairs.assurant.com (dealer portal), NOT autoclaims.com; if caller prefers phone, instruct to have RO and VIN ready and transfer to adjuster
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealership
+- rules:
+  - Agent offers the dealer self-service portal at autorepairs.assurant.com (NOT autoclaims.com)
+- rules:
+  - Agent does NOT direct the dealership to autoclaims.com
+- rules:
+  - Agent identifies the caller's issue as a new claim
+- rules:
+  - When caller says they prefer to handle over the phone, agent instructs them to have the Repair Order and VIN ready before transferring to a claims adjuster
+- rules:
+  - The caller provided the vehicle VIN to the agent before the call was transferred to a claims adjuster
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Dealership: CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, UPDATECLAIM, COVERAGEINFO, GAP, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT"
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+id: e2e_dealership_portal_correct_url_new_claim
+mock_user:
+  current_timestamp: '2026-03-18'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551300006'
+    - params: {}
+      response:
+        PhoneNumber: '5551300006'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551300006'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551300006'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- new_claim
+- portal_url
+- regression
+- CA48b739dec25d5ac50f2667ca933a5292

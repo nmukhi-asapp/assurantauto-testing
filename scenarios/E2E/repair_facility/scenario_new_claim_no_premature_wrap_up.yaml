@@ -1,0 +1,146 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-012
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are a repair facility
+  - Tell the agent you need to file a new claim and have not yet sent the Repair Order
+  - When asked whether you prefer online or phone, say you prefer phone
+  - When the agent explains online is faster, insist you want to do it over the phone
+  - When the agent asks you to email the Repair Order, say "I'll email it now" and
+    nothing else — do not say you have sent it yet
+  - If the agent then asks "Is there anything else I can assist with?" or tries to
+    wrap up, say "No. I'm still emailing it." — do not end the conversation
+  - After a moment, say "OK, I sent it"
+  - When the agent tells you to wait for the case number email, say "I got it — the
+    case number is CASE-RF-012"
+  knowledge: You are calling from Eastside Motors. A customer brought in a 2021 Honda
+    CR-V (VIN 7FARW2H58ME012345, last 8 ME012345, contract VSC200012) with a faulty
+    power steering pump at 45,000 miles. You have not yet emailed the Repair Order.
+    You prefer to handle this over the phone. You will email the RO during the call
+    and receive case number CASE-RF-012. If asked your caller type, say repair facility.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Busy shop manager — impatient but cooperative once engaged. Prefers phone. When mid-task, clearly signals that they are still in progress if the agent tries to end the call too early.
+description: "Regression test for premature wrap-up bug: agent must not ask 'Is there
+  anything else?' or end the call while the caller is still in the process of emailing
+  the Repair Order. Agent must stay on the line, wait for the RO to be sent, wait
+  for the case number email, collect the case number, and then escalate."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent instructs the caller to email the Repair Order to ro@autoclaims.com and
+    asks them to confirm when it has been sent
+- rules:
+  - Agent asks the caller to let them know when the email response with the case number
+    arrives
+- applicability:
+  - The customer did not voluntarily provide the case number unprompted
+  rules:
+  - Agent asks the caller for the case number from the response email
+- rules:
+  - Agent does NOT end the conversation or call end_of_conversation before the caller
+    has provided the case number
+- rules:
+  - After the caller says they are still emailing the Repair Order, agent does NOT
+    treat this as a conversation-ending response — agent stays on the line and continues
+    assisting
+- rules:
+  - Agent does NOT call escalate_to_agent_from_ivr or end_of_conversation before
+    first obtaining the case number from the caller
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "If the agent escalated the call, the GAIntent output variable is set to one of
+    the valid values for Repair Facility: CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM,
+    NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT, UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT,
+    RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT"
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_new_claim_no_premature_wrap_up
+mock_user:
+  current_timestamp: '2026-04-01'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: 'repairShop'
+      response:
+        success: true
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: 'repairShop'
+      response:
+        success: true
+    - params: {}
+      response:
+        success: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551100012'
+    - params: {}
+      response:
+        PhoneNumber: '5551100012'
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551100012'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551100012'
+  max_turns: 35
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- new_claim
+- phone_filing
+- case_number
+- no_premature_escalation
+- regression
+- premature_wrap_up

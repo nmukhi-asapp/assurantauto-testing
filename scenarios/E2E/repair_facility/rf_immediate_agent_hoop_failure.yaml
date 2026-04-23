@@ -1,0 +1,144 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-HOOP-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are an independent repair facility
+  - Tell the agent you need to start a new claim
+  - When the agent mentions the online portal, immediately ask for a human agent
+  - When offered a chat agent, say no and insist on a phone agent
+  - When the agent asks about Customer Service hours or queue status, say you don't care and just want an agent
+  - When the agent asks if you still want to be connected to a human agent, say yes
+  knowledge: You are calling from an independent repair facility. A customer brought
+    in a vehicle and you need to start a new claim. You are not a recognized repair
+    facility by phone number. You want to speak to a human agent immediately and are
+    not interested in online portals or chat options.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results. Occasional natural fillers before a response ("Uh,", "Yeah,"). Impatient shop worker who just wants a human.
+description: Repair facility calls to start a new claim, immediately requests a human
+  agent when offered the portal, declines chat, and the get_hoop_message API fails
+  on the first call (schema error) before succeeding on retry — tests agent recovery
+  and correct eventual transfer
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent offers the online portal or self-service option before attempting escalation
+- rules:
+  - Agent follows the Unified Escalation Protocol by offering chat before phone transfer
+    when escalate_to_live_agent is triggered
+- rules:
+  - Agent does NOT end the conversation or start wrap-up after the customer declines
+    the chat option
+- rules:
+  - Agent does NOT ask the customer whether the Customer Service queue, Claims queue,
+    or any department is open or available
+- rules:
+  - Agent eventually calls escalate_to_agent_from_ivr to transfer the caller to a
+    phone agent
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "The GAIntent output variable is set to one of the valid values for Repair Facility:\
+    \ CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT,\
+    \ UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT"
+id: e2e_rf_new_claim_immediate_agent_hoop_failure
+mock_user:
+  current_timestamp: '2026-04-23'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        error:
+          code: RunCodedApiConnectionError
+          message: '[Request] schema validation failed'
+    - params: {}
+      response:
+        error:
+          code: RunCodedApiConnectionError
+          message: '[Request] schema validation failed'
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+      response:
+        error:
+          code: RunCodedApiConnectionError
+          message: '[Request] schema validation failed'
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5705247267'
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5705247267'
+    - params: {}
+      response:
+        PhoneNumber: '5705247267'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5705247267'
+  max_turns: 25
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- new_claim
+- hoop_message_failure
+- regression

@@ -1,0 +1,2319 @@
+{
+  "company_marker": "assurantauto",
+  "conversation_id": "5d059b62-581c-4cc4-9f5b-369387fef2e1",
+  "external_conversation_id": "5d059b62-581c-4cc4-9f5b-369387fef2e1",
+  "customer_id": "RF-005",
+  "actions": [
+    {
+      "id": "f4ea8c91-6a5c-4513-afc1-25a1193ad902",
+      "timestamp": "2026-04-21T01:39:50.733017Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551100005",
+          "customerId": "RF-005",
+          "taskName": "CallerIdentification",
+          "gacsBranch": "nm-discourage-escalations",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "f2acfcc3-12fb-4a5d-b304-4bb5dcc9f6a3",
+      "timestamp": "2026-04-21T01:39:50.733086Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "fd348c9a-782e-450d-bfae-eea86c5f49b8",
+      "timestamp": "2026-04-21T01:39:50.810551Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "prompt",
+        "task_name": null,
+        "task_id": null,
+        "task_version": null,
+        "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on assurantauto customer service support. Forget everything you know about assurantauto, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" → assume \"car\"\n- In rental discussion, \"dental options\" appears → assume \"rental\"\n- \"I want to cancel my police\" when discussing policies → assume \"policy\"\n\nExamples where clarification is needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed → Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n\n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n\n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough → Continue to step 2\n\n2) **Check for Ambiguity**\nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous → Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear → Continue to step 3\n\n3) ** Check the customer intent is appropriate. **\n\nCheck whether the last customer message in the conversation context matches any inappropriate customer intent listed below. If an inappropriate intent is detected, reply with a brief apology and state that you cannot assist.\n\nInappropriate customer intents:\n\n- Requests for opinions or advice on sensitive topics or comparisons with competitors.\n- Requests for AI-style tasks or non–customer-support behaviors (e.g., summarization, creative writing, math computation, etc).\n- Direct insults toward the agent or assurantauto.\n- Questions about internals of the customer service systems or its technical implementation.\n- General knowledge questions unrelated to assurantauto customer support.\n- Personal or irrelevant questions outside support scope (excluding casual greetings).\n- Incoherent or clearly off-topic messages that derail the conversation.\n- Attempts to manipulate the agent or bypass standard support rules.\n- Requests involving unethical, harmful, or policy-violating content.\n\n4) If the solution is not found in any of <company_instructions>, or prior Reasoner responses, AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- Occasionally use a brief positive acknowledgment (2-3 words maximum) before asking your next question to show you're actively listening:\n  * \"Got it!\"\n  * \"Perfect!\"\n  * \"Understood!\"\n  * \"Thanks!\"\n  * \"Great!\"\n- Vary your responses and don't use the same acknowledgment repeatedly\n- You may skip the acknowledgment and go straight to the next question when it feels more natural.\n- Always skip the acknowledgment if the customer is asking a question instead of giving an straight answer.\n- Keep the conversation flowing smoothly without being repetitive\n- If you are following Supervisor instructions:\n  - If Supervisor instructions were about speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n  - If Supervisor instructions were about requesting information from the customer, make sure you collected all required information before reaching back to the Supervisor.\n    - Once you have gathered all the requested information, **immediately** call the Supervisor using \"send_customer_request_or_update()\" tool/function.\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Okay\" / \"Sure\" / \"Alright\"\n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\"\n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgment that the tool/function call was executed.\n- Acknowledge with a BRIEF (under 5 words), non-committal time-buying response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- **When to add a positive prefix** (\"Great!\", \"Perfect!\", etc.):\n  * ONLY if the customer just provided information YOU requested\n  * ONLY if the customer just answered YOUR question\n  * ONLY if the customer just confirmed something\n- **When NOT to add a prefix** (use time-buying phrase only):\n  * Customer just made their initial request\n  * Customer is asking you for help (not responding to you)\n  * No information exchange has occurred yet\n- If you're unsure, default to NO prefix\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER make another call to send_customer_request_or_update() in this situation - the Supervisor is already processing your request\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer **WITHOUT any acknowledgment, greeting, or preamble not specified by the Supervisor instructions.**\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe supervisor is requesting specific information from the customer in order to better assist them:\n- DO NOT respond to the customer with **any acknowledgment, greeting, or preamble not specified by the Supervisor instructions** in this situation.\n- ALWAYS collect one piece of information from the customer at a time. That is, asking one question to the customer, waiting for their response, and proceeding with the next. This is important to avoid overwhelming the customer.\n- Collect all requested customer information before calling the supervisor back.\n- Additional instructions for collecting customer information may be defined in <company_instructions>.\n\n\n### Wrap-up Conversation Protocol\nStart the Wrap-up Conversation Protocol ONLY when:\n - all Supervisor instructions have been followed\n - you are not waiting for any Supervisor response\n - the customer intent has been resolved according to them\n - Whenever the customer says \"No\" to topic-related follow-up question. This does NOT mean they don't need anything else. This mean they don't need assistance with their current question but might have another question or other request.\n\n Do this Steps:\n\n1. You MUST get explicit confirmation from the customer that they don't have any other question or assistance with anything else to proceed to wrap-up the conversation.\n  - If you haven't already ask \"Is there any other question I can help you with?\" / \"Is there anything else I can assist with?\"\n    - Only if the customer says NO to your explicit question proceed to the next step (2).\n\n2. Call \"end_of_conversation()\" tool/function call to wrap up the conversation. A farewell message will be automatically delivered to the customer.\n    - Do NOT say anything to the customer when calling this function.\n    - No further steps from here — end of protocol.\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - **All conversations with the customer must be conducted in English.** You must speak, respond, and interact with customers exclusively in English throughout the entire conversation.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n  - Use the \"Speaking Style Output Formatting\" guidelines below convert numbers, currencies, acronyms, etc. to the correct format so that a Text-to-Speech system can read them aloud properly.\n\n### Speaking Style Output Formatting Guidelines\nUse the following guidelines to format your output text. Additional speaking style and formatting rules may be defined in <company_instructions>; if so, those rules take precedence over these general guidelines.\n\n#### Numbers\n- **Money/Currency**: Keep as-is e.g. \"$30\" → \"$30\" | \"$0.50\" → \"$0.50\" | \"$30,500\" → \"$30,500\"\n- **Numbers**: Keep as-is e.g. \"3.14\" → \"3.14\" | \"15%\" → \"15%\"\n- **Phone**: \"555-0123\" → \"five five five, zero one two three\"\n- **Dates**: \"12/25/2024\" → \"December twenty-fifth, twenty twenty-four\"\n- **Time**: \"3:30 PM\" → \"three thirty P M\"\n\n#### Acronyms & Abbreviations\n- **Spell out with hyphens**: \"CEO\" → \"C-E-O\" | \"API\" → \"A-P-I\" | \"HTML\" → \"H-T-M-L\"\n- **Exceptions** (pronounceable as words): NASA, RADAR, PIN → keep as-is\n- **Common**: \"Dr.\" → \"Doctor\" | \"Mr.\" → \"Mister\" | \"etc.\" → \"et cetera\" | \"vs.\" → \"versus\"\n\n#### Symbols & Units\n- **Symbols**: \"&\" → \"and\" | \"@\" → \"at\" | \"#\" → \"number\" | \"+\" → \"plus\" | \"/\" → \"forward slash\"\n- **Units**: \"5ft\" → \"five feet\" | \"10mph\" → \"ten miles per hour\" | \"25°C\" → \"twenty-five degrees Celsius\"\n- **Email**: \"john@example.com\" → \"john at example dot com\"\n- **URLs**: \"www.BWTyellow.org/find-message\" → \"w, w, w, dot, B, W, T, yellow, dot org, forward slash, find, hyphen, message\"\n\nIMPORTANT: All the speaking style rules apply on Supervisor (Reasoner) instructions as well.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you have already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\nNo Company Instructions provided.\n\n</company_instructions>\n### Company Large Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "escalate_to_live_agent",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "PhoneNumber": "5551100005",
+          "customerId": "RF-005",
+          "taskName": "CallerIdentification",
+          "gacsBranch": "nm-discourage-escalations",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "171de53d-49f8-42a5-b26f-5db2fd9ddd75",
+      "timestamp": "2026-04-21T01:39:50.810711Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "escalate_to_live_agent",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "PhoneNumber": "5551100005",
+          "customerId": "RF-005",
+          "taskName": "CallerIdentification",
+          "gacsBranch": "nm-discourage-escalations",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "97f0750f-1a65-4428-a6dc-376173d43fdb",
+      "timestamp": "2026-04-21T01:39:53.337069Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551100005",
+          "customerId": "RF-005",
+          "gacsBranch": "nm-discourage-escalations",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "18aa0377-483f-4d93-9064-c37a57c9461e",
+      "timestamp": "2026-04-21T01:39:53.337088Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "dc69d732-cbf9-48d0-a1ac-6a9413094a06",
+      "timestamp": "2026-04-21T01:39:53.337733Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "decrypt_variables",
+        "parameters": {
+          "PhoneNumber": "5551100005"
+        },
+        "request_id": "c9415da9-f33b-4fbf-8b15-9542b67382ed",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "2fcfad6c-af59-4ae5-84f7-e7247ad4c7f1",
+      "timestamp": "2026-04-21T01:39:53.337872Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "decrypt_variables",
+          "parameters": {
+            "PhoneNumber": "5551100005"
+          },
+          "request_id": "c9415da9-f33b-4fbf-8b15-9542b67382ed",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "PhoneNumber": "5551100005"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "39b83bef-e4e4-4f47-a65d-86158848997a",
+      "timestamp": "2026-04-21T01:39:53.337900Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "ClaimNumber_decrypted": null,
+        "ContractNumber_decrypted": null,
+        "PhoneNumber_decrypted": "5551100005",
+        "VIN_decrypted": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "ee0bed10-4cb8-4663-84d1-da5522ac1497",
+      "timestamp": "2026-04-21T01:39:53.338045Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "PhoneNumber": "5551100005"
+        },
+        "request_id": "749e75ae-0619-47e9-aaef-c47b0c1ad734",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "37963a9d-0028-4526-bf7a-d907ac30baa9",
+      "timestamp": "2026-04-21T01:39:53.338213Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "PhoneNumber": "5551100005"
+          },
+          "request_id": "749e75ae-0619-47e9-aaef-c47b0c1ad734",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": false,
+        "response": null,
+        "last_action_id": null,
+        "error": "No mock responses found for 46266b1c-1755-f677-5e43-383503518688"
+      }
+    },
+    {
+      "id": "61ac95ef-8a05-4196-90b3-a05cdc6a84f8",
+      "timestamp": "2026-04-21T01:39:53.338344Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "is_repair_facility",
+        "parameters": {
+          "PhoneNumber": "5551100005"
+        },
+        "request_id": "262f2705-2093-4765-81ff-771ad02d88d8",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "c41c6cfa-7000-4eac-b71f-ee8b060136e5",
+      "timestamp": "2026-04-21T01:39:53.338440Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "is_repair_facility",
+          "parameters": {
+            "PhoneNumber": "5551100005"
+          },
+          "request_id": "262f2705-2093-4765-81ff-771ad02d88d8",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "isRepairFacility": true
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "c3813d16-0c44-4810-b17d-2e92678b602a",
+      "timestamp": "2026-04-21T01:39:53.347253Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\nThanks for calling Assurant! How can I help you today?\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "5847acfe-9720-4feb-bd0b-a4439027f983",
+      "timestamp": "2026-04-21T01:39:53.347493Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"\n\nThanks for calling Assurant! How can I help you today?\n\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "68ed9168-216c-4ab6-90a3-2a9b7d428634",
+      "timestamp": "2026-04-21T01:39:53.347530Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\nThanks for calling Assurant! How can I help you today?\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "02ab5624-0fe3-4e4e-aecb-a85d3adeee1c",
+      "timestamp": "2026-04-21T01:39:56.366530Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": ". Thanks for calling Assurant! How can I help you today?.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3019
+    },
+    {
+      "id": "cfa7b32c-3427-41d1-b63c-c47231af70fd",
+      "timestamp": "2026-04-21T01:39:59.998213Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, uh, I need to check on a claim status.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "bced4287-9d7c-4ea7-a29f-27b7cf1a2c46",
+      "timestamp": "2026-04-21T01:40:01.720250Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Customer wants to check the status of a claim."
+        },
+        "request_id": "call_gLYzZ2EDyDzlFVe97AT8UXD8",
+        "external_request_id": "f51ff77b-ab51-4bb2-9fd1-d961fbd0e9af",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "0d7bb214-6ff4-483a-81de-6ab47b0a14a6",
+      "timestamp": "2026-04-21T01:40:01.720722Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Customer wants to check the status of a claim.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "7dc9015b-a0d8-471e-9505-5c6204289862",
+      "timestamp": "2026-04-21T01:40:01.739262Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Call set_customer_type(\"contractHolder\"), then call change_task(task_name=\"ContractHolderIssues\") immediately. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n\n## Step 1: Initial Data Retrieval\n\n# Step 2 — Routing Based on Caller Type\n\nAsk the caller: \"Are you a customer calling about your contract, or an Assurant employee?\"\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 3 — If Caller Does Not Understand the Options/ Asks Something else\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_caller_type(\"other\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller asks a question, ask them for patience while you look up the information needed to help them.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "set_customer_type",
+          "decrypt_variables",
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "030e6d84-d8f0-4844-a5a9-b105a5157c07",
+      "timestamp": "2026-04-21T01:40:02.484000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "e6f92a96-179e-401a-8f78-23be54c13745",
+      "timestamp": "2026-04-21T01:40:03.784000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1300
+    },
+    {
+      "id": "888ac953-35d5-4834-8c60-0577892db212",
+      "timestamp": "2026-04-21T01:40:03.930951Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 4587,
+        "num_output_tokens": 153,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_eab26b12fe7d4f94b7c336499eb29326",
+        "llm_id": "litellm",
+        "cost": 0.004254,
+        "call_duration": 2174,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "8ea9c66a-d872-4d3b-8f6a-3b01bffc779c",
+      "timestamp": "2026-04-21T01:40:03.931677Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(1.1) The customer wants to check the status of a claim (1.2) The goal is clear and specific (2.1) The solution is determined by the task instructions: I must not answer the claim status question in this task, but must identify the caller type and route accordingly. The is_repair_facility API indicates the caller may be a repair facility, but this is not definitive. I need to confirm the caller type with the customer as per task instructions."
+    },
+    {
+      "id": "f9779d5a-1980-4f16-98fe-7d244c9e1e42",
+      "timestamp": "2026-04-21T01:40:03.931678Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Ask the customer: \"Are you a customer calling about your contract, or an Assurant employee?\" If they are unsure or say something else, ask one follow-up to clarify. Call me back with their answer so I can proceed.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "5c21e06e-ec32-4bd6-8c89-75914c2d072e",
+      "timestamp": "2026-04-21T01:40:03.932069Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to check the status of a claim."
+          },
+          "request_id": "call_gLYzZ2EDyDzlFVe97AT8UXD8",
+          "external_request_id": "f51ff77b-ab51-4bb2-9fd1-d961fbd0e9af",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Ask the customer: \"Are you a customer calling about your contract, or an Assurant employee?\" If they are unsure or say something else, ask one follow-up to clarify. Call me back with their answer so I can proceed.",
+        "last_action_id": "f9779d5a-1980-4f16-98fe-7d244c9e1e42",
+        "error": null
+      }
+    },
+    {
+      "id": "0c21fa58-e4e9-4b23-b981-3e56bf52abb5",
+      "timestamp": "2026-04-21T01:40:06.372487Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Ask the customer: \"Are you a customer calling about your contract, or an Assurant employee?\" If they are unsure or say something else, ask one follow-up to clarify. Call me back with their answer so I can proceed.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "d5406d62-9c1c-4525-b22f-a1dc4c29b6c3",
+      "timestamp": "2026-04-21T01:40:07.801000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Are you a customer calling about your contract, or an Assurant employee?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "cdd8fcdc-6248-4f71-8a06-b433d4a6b64d",
+      "timestamp": "2026-04-21T01:40:11.934000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Are you a customer calling about your contract, or an Assurant employee?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 4133
+    },
+    {
+      "id": "63c3234d-5371-4782-973f-5b24bf625edc",
+      "timestamp": "2026-04-21T01:40:14.768383Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Repair facility.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "37ff78f4-9ed2-4a00-8b1d-56da23bb2903",
+      "timestamp": "2026-04-21T01:40:16.193000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Could you clarify if you are calling on behalf of a customer’s contract, or for a business matter related to Assurant?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "e0f2b106-495e-4394-97b6-2d88cfd5890c",
+      "timestamp": "2026-04-21T01:40:22.880000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Could you clarify if you are calling on behalf of a customer’s contract, or for a business matter related to Assurant?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 6687
+    },
+    {
+      "id": "0f96ff49-b4ec-4a2d-8a79-da33955a1435",
+      "timestamp": "2026-04-21T01:40:25.601019Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Uh, calling on behalf of a customer. We're a repair facility.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "3331660f-82c6-47d7-ad7b-80c0dbb0fff0",
+      "timestamp": "2026-04-21T01:40:27.115320Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Repair facility calling on behalf of a customer to check a claim status."
+        },
+        "request_id": "call_wZYCyObltBvWIRUvDG3c33h8",
+        "external_request_id": "882541d5-0567-4248-ad3f-442182afc2d5",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "1795d780-cd90-4aaa-ae6c-a6d41e2211a8",
+      "timestamp": "2026-04-21T01:40:27.116073Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Repair facility calling on behalf of a customer to check a claim status.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "77f5edaa-5612-456d-90be-51106ab5a5b0",
+      "timestamp": "2026-04-21T01:40:27.134529Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Call set_customer_type(\"contractHolder\"), then call change_task(task_name=\"ContractHolderIssues\") immediately. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n\n## Step 1: Initial Data Retrieval\n\n# Step 2 — Routing Based on Caller Type\n\nAsk the caller: \"Are you a customer calling about your contract, or an Assurant employee?\"\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 3 — If Caller Does Not Understand the Options/ Asks Something else\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_caller_type(\"other\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller asks a question, ask them for patience while you look up the information needed to help them.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "set_customer_type",
+          "decrypt_variables",
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "360ae5a9-fce4-4ce9-9a73-42f677c86beb",
+      "timestamp": "2026-04-21T01:40:27.849000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Let me check on that.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "929cfcab-c837-4bc6-8389-1bedd5f2893b",
+      "timestamp": "2026-04-21T01:40:28.459681Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 4762,
+        "num_output_tokens": 85,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_afd33f78e39349acb43a22b1bafa13a7",
+        "llm_id": "litellm",
+        "cost": 0.004059999999999999,
+        "call_duration": 1304,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "b2c7aaac-75de-4e0d-91d0-a2d449696275",
+      "timestamp": "2026-04-21T01:40:28.460250Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(2.1) The caller identified as a repair facility calling on behalf of a customer to check a claim status. Task instructions require me to route based on caller type, and for repair facilities, I should set the type and change the task. (2.2) My next action requires using the set_customer_type and change_task APIs."
+    },
+    {
+      "id": "4d8ceefe-ccc0-4880-b42e-e03360adfd56",
+      "timestamp": "2026-04-21T01:40:28.460760Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "set_customer_type",
+        "parameters": {
+          "customerType": "repairFacility"
+        },
+        "request_id": "e46fe31b-c196-4847-94eb-58dc09614411",
+        "external_request_id": null,
+        "function_type": "set_context",
+        "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "a9b61644-3cc8-4806-b955-7fa399d8c276",
+      "timestamp": "2026-04-21T01:40:28.463102Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "set_customer_type",
+          "parameters": {
+            "customerType": "repairFacility"
+          },
+          "request_id": "e46fe31b-c196-4847-94eb-58dc09614411",
+          "external_request_id": null,
+          "function_type": "set_context",
+          "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "customerType": {
+            "value": "repairFacility",
+            "description": "The customer type for this call"
+          }
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "11f97a01-6b68-413e-bbf6-bddd943ee0e5",
+      "timestamp": "2026-04-21T01:40:28.463180Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "customerType": "repairFacility"
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "764bf09c-ea46-464f-bbec-743f452c9ad7",
+      "timestamp": "2026-04-21T01:40:28.477438Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Call set_customer_type(\"contractHolder\"), then call change_task(task_name=\"ContractHolderIssues\") immediately. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n\n## Step 1: Initial Data Retrieval\n\n# Step 2 — Routing Based on Caller Type\n\nAsk the caller: \"Are you a customer calling about your contract, or an Assurant employee?\"\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 3 — If Caller Does Not Understand the Options/ Asks Something else\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_caller_type(\"other\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller asks a question, ask them for patience while you look up the information needed to help them.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "set_customer_type",
+          "decrypt_variables",
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "da8dde06-3e93-4680-9c59-70b1af9236b3",
+      "timestamp": "2026-04-21T01:40:29.103000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Let me check on that. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1254
+    },
+    {
+      "id": "41ba1b9b-e3f5-4332-b635-3ce3b3e56c06",
+      "timestamp": "2026-04-21T01:40:29.593870Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 4934,
+        "num_output_tokens": 70,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_4a571319cf0d4de78c6a6ec6388be7c0",
+        "llm_id": "litellm",
+        "cost": 0.004284,
+        "call_duration": 1094,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "ede01730-e0f8-4b36-9525-6929623b84c6",
+      "timestamp": "2026-04-21T01:40:29.594504Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.5) The set_customer_type API call was successful and the next step per task instructions is to change the task to \"ContractHolderIssues\" for repair facilities. (3.2) My next action is to call change_task with the appropriate task name."
+    },
+    {
+      "id": "b8924570-c9b1-45a6-bc9b-df2884f79050",
+      "timestamp": "2026-04-21T01:40:29.596085Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "change_task",
+        "parameters": {
+          "task_name": "ContractHolderIssues"
+        },
+        "request_id": "382c9a34-53e4-44bb-8a77-e22e0927c004",
+        "external_request_id": null,
+        "function_type": "system",
+        "function_id": "system_fn__change_task",
+        "function_version": "1",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "bed077e9-a312-4837-8dfe-8c00eac46c26",
+      "timestamp": "2026-04-21T01:40:29.596467Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "change_task",
+          "parameters": {
+            "task_name": "ContractHolderIssues"
+          },
+          "request_id": "382c9a34-53e4-44bb-8a77-e22e0927c004",
+          "external_request_id": null,
+          "function_type": "system",
+          "function_id": "system_fn__change_task",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "answer": "Switching to task: ContractHolderIssues"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "fb6f7d0b-eb06-4fec-9a2d-02c0f1b8885f",
+      "timestamp": "2026-04-21T01:40:29.596560Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "exit_task",
+      "task_name": "ContractHolderIssues",
+      "task_metadata": {
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "4b1dcd94-abdb-4e7f-8932-ae01c08cfea4",
+      "timestamp": "2026-04-21T01:40:29.596613Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "ContractHolderIssues",
+      "task_metadata": {
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "enable_core_prompt_override": true
+      }
+    },
+    {
+      "id": "73d5f8f7-3526-4b6b-b1a1-ce598e8332e0",
+      "timestamp": "2026-04-21T01:40:29.598575Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "afc7aee7-ab82-4b6e-9fbb-dd4ca68329bb",
+      "timestamp": "2026-04-21T01:40:29.598961Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Repair facility calling on behalf of a customer to check a claim status."
+          },
+          "request_id": "call_wZYCyObltBvWIRUvDG3c33h8",
+          "external_request_id": "882541d5-0567-4248-ad3f-442182afc2d5",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "I'm checking any contracts or claims you may have with us",
+        "last_action_id": "73d5f8f7-3526-4b6b-b1a1-ce598e8332e0",
+        "error": null
+      }
+    },
+    {
+      "id": "bf0c2379-05a1-4521-82e7-dd209d517030",
+      "timestamp": "2026-04-21T01:40:29.599124Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "PhoneNumber": "5551100005"
+        },
+        "request_id": "205a7a16-1677-4bbd-acd8-cfeea6196071",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "2e220408-dba9-4390-90c6-e5e91ceb6dcd",
+      "timestamp": "2026-04-21T01:40:29.599818Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "PhoneNumber": "5551100005"
+          },
+          "request_id": "205a7a16-1677-4bbd-acd8-cfeea6196071",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": false,
+        "response": null,
+        "last_action_id": null,
+        "error": "No mock responses found for 46266b1c-1755-f677-5e43-383503518688"
+      }
+    },
+    {
+      "id": "6edb1674-dbf4-4764-a132-13853c1e1922",
+      "timestamp": "2026-04-21T01:40:29.600196Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_sms_to_phone",
+        "parameters": {
+          "PhoneNumber_decrypted": "5551100005",
+          "customerType": "repairFacility"
+        },
+        "request_id": "c9683526-ba46-4822-9dcb-a3668979f4c0",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "715dd5c4-2e4a-4aa1-983d-3ab8b08bdf62",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "346a9d33-16bd-41a0-b357-3c14775fcffd",
+      "timestamp": "2026-04-21T01:40:29.600602Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_sms_to_phone",
+          "parameters": {
+            "PhoneNumber_decrypted": "5551100005",
+            "customerType": "repairFacility"
+          },
+          "request_id": "c9683526-ba46-4822-9dcb-a3668979f4c0",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "715dd5c4-2e4a-4aa1-983d-3ab8b08bdf62",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": false,
+        "response": null,
+        "last_action_id": null,
+        "error": "Request parameters did not match the request, at key PhoneNumber_decrypted, expected={}, actual=None"
+      }
+    },
+    {
+      "id": "6f348a7b-dd99-4403-9839-7da2228dcde9",
+      "timestamp": "2026-04-21T01:40:29.654608Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n- Call the `get_contract_and_claims_data_ivr` API using the phone number 5551100005.\n- Make this call immediately — do NOT wait for the customer to state their question first.\n- You cannot verify coverage, eligibility, or claim status until you receive the actual result from this API call.\n\n- If this call fails, do NOT proceed to the Escalation Protocol. Instead:\n  1. Ask the customer what they are calling about today.\n  2. Ask them to provide a claim number, contract number, or the last 8 characters of their VIN so you can look up their account.\n  3. Retry the API using the identifier they provide, then proceed to Step 3: Journey Routing.\n  - Only proceed to the Unified Escalation Protocol if two consecutive lookup attempts have failed.\n\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer Response to Chat Offer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n- **If they decline or repeat their request** (e.g., they say \"No,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative,\" or \"Get me a human\"):\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\n\n\n## Encrypt relevant transfer variables\nYou will need to call the API `encrypt_variables`. This takes four arguments, you will need to use this logic to determine each argument:\n1. Set PhoneNumber to 5551100005\n2. Set VIN based on contract / claim data, as follows:\n  - The VIN must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the VIN from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or VIN is NOT IN claim data.\n3. Set ContractNumber based on contract / claim data, as follows:\n  - The ContractNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ContractNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or contract number is NOT IN claim data.\n4. Set ClaimNumber based on the claim data: \n  - The ClaimNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ClaimNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or claim number is NOT IN claim data.\nNow call the API.\n** Critical: DO NOT proceed with further instructions until the API has been called **\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Step 3: Execute Agent Transfer\n**Context:** You are executing this protocol because an Escalation Determination has been made.\n\n## Setting Transfer Variables\n\n**CRITICAL : SET ALL THE Transfer Variables**\n\nWhile making the API call `escalate_to_agent_from_ivr`, set **ALL** of the following arguments using these rules:\n\n- **`GAIntent`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `GAIntent` to any value other than the ones listed above.\n\n- **`contractFoundBy`** — set to whichever was used in the API call:\n  `` \n  - If identifier not used to call API set \"\".\n  \n- **`Identified`** — Must always be set to a boolean value :\n  - set `Identified` = `False`\n  - **CRITICAL** : Identified MUST be set to ONLY `true` or `false`.\n\n- **`GACallerType`**\n  -set `GACallerType = \"Contract Holder\"`\n  - **CRITICAL** : The GACallerType MUST be set to only to [Contract Holder / Repair Facility / Selling Dealer]\n  - NOTE : set the GACallerType such that it matches the listed values above.\n\n- **`TransferReason`** — set based on why escalation is occurring:\n  - Customer requested a human agent explicitly → `'CallerRequestedAgent'`\n  - Out-of-scope request that cannot be handled → `'OOSIntent'`\n  - No identifier that worked to look up information (VIN, phone, contract number, claim number) → `'IdentifierMissing'`\n  - API error → `'APIError'`\n  - Any other reason → `'Other'`\n  - Do not set `TransferReason` to any value other than the ones listed above.\n\n- **`VIN`** - set it to `vinOut`\n  - CRITICAL: VIN value MUST come ONLY from `vinOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ClaimNumber`** - set it to `claimOut`\n  - CRITICAL: ClaimNumber value MUST come ONLY from `claimOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ContractNumber`** - set it to `contractOut`\n  - CRITICAL: ContractNumber value MUST come ONLY from `contractOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`productType`** - set productType based on contract / claim data : \n  - The productType must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the productType from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or productType is NOT IN claim data.\n\n- **`ClaimStatus`** — set based on claim data:\n  - No claims found → `'NoClaim'`\n  - Denied or Correction Needed → `'ClaimNotAuthorized'`\n  - Authorization Approved, Payment Authorized, Payment Approved, or Paid → `'Authorized'`\n  - Anything else → `'Other'`\n  - Do not set `ClaimStatus` to any value other than the ones listed above.\n\n- **`roadsideAdministratorPhoneNumber`** - set based in the claim data:\n  - - ``\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or roadside phone number is NOT IN claim data.\n\n- **`salesforceID`** - set it to salesforce_idOut\n  - **CRITICAL** : Set salesforceID based on contract / claim data, as follows:\n  - The salesforceID must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the salesforceID from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or salesforceID is NOT IN claim data.\n\n- **`Question`** — a detailed summary of the customer's last unanswered inquiry. Do not leave this blank; if the intent is unclear, use the last spoken utterance.\n\n- **`escalation_agent_verbiage`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `escalation_agent_verbiage` to any value other than the ones listed above.\n\n- **`caseNumber`** - Set to the specific CaseNumber number referenced during this conversation which is provided by the customer:\n  - Set the value as `\"\"` if case number was not provided by customer.\n  \n- **`escalation_reason_description`** - set by describing the specific reason for the transfer in relation to the caller's primary `GAIntent` and reason for the call.\n\n- **`CiscoCallId`** - set it to CiscoCallIdOut\n- **`IVR_Context`** - set it to IVR_ContextOut\n- **`Language`** - set it to LanguageOut\n- **`MenuCallType`** - set it to `\"Default\"`\n- **`PhoneNumber`** - set it to phoneNumberOut\n- **`TFN_DNIS`** - set it to TFN_DNISOut\n- **`Timestamp`** - set it to TimestampOut\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "34ea83d7-b005-4cc8-926b-c3b34f077c37",
+      "timestamp": "2026-04-21T01:40:31.512747Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"I'm checking any contracts or claims you may have with us\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "1286f877-1f50-4444-82b7-ea13acaedf82",
+      "timestamp": "2026-04-21T01:40:31.513024Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "82187a93-c95e-4af3-a9f4-1970cd8003a2",
+      "timestamp": "2026-04-21T01:40:32.512484Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 10120,
+        "num_output_tokens": 174,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_8913482175394014b046a6872afa8a7b",
+        "llm_id": "litellm",
+        "cost": 0.017216000000000002,
+        "call_duration": 2838,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "0cdf8fa5-fd8b-4131-8c06-872c2a3f1229",
+      "timestamp": "2026-04-21T01:40:32.513554Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.3) The get_contract_and_claims_data_ivr API call failed for the second time, so per task instructions, I must now ask the repair facility for a claim number, contract number, or last 8 of VIN to retry the lookup. (3.4) I need to instruct the Talker to gather this identifier and confirm its type before proceeding."
+    },
+    {
+      "id": "a00b5e6f-7407-4594-bc69-503512ebbd3a",
+      "timestamp": "2026-04-21T01:40:32.513555Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Ask the repair facility: \"Can you provide the claim number, contract number, or the last 8 characters of the vehicle's VIN?\" Once they respond, if they do not specify which type of number it is, ask: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" After you have both the number and its type, call me back with that information so I can proceed.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "625a2cde-8219-482c-88c9-721c43ee91c4",
+      "timestamp": "2026-04-21T01:40:32.514058Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Repair facility calling on behalf of a customer to check a claim status."
+          },
+          "request_id": "call_wZYCyObltBvWIRUvDG3c33h8",
+          "external_request_id": "882541d5-0567-4248-ad3f-442182afc2d5",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Ask the repair facility: \"Can you provide the claim number, contract number, or the last 8 characters of the vehicle's VIN?\" Once they respond, if they do not specify which type of number it is, ask: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" After you have both the number and its type, call me back with that information so I can proceed.",
+        "last_action_id": "a00b5e6f-7407-4594-bc69-503512ebbd3a",
+        "error": null
+      }
+    },
+    {
+      "id": "bb79b9cf-572c-443f-86da-d44d803677d9",
+      "timestamp": "2026-04-21T01:40:34.624024Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3111
+    },
+    {
+      "id": "b0447366-2d54-4e4b-9da6-87c0b08f463d",
+      "timestamp": "2026-04-21T01:40:37.435778Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Ask the repair facility: \"Can you provide the claim number, contract number, or the last 8 characters of the vehicle's VIN?\" Once they respond, if they do not specify which type of number it is, ask: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" After you have both the number and its type, call me back with that information so I can proceed.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "74ee7310-6b02-490c-a945-24715f26407d",
+      "timestamp": "2026-04-21T01:40:39.560000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Can you provide the claim number, contract number, or the last eight characters of the vehicle's Vin?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "f0623692-6611-46c8-9fd1-d654cba00f7a",
+      "timestamp": "2026-04-21T01:40:45.411000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Can you provide the claim number, contract number, or the last eight characters of the vehicle's Vin?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 5851
+    },
+    {
+      "id": "62d5a6ff-fdbf-4c31-8b26-ca8ef38517af",
+      "timestamp": "2026-04-21T01:40:48.277809Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Claim number 37020205A.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "19423d54-b8e5-4ba4-acdc-fce5463bdaca",
+      "timestamp": "2026-04-21T01:40:49.305000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Thank you. Is that your claim number, your contract number, or the last eight characters of your Vin?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "52de2275-c000-4eb3-8785-3ffe8ce7e21f",
+      "timestamp": "2026-04-21T01:40:54.971000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Thank you. Is that your claim number, your contract number, or the last eight characters of your Vin?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 5666
+    },
+    {
+      "id": "ef9422c6-3c38-455f-9026-346852636729",
+      "timestamp": "2026-04-21T01:40:59.434680Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Claim number.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "712ac0b6-f2f7-490e-ab23-456d3002aca5",
+      "timestamp": "2026-04-21T01:41:00.740799Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A."
+        },
+        "request_id": "call_Pdr2JxojiR6sCBPoZjdUQr2b",
+        "external_request_id": "2248b16f-b038-4c20-91a4-01c129dca67a",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "3e5ebe3c-16bc-4119-91da-eb2093c7fecf",
+      "timestamp": "2026-04-21T01:41:00.741418Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "7cd5924c-1334-4096-882d-426dc2373d81",
+      "timestamp": "2026-04-21T01:41:00.807404Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n- Call the `get_contract_and_claims_data_ivr` API using the phone number 5551100005.\n- Make this call immediately — do NOT wait for the customer to state their question first.\n- You cannot verify coverage, eligibility, or claim status until you receive the actual result from this API call.\n\n- If this call fails, do NOT proceed to the Escalation Protocol. Instead:\n  1. Ask the customer what they are calling about today.\n  2. Ask them to provide a claim number, contract number, or the last 8 characters of their VIN so you can look up their account.\n  3. Retry the API using the identifier they provide, then proceed to Step 3: Journey Routing.\n  - Only proceed to the Unified Escalation Protocol if two consecutive lookup attempts have failed.\n\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer Response to Chat Offer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n- **If they decline or repeat their request** (e.g., they say \"No,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative,\" or \"Get me a human\"):\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\n\n\n## Encrypt relevant transfer variables\nYou will need to call the API `encrypt_variables`. This takes four arguments, you will need to use this logic to determine each argument:\n1. Set PhoneNumber to 5551100005\n2. Set VIN based on contract / claim data, as follows:\n  - The VIN must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the VIN from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or VIN is NOT IN claim data.\n3. Set ContractNumber based on contract / claim data, as follows:\n  - The ContractNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ContractNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or contract number is NOT IN claim data.\n4. Set ClaimNumber based on the claim data: \n  - The ClaimNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ClaimNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or claim number is NOT IN claim data.\nNow call the API.\n** Critical: DO NOT proceed with further instructions until the API has been called **\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Step 3: Execute Agent Transfer\n**Context:** You are executing this protocol because an Escalation Determination has been made.\n\n## Setting Transfer Variables\n\n**CRITICAL : SET ALL THE Transfer Variables**\n\nWhile making the API call `escalate_to_agent_from_ivr`, set **ALL** of the following arguments using these rules:\n\n- **`GAIntent`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `GAIntent` to any value other than the ones listed above.\n\n- **`contractFoundBy`** — set to whichever was used in the API call:\n  `` \n  - If identifier not used to call API set \"\".\n  \n- **`Identified`** — Must always be set to a boolean value :\n  - set `Identified` = `False`\n  - **CRITICAL** : Identified MUST be set to ONLY `true` or `false`.\n\n- **`GACallerType`**\n  -set `GACallerType = \"Contract Holder\"`\n  - **CRITICAL** : The GACallerType MUST be set to only to [Contract Holder / Repair Facility / Selling Dealer]\n  - NOTE : set the GACallerType such that it matches the listed values above.\n\n- **`TransferReason`** — set based on why escalation is occurring:\n  - Customer requested a human agent explicitly → `'CallerRequestedAgent'`\n  - Out-of-scope request that cannot be handled → `'OOSIntent'`\n  - No identifier that worked to look up information (VIN, phone, contract number, claim number) → `'IdentifierMissing'`\n  - API error → `'APIError'`\n  - Any other reason → `'Other'`\n  - Do not set `TransferReason` to any value other than the ones listed above.\n\n- **`VIN`** - set it to `vinOut`\n  - CRITICAL: VIN value MUST come ONLY from `vinOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ClaimNumber`** - set it to `claimOut`\n  - CRITICAL: ClaimNumber value MUST come ONLY from `claimOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ContractNumber`** - set it to `contractOut`\n  - CRITICAL: ContractNumber value MUST come ONLY from `contractOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`productType`** - set productType based on contract / claim data : \n  - The productType must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the productType from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or productType is NOT IN claim data.\n\n- **`ClaimStatus`** — set based on claim data:\n  - No claims found → `'NoClaim'`\n  - Denied or Correction Needed → `'ClaimNotAuthorized'`\n  - Authorization Approved, Payment Authorized, Payment Approved, or Paid → `'Authorized'`\n  - Anything else → `'Other'`\n  - Do not set `ClaimStatus` to any value other than the ones listed above.\n\n- **`roadsideAdministratorPhoneNumber`** - set based in the claim data:\n  - - ``\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or roadside phone number is NOT IN claim data.\n\n- **`salesforceID`** - set it to salesforce_idOut\n  - **CRITICAL** : Set salesforceID based on contract / claim data, as follows:\n  - The salesforceID must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the salesforceID from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or salesforceID is NOT IN claim data.\n\n- **`Question`** — a detailed summary of the customer's last unanswered inquiry. Do not leave this blank; if the intent is unclear, use the last spoken utterance.\n\n- **`escalation_agent_verbiage`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `escalation_agent_verbiage` to any value other than the ones listed above.\n\n- **`caseNumber`** - Set to the specific CaseNumber number referenced during this conversation which is provided by the customer:\n  - Set the value as `\"\"` if case number was not provided by customer.\n  \n- **`escalation_reason_description`** - set by describing the specific reason for the transfer in relation to the caller's primary `GAIntent` and reason for the call.\n\n- **`CiscoCallId`** - set it to CiscoCallIdOut\n- **`IVR_Context`** - set it to IVR_ContextOut\n- **`Language`** - set it to LanguageOut\n- **`MenuCallType`** - set it to `\"Default\"`\n- **`PhoneNumber`** - set it to phoneNumberOut\n- **`TFN_DNIS`** - set it to TFN_DNISOut\n- **`Timestamp`** - set it to TimestampOut\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "dd411f07-b731-44fa-af85-1d91541ea6b4",
+      "timestamp": "2026-04-21T01:41:01.638000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "62c82812-cd3e-4c27-9cd8-b66c7fdb1140",
+      "timestamp": "2026-04-21T01:41:02.345935Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 10326,
+        "num_output_tokens": 99,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_3f7b997a3a7a44fab4433843d5670dea",
+        "llm_id": "litellm",
+        "cost": 0.017028,
+        "call_duration": 1523,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "8e48de66-9c54-4c16-b349-7403bc81caf9",
+      "timestamp": "2026-04-21T01:41:02.346861Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.1) I now have the claim number (37020205A) and its type (claim number) from the repair facility, so I can retry the get_contract_and_claims_data_ivr API using this identifier. (3.2) My next action is to call get_contract_and_claims_data_ivr with ClaimNumber=\"37020205A\"."
+    },
+    {
+      "id": "0a90df95-522f-45de-8201-7c459eea643b",
+      "timestamp": "2026-04-21T01:41:02.349873Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "8c1c09ed-52ef-41c5-a4a5-e6de402a1649",
+      "timestamp": "2026-04-21T01:41:02.350438Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A."
+          },
+          "request_id": "call_Pdr2JxojiR6sCBPoZjdUQr2b",
+          "external_request_id": "2248b16f-b038-4c20-91a4-01c129dca67a",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "I'm checking any contracts or claims you may have with us",
+        "last_action_id": "0a90df95-522f-45de-8201-7c459eea643b",
+        "error": null
+      }
+    },
+    {
+      "id": "6a597402-bfa5-4c66-9bd2-defe039401f0",
+      "timestamp": "2026-04-21T01:41:02.350696Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "ClaimNumber": "37020205A"
+        },
+        "request_id": "52c83e8e-d676-43e7-9867-b3e459f106c0",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "93a58aad-b1e2-449b-98c4-1b0628b64e07",
+      "timestamp": "2026-04-21T01:41:02.351735Z",
+      "source_system": "function_caller_lexicon",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "ClaimNumber": "37020205A"
+          },
+          "request_id": "52c83e8e-d676-43e7-9867-b3e459f106c0",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": false,
+        "response": null,
+        "last_action_id": null,
+        "error": "No mock responses found for 46266b1c-1755-f677-5e43-383503518688"
+      }
+    },
+    {
+      "id": "097c6a40-92cd-4dc4-90fe-e771e83515df",
+      "timestamp": "2026-04-21T01:41:02.408956Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n- Call the `get_contract_and_claims_data_ivr` API using the phone number 5551100005.\n- Make this call immediately — do NOT wait for the customer to state their question first.\n- You cannot verify coverage, eligibility, or claim status until you receive the actual result from this API call.\n\n- If this call fails, do NOT proceed to the Escalation Protocol. Instead:\n  1. Ask the customer what they are calling about today.\n  2. Ask them to provide a claim number, contract number, or the last 8 characters of their VIN so you can look up their account.\n  3. Retry the API using the identifier they provide, then proceed to Step 3: Journey Routing.\n  - Only proceed to the Unified Escalation Protocol if two consecutive lookup attempts have failed.\n\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer Response to Chat Offer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n- **If they decline or repeat their request** (e.g., they say \"No,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative,\" or \"Get me a human\"):\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\n\n\n## Encrypt relevant transfer variables\nYou will need to call the API `encrypt_variables`. This takes four arguments, you will need to use this logic to determine each argument:\n1. Set PhoneNumber to 5551100005\n2. Set VIN based on contract / claim data, as follows:\n  - The VIN must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the VIN from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or VIN is NOT IN claim data.\n3. Set ContractNumber based on contract / claim data, as follows:\n  - The ContractNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ContractNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or contract number is NOT IN claim data.\n4. Set ClaimNumber based on the claim data: \n  - The ClaimNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ClaimNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or claim number is NOT IN claim data.\nNow call the API.\n** Critical: DO NOT proceed with further instructions until the API has been called **\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Step 3: Execute Agent Transfer\n**Context:** You are executing this protocol because an Escalation Determination has been made.\n\n## Setting Transfer Variables\n\n**CRITICAL : SET ALL THE Transfer Variables**\n\nWhile making the API call `escalate_to_agent_from_ivr`, set **ALL** of the following arguments using these rules:\n\n- **`GAIntent`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `GAIntent` to any value other than the ones listed above.\n\n- **`contractFoundBy`** — set to whichever was used in the API call:\n  `` \n  - If identifier not used to call API set \"\".\n  \n- **`Identified`** — Must always be set to a boolean value :\n  - set `Identified` = `False`\n  - **CRITICAL** : Identified MUST be set to ONLY `true` or `false`.\n\n- **`GACallerType`**\n  -set `GACallerType = \"Contract Holder\"`\n  - **CRITICAL** : The GACallerType MUST be set to only to [Contract Holder / Repair Facility / Selling Dealer]\n  - NOTE : set the GACallerType such that it matches the listed values above.\n\n- **`TransferReason`** — set based on why escalation is occurring:\n  - Customer requested a human agent explicitly → `'CallerRequestedAgent'`\n  - Out-of-scope request that cannot be handled → `'OOSIntent'`\n  - No identifier that worked to look up information (VIN, phone, contract number, claim number) → `'IdentifierMissing'`\n  - API error → `'APIError'`\n  - Any other reason → `'Other'`\n  - Do not set `TransferReason` to any value other than the ones listed above.\n\n- **`VIN`** - set it to `vinOut`\n  - CRITICAL: VIN value MUST come ONLY from `vinOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ClaimNumber`** - set it to `claimOut`\n  - CRITICAL: ClaimNumber value MUST come ONLY from `claimOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ContractNumber`** - set it to `contractOut`\n  - CRITICAL: ContractNumber value MUST come ONLY from `contractOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`productType`** - set productType based on contract / claim data : \n  - The productType must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the productType from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or productType is NOT IN claim data.\n\n- **`ClaimStatus`** — set based on claim data:\n  - No claims found → `'NoClaim'`\n  - Denied or Correction Needed → `'ClaimNotAuthorized'`\n  - Authorization Approved, Payment Authorized, Payment Approved, or Paid → `'Authorized'`\n  - Anything else → `'Other'`\n  - Do not set `ClaimStatus` to any value other than the ones listed above.\n\n- **`roadsideAdministratorPhoneNumber`** - set based in the claim data:\n  - - ``\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or roadside phone number is NOT IN claim data.\n\n- **`salesforceID`** - set it to salesforce_idOut\n  - **CRITICAL** : Set salesforceID based on contract / claim data, as follows:\n  - The salesforceID must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the salesforceID from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or salesforceID is NOT IN claim data.\n\n- **`Question`** — a detailed summary of the customer's last unanswered inquiry. Do not leave this blank; if the intent is unclear, use the last spoken utterance.\n\n- **`escalation_agent_verbiage`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `escalation_agent_verbiage` to any value other than the ones listed above.\n\n- **`caseNumber`** - Set to the specific CaseNumber number referenced during this conversation which is provided by the customer:\n  - Set the value as `\"\"` if case number was not provided by customer.\n  \n- **`escalation_reason_description`** - set by describing the specific reason for the transfer in relation to the caller's primary `GAIntent` and reason for the call.\n\n- **`CiscoCallId`** - set it to CiscoCallIdOut\n- **`IVR_Context`** - set it to IVR_ContextOut\n- **`Language`** - set it to LanguageOut\n- **`MenuCallType`** - set it to `\"Default\"`\n- **`PhoneNumber`** - set it to phoneNumberOut\n- **`TFN_DNIS`** - set it to TFN_DNISOut\n- **`Timestamp`** - set it to TimestampOut\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "22662a93-0bf9-4067-9119-98eefde85bcb",
+      "timestamp": "2026-04-21T01:41:02.892000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "One moment please. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1254
+    },
+    {
+      "id": "780d25b9-792e-4cc8-8113-66db17334186",
+      "timestamp": "2026-04-21T01:41:05.333160Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"I'm checking any contracts or claims you may have with us\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "311753af-e1d1-4573-bd93-a69a40c20eb7",
+      "timestamp": "2026-04-21T01:41:05.333419Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "dd3ed888-f889-4224-903f-e3a5a1d9ebed",
+      "timestamp": "2026-04-21T01:41:05.939457Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 10531,
+        "num_output_tokens": 168,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_8a8104f437b74045a432e0bda8584ebc",
+        "llm_id": "litellm",
+        "cost": 0.007045999999999999,
+        "call_duration": 3516,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "79e57720-c10a-4e6f-80fb-c23d4d4ff236",
+      "timestamp": "2026-04-21T01:41:05.940432Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.3) The get_contract_and_claims_data_ivr API call failed again, and per task instructions, after two consecutive lookup failures, I must proceed to the Unified Escalation Protocol. The next step is to attempt mandatory chat deflection before proceeding with escalation. (4.1) My next action is to instruct the Talker to offer chat support as described in the escalation protocol."
+    },
+    {
+      "id": "dce81c6a-e3f6-4cff-8d8d-b7c1b871e524",
+      "timestamp": "2026-04-21T01:41:05.940433Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say EXACTLY: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\" Call me back with their answer so I can proceed.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "4cec0f3b-4406-41b7-be99-b187e0f1f2cb",
+      "timestamp": "2026-04-21T01:41:05.940995Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A."
+          },
+          "request_id": "call_Pdr2JxojiR6sCBPoZjdUQr2b",
+          "external_request_id": "2248b16f-b038-4c20-91a4-01c129dca67a",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Say EXACTLY: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\" Call me back with their answer so I can proceed.",
+        "last_action_id": "dce81c6a-e3f6-4cff-8d8d-b7c1b871e524",
+        "error": null
+      }
+    },
+    {
+      "id": "4ab40f3b-5516-4e16-afb0-a44d2cc44fe4",
+      "timestamp": "2026-04-21T01:41:08.352419Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "I'm checking any contracts or claims you may have with us",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3019
+    },
+    {
+      "id": "22b0640e-5055-48d1-9677-a022d434a1e6",
+      "timestamp": "2026-04-21T01:41:11.168474Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Say EXACTLY: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\" Call me back with their answer so I can proceed.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "bfdb5a8e-fcb6-49f5-9431-260d5dc5bef2",
+      "timestamp": "2026-04-21T01:41:13.105000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "ae2874b9-b235-4331-905b-a7d353165245",
+      "timestamp": "2026-04-21T01:41:29.731000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 16626
+    },
+    {
+      "id": "dc366605-bfcb-40fa-9410-134b3c9bfe78",
+      "timestamp": "2026-04-21T01:41:32.696871Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Phone agent.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "5114039a-b0d3-40b8-bd6d-1160f8968d9a",
+      "timestamp": "2026-04-21T01:41:34.125083Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Repair facility wants to continue and wait for a phone agent to check claim status for claim number 37020205A."
+        },
+        "request_id": "call_jvR9HpT7nhGoHDiSCLGvD7oK",
+        "external_request_id": "561b74b5-4889-4836-b653-bc2fb467c544",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "f9b4a1da-4801-4331-bd54-d7de515d2b8b",
+      "timestamp": "2026-04-21T01:41:34.130811Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Repair facility wants to continue and wait for a phone agent to check claim status for claim number 37020205A.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "c4da676e-8174-4017-9b7d-98ae7ea2c5fd",
+      "timestamp": "2026-04-21T01:41:34.192876Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n- Call the `get_contract_and_claims_data_ivr` API using the phone number 5551100005.\n- Make this call immediately — do NOT wait for the customer to state their question first.\n- You cannot verify coverage, eligibility, or claim status until you receive the actual result from this API call.\n\n- If this call fails, do NOT proceed to the Escalation Protocol. Instead:\n  1. Ask the customer what they are calling about today.\n  2. Ask them to provide a claim number, contract number, or the last 8 characters of their VIN so you can look up their account.\n  3. Retry the API using the identifier they provide, then proceed to Step 3: Journey Routing.\n  - Only proceed to the Unified Escalation Protocol if two consecutive lookup attempts have failed.\n\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer Response to Chat Offer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n- **If they decline or repeat their request** (e.g., they say \"No,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative,\" or \"Get me a human\"):\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\n\n\n## Encrypt relevant transfer variables\nYou will need to call the API `encrypt_variables`. This takes four arguments, you will need to use this logic to determine each argument:\n1. Set PhoneNumber to 5551100005\n2. Set VIN based on contract / claim data, as follows:\n  - The VIN must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the VIN from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or VIN is NOT IN claim data.\n3. Set ContractNumber based on contract / claim data, as follows:\n  - The ContractNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ContractNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or contract number is NOT IN claim data.\n4. Set ClaimNumber based on the claim data: \n  - The ClaimNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ClaimNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or claim number is NOT IN claim data.\nNow call the API.\n** Critical: DO NOT proceed with further instructions until the API has been called **\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Step 3: Execute Agent Transfer\n**Context:** You are executing this protocol because an Escalation Determination has been made.\n\n## Setting Transfer Variables\n\n**CRITICAL : SET ALL THE Transfer Variables**\n\nWhile making the API call `escalate_to_agent_from_ivr`, set **ALL** of the following arguments using these rules:\n\n- **`GAIntent`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `GAIntent` to any value other than the ones listed above.\n\n- **`contractFoundBy`** — set to whichever was used in the API call:\n  `` \n  - If identifier not used to call API set \"\".\n  \n- **`Identified`** — Must always be set to a boolean value :\n  - set `Identified` = `False`\n  - **CRITICAL** : Identified MUST be set to ONLY `true` or `false`.\n\n- **`GACallerType`**\n  -set `GACallerType = \"Contract Holder\"`\n  - **CRITICAL** : The GACallerType MUST be set to only to [Contract Holder / Repair Facility / Selling Dealer]\n  - NOTE : set the GACallerType such that it matches the listed values above.\n\n- **`TransferReason`** — set based on why escalation is occurring:\n  - Customer requested a human agent explicitly → `'CallerRequestedAgent'`\n  - Out-of-scope request that cannot be handled → `'OOSIntent'`\n  - No identifier that worked to look up information (VIN, phone, contract number, claim number) → `'IdentifierMissing'`\n  - API error → `'APIError'`\n  - Any other reason → `'Other'`\n  - Do not set `TransferReason` to any value other than the ones listed above.\n\n- **`VIN`** - set it to `vinOut`\n  - CRITICAL: VIN value MUST come ONLY from `vinOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ClaimNumber`** - set it to `claimOut`\n  - CRITICAL: ClaimNumber value MUST come ONLY from `claimOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ContractNumber`** - set it to `contractOut`\n  - CRITICAL: ContractNumber value MUST come ONLY from `contractOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`productType`** - set productType based on contract / claim data : \n  - The productType must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the productType from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or productType is NOT IN claim data.\n\n- **`ClaimStatus`** — set based on claim data:\n  - No claims found → `'NoClaim'`\n  - Denied or Correction Needed → `'ClaimNotAuthorized'`\n  - Authorization Approved, Payment Authorized, Payment Approved, or Paid → `'Authorized'`\n  - Anything else → `'Other'`\n  - Do not set `ClaimStatus` to any value other than the ones listed above.\n\n- **`roadsideAdministratorPhoneNumber`** - set based in the claim data:\n  - - ``\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or roadside phone number is NOT IN claim data.\n\n- **`salesforceID`** - set it to salesforce_idOut\n  - **CRITICAL** : Set salesforceID based on contract / claim data, as follows:\n  - The salesforceID must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the salesforceID from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or salesforceID is NOT IN claim data.\n\n- **`Question`** — a detailed summary of the customer's last unanswered inquiry. Do not leave this blank; if the intent is unclear, use the last spoken utterance.\n\n- **`escalation_agent_verbiage`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `escalation_agent_verbiage` to any value other than the ones listed above.\n\n- **`caseNumber`** - Set to the specific CaseNumber number referenced during this conversation which is provided by the customer:\n  - Set the value as `\"\"` if case number was not provided by customer.\n  \n- **`escalation_reason_description`** - set by describing the specific reason for the transfer in relation to the caller's primary `GAIntent` and reason for the call.\n\n- **`CiscoCallId`** - set it to CiscoCallIdOut\n- **`IVR_Context`** - set it to IVR_ContextOut\n- **`Language`** - set it to LanguageOut\n- **`MenuCallType`** - set it to `\"Default\"`\n- **`PhoneNumber`** - set it to phoneNumberOut\n- **`TFN_DNIS`** - set it to TFN_DNISOut\n- **`Timestamp`** - set it to TimestampOut\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "5e629bb2-7d80-4170-82c1-d1c1ed016d84",
+      "timestamp": "2026-04-21T01:41:35.057000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Let me check on that.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "0be7dfdf-a65a-4d89-a933-174b7cfb1fd2",
+      "timestamp": "2026-04-21T01:41:35.655909Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 10731,
+        "num_output_tokens": 137,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_d01de371843b4fa3884c4e4e919b6622",
+        "llm_id": "litellm",
+        "cost": 0.008734,
+        "call_duration": 1448,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "ed61462b-e61b-4d30-83fc-c2b5f5353fc9",
+      "timestamp": "2026-04-21T01:41:35.656484Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(4.1) The repair facility declined chat and wants to wait for a phone agent. Per escalation protocol, I must now collect transfer variables and escalate. Since the claim number was provided, I need to encrypt the transfer variables (PhoneNumber, ClaimNumber, ContractNumber, VIN) before proceeding. (3.2) My next action is to call encrypt_variables with PhoneNumber=\"5551100005\", ClaimNumber=\"37020205A\", ContractNumber=\"\", VIN=\"\" (since contract and VIN are not available)."
+    },
+    {
+      "id": "3399e5cc-6b0f-451e-8723-e3a91d4510f2",
+      "timestamp": "2026-04-21T01:41:35.657029Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "encrypt_variables",
+        "parameters": {
+          "PhoneNumber": "5551100005",
+          "ClaimNumber": "37020205A",
+          "ContractNumber": "",
+          "VIN": ""
+        },
+        "request_id": "fbabc2b0-574b-4565-b2c0-47a852552612",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "7e59619f-c63d-4f4b-aba1-2df7c7d0884c",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "39c82cff-aa4e-4a53-bee8-5b450e802a8b",
+      "timestamp": "2026-04-21T01:41:35.657687Z",
+      "source_system": "function_caller_lexicon",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "encrypt_variables",
+          "parameters": {
+            "PhoneNumber": "5551100005",
+            "ClaimNumber": "37020205A",
+            "ContractNumber": "",
+            "VIN": ""
+          },
+          "request_id": "fbabc2b0-574b-4565-b2c0-47a852552612",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "7e59619f-c63d-4f4b-aba1-2df7c7d0884c",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "PhoneNumber": "5551100005",
+          "VIN": "enc_vin",
+          "ContractNumber": "enc_contract",
+          "ClaimNumber": "enc_claim"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "3d6b88f6-d900-4c9e-97d5-0729d022553a",
+      "timestamp": "2026-04-21T01:41:35.714001Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "ContractHolderIssues",
+        "task_id": "99fb68d2-651a-4d07-80c5-dfcef558d751",
+        "task_version": "0",
+        "content": "# Objective\n- Route contract holders to the appropriate journey based on their needs, using `get_contract_and_claims_data_ivr` to retrieve contract and claims data, then providing accurate guidance on mechanical repair, claim status, contract questions, repair coverage, and roadside assistance — or handing off to a specialist task for rental inquiries.\n\n\n## Step 1: Mandatory Self-Service Portal Communication\n\nYOU MUST execute the following steps in the EXACT order listed. DO NOT SKIP ANY STEPS.\n\n\n### Step 1a: Communicate the Self-Service Portal\n- Say EXACTLY the following VERBATIM: \"To quickly view claim status, manage your contract, find answers to frequently asked questions or chat with Customer care, visit vehicle care plan dot com. If you don't want to use that option, I'm here to help — what can I do for you today?\"\n- Proceed to **Step 2: Retrieve customer's contract and claims data**.\n\n\n## Step 2: Retrieve customer's contract and claims data\n\n\n\n- Call the `get_contract_and_claims_data_ivr` API using the phone number 5551100005.\n- Make this call immediately — do NOT wait for the customer to state their question first.\n- You cannot verify coverage, eligibility, or claim status until you receive the actual result from this API call.\n\n- If this call fails, do NOT proceed to the Escalation Protocol. Instead:\n  1. Ask the customer what they are calling about today.\n  2. Ask them to provide a claim number, contract number, or the last 8 characters of their VIN so you can look up their account.\n  3. Retry the API using the identifier they provide, then proceed to Step 3: Journey Routing.\n  - Only proceed to the Unified Escalation Protocol if two consecutive lookup attempts have failed.\n\n\n\n## Guardrail 7: Qualify Explicit Agent Requests Before Escalating\nIf the caller has explicitly requested an agent **only once** in the conversation and their stated topic does not clearly match one of the Escalation Scenarios below, you MUST NOT proceed to the Unified Escalation Protocol yet. Instead, ask: \"I can connect you — could you tell me what specifically you need help with so I can make sure you reach the right person?\" Use their response to determine whether the need maps to a journey you can handle directly (claim lookup, contract questions, roadside assistance, etc.). Only proceed to the Unified Escalation Protocol if the need is genuinely out of scope.\n\n# Escalation Scenarios\n\nIf the customer requests any of the following, immediately proceed to **Unified Escalation Protocol**:\n- Customer needs to modify, or make changes to their contract.\n- Customer has billing disputes, payment problems, or financial issues.\n- Customer reports system errors or data discrepancies.\n- Customer's claim is Denied and they need further assistance.\n- Customer has questions about rental car benefits.\n- Customer wants to ADD or CHANGE a co-owner on their contract/account (NOTE: if they're just asking WHO is listed, follow Journey 4 Account Holder guidance instead).\n- Customer wants to transfer their contract.\n- Customer has issues logging in to the self-service portal.\n- Any situation where you cannot provide a complete answer or resolution.\n\n# Unified Escalation Protocol\n\n## Step 1: Mandatory Chat Deflection\nYou must first attempt to deflect the customer to our online chat before executing any transfers.\n- Say EXACTLY VERBATIM: \"You could stay on the phone but there's a wait to get connected to a phone agent. To get help faster, you can work with a chat agent. You'll need to visit our website vehicle care plan dot com, agents are available with no wait. Is that ok or do you want to continue with a phone agent?\"\n- Proceed to **Step 2: Evaluate Customer Response to Chat Offer**\n\n## Step 2: Evaluate Customer Response to Chat Offer\n- **IF the customer agrees to use the chat support**:\n  - Say EXACTLY VERBATIM: \"Great! Is there anything else I can help you with?\"\n    - If they say yes or ask a new question: Continue helping them using the appropriate journey instructions.\n- **If they decline or repeat their request** (e.g., they say \"No,\" or they ignore the chat offer and simply repeat words like \"Agent,\" \"Representative,\" or \"Get me a human\"):\n  - Proceed immediately to **Step 3: Conditional Identifier Collection**.\n\n## Step 3: Conditional Identifier Collection (Only When No Data Available)\n\nCheck if you have customer identifier information to pass to the agent. Choose the appropriate scenario below:\n\n### Scenario A: API Call Succeeded (resp.success == true)\n- You already have the customer's contract and identifier information from the successful API call.\n- **Skip identifier collection entirely.**\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario B: API Failed BUT Customer Already Provided Identifier Earlier\n- **Check conversation history:** Did the customer provide a VIN, Claim Number, or Contract Number during Step 2A-2E earlier in this conversation?\n- **If YES** → You have the identifier information needed to pass to the agent.\n- **DO NOT ask for the identifier again** — the customer already provided it.\n- **Proceed immediately to Step 4: Execute Agent Transfer.**\n\n### Scenario C: API Failed AND No Identifier Was Ever Provided\n- The customer never provided any identifier (VIN, Claim Number, or Contract Number) during this conversation.\n- You MUST collect this information before transferring to an agent.\n- Say: \"Before I transfer you to an agent, I need to collect some information so we can look up the vehicle you are calling about.\"\n- Collect the identifier using the steps below:\nFollow these steps in their exact order.\n\n#### Step A: Initial Ask\n- Ask the customer EXACTLY: \"Can you provide the claim number, contract number, or the last 8 character of the vehicle's VIN?\". Proceed to **Step B: Evaluate the Customer's Response**.\n\n#### Step B: Evaluate the Customer's Response\n**Context**: To determine which API to call later, you must know what type of number it is. The types are Claim Number, Contract Number, or a VIN (full or last 8). \n- Analyze the customer's reply. Did they state WHICH type of number they provided (e.g., Claim, Contract, or VIN)?\n- IF NO (They only gave a number without saying what it is):\n  - Say EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\"\n  - Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n- IF YES (They explicitly said it was a claim, contract, or VIN): \n  - Immediately proceed to **Step C: Confirmation of Number Provided**. \n  - Do NOT ask them to clarify the type as they have already mentioned it in their response. Asking them for a clarification when they have already mentioned the type would create an undesirable experience for the customer. \n- **Note**: The API automatically handles both full 17-character VINs and last 8-character VINs so you MUST NOT clarify from the customer if they have provided the full VIN or the last 8 characters. \n- If the type IS included (e.g., they mention \"claim\", \"contract\", or \"VIN\"): IMMEDIATELY proceed to **Step C: Confirmation of Number Provided.**\n- If the type IS NOT included (they only gave a number): Ask EXACTLY: \"Thank you. Is that your claim number, your contract number, or the last 8 characters of your VIN?\" Wait for their response, then proceed to **Step C: Confirmation of Number Provided.**\n\n#### Step C: Confirmation of Number Provided\n- **CRITICAL: Do NOT enter this step if the customer has not yet stated the identifier type. If the type (Claim Number, Contract Number, or VIN) is still unknown, return to Step B and ask for it first.**\n- Once the type is confirmed, read the number back digit-by-digit, separating each character with a comma. Group digits or characters within each  identifier so you pause between sets of three characters. Say the number back ONCE only — do NOT repeat or re-state it a second time. Ask EXACTLY: \"Just to be sure, you gave me [Number, read digit-by-digit] as your [Claim/Contract/VIN]. Is that correct?\"\n- After collecting the identifier, **proceed to Step 4: Execute Agent Transfer.**\n\n## Step 4: Execute Agent Transfer\n- Pass `salesforceId = \"\"` to the transfer.\n\n\n\n\n\n\n## Encrypt relevant transfer variables\nYou will need to call the API `encrypt_variables`. This takes four arguments, you will need to use this logic to determine each argument:\n1. Set PhoneNumber to 5551100005\n2. Set VIN based on contract / claim data, as follows:\n  - The VIN must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the VIN from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or VIN is NOT IN claim data.\n3. Set ContractNumber based on contract / claim data, as follows:\n  - The ContractNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ContractNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or contract number is NOT IN claim data.\n4. Set ClaimNumber based on the claim data: \n  - The ClaimNumber must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the ClaimNumber from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or claim number is NOT IN claim data.\nNow call the API.\n** Critical: DO NOT proceed with further instructions until the API has been called **\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Step 3: Execute Agent Transfer\n**Context:** You are executing this protocol because an Escalation Determination has been made.\n\n## Setting Transfer Variables\n\n**CRITICAL : SET ALL THE Transfer Variables**\n\nWhile making the API call `escalate_to_agent_from_ivr`, set **ALL** of the following arguments using these rules:\n\n- **`GAIntent`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `GAIntent` to any value other than the ones listed above.\n\n- **`contractFoundBy`** — set to whichever was used in the API call:\n  `` \n  - If identifier not used to call API set \"\".\n  \n- **`Identified`** — Must always be set to a boolean value :\n  - set `Identified` = `False`\n  - **CRITICAL** : Identified MUST be set to ONLY `true` or `false`.\n\n- **`GACallerType`**\n  -set `GACallerType = \"Contract Holder\"`\n  - **CRITICAL** : The GACallerType MUST be set to only to [Contract Holder / Repair Facility / Selling Dealer]\n  - NOTE : set the GACallerType such that it matches the listed values above.\n\n- **`TransferReason`** — set based on why escalation is occurring:\n  - Customer requested a human agent explicitly → `'CallerRequestedAgent'`\n  - Out-of-scope request that cannot be handled → `'OOSIntent'`\n  - No identifier that worked to look up information (VIN, phone, contract number, claim number) → `'IdentifierMissing'`\n  - API error → `'APIError'`\n  - Any other reason → `'Other'`\n  - Do not set `TransferReason` to any value other than the ones listed above.\n\n- **`VIN`** - set it to `vinOut`\n  - CRITICAL: VIN value MUST come ONLY from `vinOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ClaimNumber`** - set it to `claimOut`\n  - CRITICAL: ClaimNumber value MUST come ONLY from `claimOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`ContractNumber`** - set it to `contractOut`\n  - CRITICAL: ContractNumber value MUST come ONLY from `contractOut`, which is the encrypted response returned by the `encrypt_variables` API call.\n  - CRITICAL: Only set encrypted values. NEVER set the any values from conversation.\n\n- **`productType`** - set productType based on contract / claim data : \n  - The productType must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the productType from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or productType is NOT IN claim data.\n\n- **`ClaimStatus`** — set based on claim data:\n  - No claims found → `'NoClaim'`\n  - Denied or Correction Needed → `'ClaimNotAuthorized'`\n  - Authorization Approved, Payment Authorized, Payment Approved, or Paid → `'Authorized'`\n  - Anything else → `'Other'`\n  - Do not set `ClaimStatus` to any value other than the ones listed above.\n\n- **`roadsideAdministratorPhoneNumber`** - set based in the claim data:\n  - - ``\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or roadside phone number is NOT IN claim data.\n\n- **`salesforceID`** - set it to salesforce_idOut\n  - **CRITICAL** : Set salesforceID based on contract / claim data, as follows:\n  - The salesforceID must match the specific vehicle referenced and confirmed during this call.\n  - If no specific vehicle was referenced in the conversation, provide the salesforceID from the most recent claim (based on creation date).\n  - set the value as `\"\"` if claim data is NOT AVAILABLE or salesforceID is NOT IN claim data.\n\n- **`Question`** — a detailed summary of the customer's last unanswered inquiry. Do not leave this blank; if the intent is unclear, use the last spoken utterance.\n\n- **`escalation_agent_verbiage`** — set based on the caller's primary reason for calling:\n``\n  - Do not set `escalation_agent_verbiage` to any value other than the ones listed above.\n\n- **`caseNumber`** - Set to the specific CaseNumber number referenced during this conversation which is provided by the customer:\n  - Set the value as `\"\"` if case number was not provided by customer.\n  \n- **`escalation_reason_description`** - set by describing the specific reason for the transfer in relation to the caller's primary `GAIntent` and reason for the call.\n\n- **`CiscoCallId`** - set it to CiscoCallIdOut\n- **`IVR_Context`** - set it to IVR_ContextOut\n- **`Language`** - set it to LanguageOut\n- **`MenuCallType`** - set it to `\"Default\"`\n- **`PhoneNumber`** - set it to phoneNumberOut\n- **`TFN_DNIS`** - set it to TFN_DNISOut\n- **`Timestamp`** - set it to TimestampOut\n\n\n\n# Critical Guardrails\n\n## Guardrail 1: Mandatory Communication of Self-Service Portal\n- YOU MUST ALWAYS complete **Step 2 (Mandatory self-service portal communication)** before routing to any journey, even if the customer has already described their issue.\n- **NEVER skip Step 2 based on prior conversation context.**\n\n## Guardrail 2: Answer Only What Customers Ask\n- Answer **ONLY** the specific question asked. Do not volunteer extra information.\n- Once you have answered the direct question, **STOP**. Wait for the customer to ask for more.\n- **NEVER** automatically summarize the full contract, all claims, or all available benefits.\n\n## Guardrail 3: Never Confirm Coverage\n- NEVER say a specific part or repair IS covered.\n- Always say: \"Based on your contract terms, [component] may be covered, but actual coverage is determined when the claim is reviewed.\"\n\n# Guardrail 4: Always Include Disclaimer with Numeric Contract Values\n- Whenever you provide any numeric value from the `termsStructuredText` such as (deductible, rental amounts, towing limits, coverage caps, days, etc.), follow this format:\n  1. State ONLY the numeric value clearly and directly\n  2. Then add this disclaimer immediately after:\n  > \"Please keep in mind that the actual coverage available to you will depend on your specific claim's authorization.\"\n- **CRITICAL** : DO NOT use words like \"maximum,\" \"limit,\" or \"depends on authorization\" when stating the numeric value itself - just state the value, then add the disclaimer.\n\n## Guardrail 5: Approved Department Names Only\n- When referring to any Assurant team or department, ONLY use: **Claims**, **Customer Care**, **Payments**, or **Premium**.\n- Never use: \"Billing\", \"Finance\", \"Cancellations\", \"Contract Team\", \"Warranty Department\", \"Customer Service\", or any other unapproved name.\n\n## Guardrail 6: Never Say \"Vehicle Service Contract\"\n- Always refer to the customer's coverage as their **\"contract\"**.\n- Never say \"vehicle service contract\", \"VSC\", or \"warranty\".\n\n# End of Conversation\n- When the customer has no further requests, call `end_of_conversation`.\n\n# Response Guidelines\n- Keep responses short and use natural, conversational language.\n- Do not provide unrequested contract details, coverage amounts, or benefit summaries.\n- Match your response scope exactly to the customer's current journey and question.",
+        "available_functions": [
+          "encrypt_variables",
+          "set_selected_vehicle",
+          "get_contract_and_claims_data_ivr",
+          "escalate_to_agent_from_ivr",
+          "end_of_conversation",
+          "send_sms_to_phone",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "customerType": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": null,
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "send_sms_to_phone": null,
+            "encrypt_variables": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "ContractHolderIssues"
+        }
+      }
+    },
+    {
+      "id": "d4e3818c-1819-4f34-ac37-8bc09f1db09b",
+      "timestamp": "2026-04-21T01:41:36.311000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Let me check on that. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1254
+    },
+    {
+      "id": "373b02c4-9c35-4fa1-bff3-760b83dacc20",
+      "timestamp": "2026-04-21T01:41:38.038641Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 11003,
+        "num_output_tokens": 269,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_f3f68390abdd4426a6feb1d759d2e461",
+        "llm_id": "litellm",
+        "cost": 0.008797999999999999,
+        "call_duration": 2308,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "6debd3e9-0e03-4fdf-96c8-9a15fae153dc",
+      "timestamp": "2026-04-21T01:41:38.039493Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.5) The transfer variables have been encrypted successfully. Now I must escalate to a phone agent using escalate_to_agent_from_ivr, setting all required arguments per task instructions. The caller is a repair facility, the escalation reason is APIError (two failed lookups), and the claim number is provided. I will use the encrypted values from the previous API response and set all other required fields as instructed."
+    },
+    {
+      "id": "e959c1ea-ccb4-41bb-a0fe-dfee96058002",
+      "timestamp": "2026-04-21T01:41:38.042636Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Hold on while I transfer you to a Claims Agent.",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "17f91b8b-30aa-4b92-bccc-69408e0597aa",
+      "timestamp": "2026-04-21T01:41:38.043233Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Repair facility wants to continue and wait for a phone agent to check claim status for claim number 37020205A."
+          },
+          "request_id": "call_jvR9HpT7nhGoHDiSCLGvD7oK",
+          "external_request_id": "561b74b5-4889-4836-b653-bc2fb467c544",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Hold on while I transfer you to a Claims Agent.",
+        "last_action_id": "e959c1ea-ccb4-41bb-a0fe-dfee96058002",
+        "error": null
+      }
+    },
+    {
+      "id": "edfb3d93-da59-4dc4-ac78-0eb9a3888423",
+      "timestamp": "2026-04-21T01:41:38.043476Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "escalate_to_agent_from_ivr",
+        "parameters": {
+          "GAIntent": "CLAIMSTATUS",
+          "contractFoundBy": "ClaimNumber",
+          "Identified": false,
+          "GACallerType": "Repair Facility",
+          "TransferReason": "APIError",
+          "VIN": "enc_vin",
+          "ClaimNumber": "enc_claim",
+          "ContractNumber": "enc_contract",
+          "ClaimStatus": "Other",
+          "roadsideAdministratorPhoneNumber": "",
+          "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+          "escalation_agent_verbiage": "a Claims Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "Default",
+          "PhoneNumber": "5551100005",
+          "TFN_DNIS": "",
+          "Timestamp": "",
+          "productType": "",
+          "salesforceID": ""
+        },
+        "request_id": "35c087c9-2337-443b-b0f9-c6854ab1c516",
+        "external_request_id": null,
+        "function_type": "system_transfer",
+        "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "1282bd9a-4dc9-488e-99b5-f3b213322efa",
+      "timestamp": "2026-04-21T01:41:38.062015Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "escalate_to_agent_from_ivr",
+          "parameters": {
+            "GAIntent": "CLAIMSTATUS",
+            "contractFoundBy": "ClaimNumber",
+            "Identified": false,
+            "GACallerType": "Repair Facility",
+            "TransferReason": "APIError",
+            "VIN": "enc_vin",
+            "ClaimNumber": "enc_claim",
+            "ContractNumber": "enc_contract",
+            "ClaimStatus": "Other",
+            "roadsideAdministratorPhoneNumber": "",
+            "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+            "escalation_agent_verbiage": "a Claims Agent",
+            "caseNumber": "",
+            "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+            "CiscoCallId": "",
+            "IVR_Context": "",
+            "Language": "",
+            "MenuCallType": "Default",
+            "PhoneNumber": "5551100005",
+            "TFN_DNIS": "",
+            "Timestamp": "",
+            "productType": "",
+            "salesforceID": ""
+          },
+          "request_id": "35c087c9-2337-443b-b0f9-c6854ab1c516",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {},
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "eeef930b-0df2-458c-bce1-da4851a1a532",
+      "timestamp": "2026-04-21T01:41:38.062088Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "GAIntent": "CLAIMSTATUS",
+        "contractFoundBy": "ClaimNumber",
+        "Identified": false,
+        "GACallerType": "Repair Facility",
+        "TransferReason": "APIError",
+        "VIN": "enc_vin",
+        "ClaimNumber": "enc_claim",
+        "ContractNumber": "enc_contract",
+        "ClaimStatus": "Other",
+        "roadsideAdministratorPhoneNumber": "",
+        "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+        "escalation_agent_verbiage": "a Claims Agent",
+        "caseNumber": "",
+        "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+        "CiscoCallId": "",
+        "IVR_Context": "",
+        "Language": "",
+        "MenuCallType": "Default",
+        "PhoneNumber": "5551100005",
+        "TFN_DNIS": "",
+        "Timestamp": "",
+        "productType": "",
+        "salesforceID": ""
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "75238ad4-9141-467b-8a3e-87ed199e7a07",
+      "timestamp": "2026-04-21T01:41:38.062244Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "system_transfer",
+      "system_transfer_metadata": {
+        "transfer_function_request": {
+          "function_name": "escalate_to_agent_from_ivr",
+          "parameters": {
+            "GAIntent": "CLAIMSTATUS",
+            "contractFoundBy": "ClaimNumber",
+            "Identified": false,
+            "GACallerType": "Repair Facility",
+            "TransferReason": "APIError",
+            "VIN": "enc_vin",
+            "ClaimNumber": "enc_claim",
+            "ContractNumber": "enc_contract",
+            "ClaimStatus": "Other",
+            "roadsideAdministratorPhoneNumber": "",
+            "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+            "escalation_agent_verbiage": "a Claims Agent",
+            "caseNumber": "",
+            "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+            "CiscoCallId": "",
+            "IVR_Context": "",
+            "Language": "",
+            "MenuCallType": "Default",
+            "PhoneNumber": "5551100005",
+            "TFN_DNIS": "",
+            "Timestamp": "",
+            "productType": "",
+            "salesforceID": ""
+          },
+          "request_id": "35c087c9-2337-443b-b0f9-c6854ab1c516",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "reference_variables": {
+          "ClaimNumber_decrypted": null,
+          "ContractNumber_decrypted": null,
+          "PhoneNumber_decrypted": "5551100005",
+          "VIN_decrypted": null,
+          "customerType": "repairFacility",
+          "GAIntent": "CLAIMSTATUS",
+          "contractFoundBy": "ClaimNumber",
+          "Identified": false,
+          "GACallerType": "Repair Facility",
+          "TransferReason": "APIError",
+          "VIN": "enc_vin",
+          "ClaimNumber": "enc_claim",
+          "ContractNumber": "enc_contract",
+          "ClaimStatus": "Other",
+          "roadsideAdministratorPhoneNumber": "",
+          "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+          "escalation_agent_verbiage": "a Claims Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "Default",
+          "PhoneNumber": "5551100005",
+          "TFN_DNIS": "",
+          "Timestamp": "",
+          "productType": "",
+          "salesforceID": ""
+        },
+        "transfer_variables": {
+          "GAIntent": "CLAIMSTATUS",
+          "contractFoundBy": "ClaimNumber",
+          "Identified": false,
+          "GACallerType": "Repair Facility",
+          "TransferReason": "APIError",
+          "VIN": "enc_vin",
+          "ClaimNumber": "enc_claim",
+          "ContractNumber": "enc_contract",
+          "ClaimStatus": "Other",
+          "roadsideAdministratorPhoneNumber": "",
+          "Question": "Repair facility is calling on behalf of a customer to check claim status. They provided claim number 37020205A.",
+          "escalation_agent_verbiage": "a Claims Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Repair facility unable to check claim status due to repeated lookup failures for claim number 37020205A. Escalating to agent for resolution.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "Default",
+          "PhoneNumber": "5551100005",
+          "TFN_DNIS": "",
+          "Timestamp": "",
+          "productType": "",
+          "salesforceID": ""
+        },
+        "sensitive_variables": [],
+        "is_escalation": true
+      }
+    },
+    {
+      "id": "ff54bf8d-3795-49e3-beb0-49ecb397feb3",
+      "timestamp": "2026-04-21T01:41:38.718763Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"Hold on while I transfer you to a Claims Agent.\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "9676b277-123d-45a1-a133-08393c11df63",
+      "timestamp": "2026-04-21T01:41:38.718832Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Hold on while I transfer you to a Claims Agent.",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "9f529b88-27cc-4d9a-bf09-e6a1f5e6365b",
+      "timestamp": "2026-04-21T01:41:41.272832Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Hold on while I transfer you to a Claims Agent. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 2554
+    },
+    {
+      "id": "24c6eaf0-28c5-4dfd-970e-189ceccfb355",
+      "timestamp": "2026-04-21T01:41:42.137526Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "disconnect",
+      "disconnect_metadata": {
+        "reason": "completed",
+        "message": "DigitalGenAgent said: 'Transfer to system'",
+        "conversation_duration_ms": 108805
+      }
+    }
+  ],
+  "current_datetime": null,
+  "generative_agent_version": null,
+  "conversation_type": "voice"
+}

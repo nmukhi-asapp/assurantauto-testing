@@ -1,0 +1,130 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-018
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are a repair facility
+  - Tell the agent you need to file a new claim and have not yet sent the Repair Order
+  - When asked whether you prefer online or phone, say you prefer online
+  knowledge: You are calling from Westside Auto Repair. A customer brought in a 2023
+    Ford F-150 (VIN 1FTFW1E84PFC18001, last 8 FC18001, contract VSC200018) with a
+    failing alternator at 32,000 miles. You have not yet emailed the Repair Order.
+    If asked your caller type, say repair facility.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Professional and cooperative.
+description: "Regression test for SMS failure handling: send_sms_to_phone is called\
+  \ without customerType (rendering bug), causing the framework to return null. The\
+  \ agent must NOT surface this to the caller — it should silently proceed to Step\
+  \ 2 (flow routing) and assist normally."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent does NOT say anything about a technical issue, a failed SMS, or a self-service
+    portal link that could not be sent
+  - Agent does NOT mention that it attempted to send a link and failed
+- rules:
+  - Agent proceeds to handle the caller's repair facility needs without referencing
+    the SMS outcome — either by asking about claim type or by responding to what the
+    caller volunteers
+- rules:
+  - Agent informs the caller about the self-service portal (autoclaims.com) — either
+    verbally telling them about it or confirming a link was sent — regardless of whether
+    the SMS succeeded or failed
+- rules:
+  - Agent directs the repair facility to email the Repair Order to ro@autoclaims.com
+    and explains they will receive an email response with a case number
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "If the agent escalated the call, the GAIntent output variable is set to one of\
+    \ the valid values for Repair Facility: CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM,\
+    \ NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT, UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT,\
+    \ RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT"
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_sms_failure_silent_proceed
+mock_user:
+  current_timestamp: '2026-04-01'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response: null
+      error: Unexpected API failure
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response: null
+      error: Unexpected API failure
+    - params:
+        PhoneNumber_decrypted: '*'
+      response: null
+      error: Unexpected API failure
+    - params: {}
+      response: null
+      error: Unexpected API failure
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551100018'
+    - params: {}
+      response:
+        PhoneNumber: '5551100018'
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551100018'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551100018'
+  max_turns: 25
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- new_claim
+- sms_failure
+- regression
+- silent_proceed

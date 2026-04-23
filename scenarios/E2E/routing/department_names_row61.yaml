@@ -1,0 +1,198 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-020
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - Ask the agent which department handles billing questions about your contract
+  - Ask which department handles cancellations
+  knowledge: If asked to identify yourself as a caller type, say you are a Contract Holder. You want to know which departments
+    Assurant has and who to contact for billing and cancellation questions.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Curious and organized. Wants clear information about who to contact for different topics.
+description: Agent must only refer to the four correct department names — Claims, Customer Care, Payments, Premium — and must
+  not invent or use other department names
+evaluations:
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a Contract Holder
+- rules:
+  - Agent only refers to departments using the approved names — Claims, Customer Care, Payments, or Premium
+- rules:
+  - Agent does NOT use any other department names (e.g. 'Billing', 'Finance', 'Cancellations', 'Contract Team', 'Warranty
+    Department')
+- rules:
+  - Agent calls get_contract_and_claims_data_ivr before answering the customer's questions
+id: e2e_routing_department_names_approved_only
+mock_user:
+  current_timestamp: '2026-03-18'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 3HGGK5H80KM100020
+              contractNumber: VSC100020
+              customerFirstName: James
+              customerLastName: Foster
+              customerEmail: james.foster@test.assurant.com
+              customerAddress1: 400 Elm Street
+              customerCity: Nashville
+              customerCountry: USA
+              customerStateCode: TN
+              customerPostalCode: '37201'
+              customerHomePhone: '5551000020'
+              expirationDate: '2027-06-01'
+              status: Active
+              dealerId: 000TN015
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 85000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2021-06-01'
+              sellingDealerName: Music City Honda
+              sellingDealerAddress: 700 Broadway, Nashville, TN, 37201
+              sellingDealerPhone: '6155550125'
+              model: FIT
+              make: HONDA
+              vehicleYear: 2019
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2021-06-01'
+              customerMobilePhone: '5551000020'
+    - params: {}
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 3HGGK5H80KM100020
+              contractNumber: VSC100020
+              customerFirstName: James
+              customerLastName: Foster
+              customerEmail: james.foster@test.assurant.com
+              customerAddress1: 400 Elm Street
+              customerCity: Nashville
+              customerCountry: USA
+              customerStateCode: TN
+              customerPostalCode: '37201'
+              customerHomePhone: '5551000020'
+              expirationDate: '2027-06-01'
+              status: Active
+              dealerId: 000TN015
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 85000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2021-06-01'
+              sellingDealerName: Music City Honda
+              sellingDealerAddress: 700 Broadway, Nashville, TN, 37201
+              sellingDealerPhone: '6155550125'
+              model: FIT
+              make: HONDA
+              vehicleYear: 2019
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2021-06-01'
+              customerMobilePhone: '5551000020'
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        message: Escalated to live agent
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000020'
+    - params: {}
+      response:
+        PhoneNumber: '5551000020'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551000020'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551000020'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- routing
+- department_names
+- terminology
+- regression
+- row61

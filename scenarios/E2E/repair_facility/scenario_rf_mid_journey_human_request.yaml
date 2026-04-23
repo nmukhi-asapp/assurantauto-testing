@@ -1,0 +1,199 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-022
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are a repair facility
+  - Ask to check authorization status on an existing claim
+  - If offered a portal link via text, decline and ask to look up the claim over the phone
+  - Provide your claim number 37020222A when asked for an identifier
+  - When the agent reads back the claim number and asks you to confirm, say yes
+  - When the agent provides the authorization status, say thank you — then immediately ask to speak to a live agent without explaining why
+  - When the agent asks what you need help with, say the authorization amount approved was $200 short of your repair estimate and you want to dispute it with a specialist
+  - If the agent tries to resolve the dispute through the IVR, insist you need a person to review the decision
+  knowledge: You are calling from Pacific Coast Auto Repair. You have claim 37020222A for a 2022 Honda CR-V (VIN 2HKRW2H55NH200022,
+    last 8 NH200222, contract VSC200022). The claim was authorized for $850 but your repair estimate was $1,050. You want to
+    dispute the shortfall with a claims specialist. If asked your caller type, say repair facility.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Experienced shop manager who got the claim status first but noticed the payout is short. After getting the status, drops the human request casually without explanation — only reveals the reason when directly asked.
+description: "Repair facility completes an authorization status check and then, without\
+  \ explanation, requests a live agent. Agent should ask what the caller needs before\
+  \ escalating, recognize the authorization dispute is outside IVR scope, and escalate\
+  \ via escalate_to_agent_from_ivr. Tests that the agent probes mid-conversation human\
+  \ requests rather than immediately acceding."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent looks up the claim using the claim number or other identifier provided
+- rules:
+  - Agent provides the authorization status of the claim to the caller
+- rules:
+  - When the caller requests a live agent, the agent asks what they need help with before escalating
+- rules:
+  - Caller states they want to dispute the authorization amount or payout
+- rules:
+  - Agent recognizes the authorization dispute cannot be resolved through the IVR and escalates using escalate_to_agent_from_ivr, OR informs the customer that agents are not currently available due to business hours
+- rules:
+  - Agent informs the caller they will be connected to the appropriate team, OR informs the customer that agents are not currently available due to business hours
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of
+    the valid values for Repair Facility: CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM,
+    NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT, UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT,
+    RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_mid_journey_human_request
+mock_user:
+  current_timestamp: '2026-03-26'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: 'repairShop'
+      response:
+        success: true
+    - params: {}
+      response:
+        success: true
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: AC Compressor Failure
+        breakdownMileage: 52000
+        createdOn: '2026-03-20'
+        repairShopName: Pacific Coast Auto Repair
+        repairShopId: 000CA122
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 850.0
+        laborRate: 125.0
+    - params:
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+    - params: {}
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: AC Compressor Failure
+        breakdownMileage: 52000
+        createdOn: '2026-03-20'
+        repairShopName: Pacific Coast Auto Repair
+        repairShopId: 000CA122
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 850.0
+        laborRate: 125.0
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+    - params: {}
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+    - params: {}
+      response:
+        claimNumber: 37020222A
+        VIN: 2HKRW2H55NH200222
+        contractNumber: VSC200022
+        status: Authorization Approved
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551100022'
+    - params: {}
+      response:
+        PhoneNumber: '5551100022'
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551100022'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551100022'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- edge_case
+- human_request
+- mid_journey
+- probe_before_escalate
+- out_of_scope
+- escalation

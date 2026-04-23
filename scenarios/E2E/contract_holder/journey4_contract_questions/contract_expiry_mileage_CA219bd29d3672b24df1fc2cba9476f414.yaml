@@ -1,0 +1,212 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-022
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - Ask whether your contract is still active and when it expires
+  - If the agent asks for your current mileage, tell them your odometer reads 48500 miles
+  knowledge: If asked to identify yourself as a caller type, say you are a Contract Holder. Start by saying 'I want to know
+    if my contract is still active and when it expires.' Your current odometer is at 48500 miles.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers specific options, answers with just the matching option in 1-3 words ("Contract.", "Repair facility.", "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences, never explanations. Never volunteers context or reasons. Never narrates actions — just reports results ("Sent it.", "Got the email.", "Got the case number."). Occasional natural fillers before a response ("Uh,", "Yeah,"). Straightforward and cooperative. Answers questions directly.
+description: Customer asking if their contract is still active — agent must ask for current vehicle mileage (odometer reading)
+  before confirming contract status, since the contract could expire by mileage before the date expiration
+evaluations:
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a Contract Holder
+- rules:
+  - Agent calls get_contract_and_claims_data_ivr before answering the customer's questions
+- rules:
+  - Agent asks the customer for their current vehicle mileage (odometer reading) before confirming the contract is active
+- rules:
+  - Agent does NOT confirm the contract is active without first asking for the customer's current mileage
+- rules:
+  - Agent uses both the expiration date and expiration mileage from the contract to determine and communicate the contract
+    status
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of the valid values for Contract Holder:
+    CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO, GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE,
+    RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_journey4_contract_status_mileage_check
+mock_user:
+  current_timestamp: '2026-03-20'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 2T1BURHE0JC100022
+              contractNumber: VSC100022
+              customerFirstName: Patricia
+              customerLastName: Simmons
+              customerEmail: patricia.simmons@test.assurant.com
+              customerAddress1: 1400 River Rd
+              customerCity: Memphis
+              customerCountry: USA
+              customerStateCode: TN
+              customerPostalCode: '38101'
+              customerHomePhone: '5551000022'
+              expirationDate: '2028-06-01'
+              status: Active
+              dealerId: 000TN018
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 60000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2021-06-01'
+              sellingDealerName: Memphis Toyota
+              sellingDealerAddress: 2200 Poplar Ave, Memphis, TN, 38101
+              sellingDealerPhone: '9015550210'
+              model: COROLLA
+              make: TOYOTA
+              vehicleYear: 2019
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2021-06-01'
+              customerMobilePhone: '5551000022'
+    - params: {}
+      response:
+        response:
+          contractClaims:
+            contract:
+            - VIN: 2T1BURHE0JC100022
+              contractNumber: VSC100022
+              customerFirstName: Patricia
+              customerLastName: Simmons
+              customerEmail: patricia.simmons@test.assurant.com
+              customerAddress1: 1400 River Rd
+              customerCity: Memphis
+              customerCountry: USA
+              customerStateCode: TN
+              customerPostalCode: '38101'
+              customerHomePhone: '5551000022'
+              expirationDate: '2028-06-01'
+              status: Active
+              dealerId: 000TN018
+              accountType: Dealer
+              productName: Service Contract
+              productType: WAR
+              administrator: Automotive Warranty Services, Inc.
+              expirationMiles: 60000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2021-06-01'
+              sellingDealerName: Memphis Toyota
+              sellingDealerAddress: 2200 Poplar Ave, Memphis, TN, 38101
+              sellingDealerPhone: '9015550210'
+              model: COROLLA
+              make: TOYOTA
+              vehicleYear: 2019
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Silver
+              termsStructuredText: 'Vehicle Service Contract For New & Pre-Owned Vehicles.
+
+                For Emergency Roadside Assistance: Toll-free 1-866-603-5420
+
+                To File a Claim: Visit us at www.mrclaims.net'
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              tieBackDistance: 40
+              classificationCode: LW
+              productCode: MAO2
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2021-06-01'
+              customerMobilePhone: '5551000022'
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000022'
+    - params: {}
+      response:
+        PhoneNumber: '5551000022'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551000022'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551000022'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- journey4
+- contract_status
+- mileage
+- odometer
+- regression
+- CA219bd29d3672b24df1fc2cba9476f414

@@ -11,7 +11,9 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Add generative-agent-optimization-mcp to path (for data_sampling)
-mcp_root = project_root.parent / "generative-agent-optimization-mcp"
+# Override with MCP_REPO_DIR env var if repos are not siblings of this repo
+_default_mcp = project_root.parent / "generative-agent-optimization-mcp"
+mcp_root = Path(os.environ.get("MCP_REPO_DIR", str(_default_mcp)))
 sys.path.insert(0, str(mcp_root))
 
 from generative_agent_optimization.data_sampling.get_historical_convos import (

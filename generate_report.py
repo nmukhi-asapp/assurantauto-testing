@@ -22,7 +22,9 @@ from typing import Optional
 import yaml
 
 # Add time inspector to path
-TIME_INSPECTOR_DIR = Path(__file__).parent.parent / "generative-agent-time-inspector"
+# Override with TIME_INSPECTOR_DIR env var if repos are not siblings of this repo
+_default_time_inspector = Path(__file__).parent.parent / "generative-agent-time-inspector"
+TIME_INSPECTOR_DIR = Path(os.environ.get("TIME_INSPECTOR_DIR", str(_default_time_inspector)))
 sys.path.insert(0, str(TIME_INSPECTOR_DIR))
 
 try:

@@ -37,45 +37,34 @@ assurantauto-testing/
 
 ## Prerequisites
 
-### 1. Sibling repositories
+### 1. Dependent repositories
 
-This repo depends on three sibling repositories that must be cloned at the same level (`~/code/`):
+Clone these three repos — they can live anywhere on your machine:
 
 | Repo | Purpose |
 |------|---------|
-| `voice-genagent` | Scenario runner (`tools/scenario_runner/`), `generate_report.py` dependencies |
+| `voice-genagent` | Scenario runner (`tools/scenario_runner/`) |
 | `generative-agent-optimization-mcp` | MCP server implementations (scenarios, GACS, data-sampling, prompt-renderer) |
 | `generative-agent-time-inspector` | Timing analysis library used by `generate_report.py` |
 
 ```bash
-cd ~/code
 git clone git@github.com:ASAPPinc/voice-genagent.git
 git clone git@github.com:ASAPPinc/generative-agent-optimization-mcp.git
 git clone git@github.com:ASAPPinc/generative-agent-time-inspector.git
-```
-
-Expected directory layout:
-```
-~/code/
-├── assurantauto-testing/        ← this repo
-├── voice-genagent/
-├── generative-agent-optimization-mcp/
-└── generative-agent-time-inspector/
 ```
 
 ### 2. Python environments
 
 **voice-genagent** uses Poetry + Python 3.10:
 ```bash
-cd ~/code/voice-genagent
+cd /path/to/voice-genagent
 pyenv install 3.10.x          # if not already installed
-pyenv local voice-genagent-py310
 poetry install
 ```
 
 **generative-agent-optimization-mcp** uses `uv`:
 ```bash
-cd ~/code/generative-agent-optimization-mcp
+cd /path/to/generative-agent-optimization-mcp
 uv sync
 ```
 
@@ -83,13 +72,25 @@ uv sync
 
 ```bash
 cp .env-sample .env
-# Edit .env and fill in:
-#   LITELLM_API_KEY    (from 1Password: "LiteLLM")
-#   VAPI_API_KEY       (for voice scenario runner)
-#   OPENAI_API_KEY     (alternative voice provider)
 ```
 
-The `.env` file is loaded automatically by the MCP servers. It is gitignored — never commit it.
+Edit `.env` and fill in at minimum:
+- `LITELLM_API_KEY` — from 1Password ("LiteLLM")
+- `VAPI_API_KEY` — for voice scenario runner
+- `OPENAI_API_KEY` — alternative voice provider (optional)
+
+**If your repos are not all in the same parent directory**, also set the path variables. By default every tool assumes the three repos above are siblings of this repo (i.e. `../voice-genagent`, `../generative-agent-optimization-mcp`, `../generative-agent-time-inspector`). If yours are elsewhere, uncomment and set these in `.env`:
+
+```bash
+MCP_REPO_DIR="/your/path/to/generative-agent-optimization-mcp"
+VOICE_GENAGENT_DIR="/your/path/to/voice-genagent"
+TIME_INSPECTOR_DIR="/your/path/to/generative-agent-time-inspector"
+GENERATIVE_AGENT_DIR="/your/path/to/generative-agent"   # only needed for chat conversation fetching
+```
+
+These env vars are read by `generate_report.py`, `scripts/fetch_conversation.py`, `.mcp.json`, and the Claude skills — so setting them once in `.env` covers everything.
+
+The `.env` file is gitignored — never commit it.
 
 ### 4. AWS credentials
 
@@ -135,19 +136,20 @@ Options: `--branch <name>` (default: `draft`), `--tags <tag>` (default: `e2e`), 
 
 ### Manually (without Claude)
 
-Run from the **voice-genagent** repo root:
+Run from the **voice-genagent** repo root (set `VOICE_GENAGENT_DIR` in `.env` if it's not a sibling of this repo):
 
 ```bash
-cd ~/code/voice-genagent
+_VG=${VOICE_GENAGENT_DIR:-$(dirname $(pwd))/voice-genagent}
+cd "$_VG"
 env -u ALL_PROXY -u all_proxy \
   poetry run python tools/scenario_runner/run.py voice \
-    ../assurantauto-testing/scenarios/E2E \
+    /path/to/assurantauto-testing/scenarios/E2E \
     --tr \
     --voice-provider vapi \
     --chunk 10 \
     --tags e2e \
     --gacs-branch draft \
-    --output ../assurantauto-testing/scenario-runs/e2e_full_$(date +%Y%m%d)
+    --output /path/to/assurantauto-testing/scenario-runs/e2e_full_$(date +%Y%m%d)
 ```
 
 ### Generating an HTML report
@@ -301,7 +303,7 @@ python3 generate_report.py scenario-runs/e2e_full_20260423 \
 ## Troubleshooting
 
 **`ImportError` when running `generate_report.py`**
-The script requires `generative-agent-time-inspector` at `~/code/generative-agent-time-inspector`. Clone it and ensure it is at that exact path.
+The script needs the `generative-agent-time-inspector` repo. Set `TIME_INSPECTOR_DIR=/your/path/to/generative-agent-time-inspector` in `.env`.
 
 **AWS authentication failures**
 Run `aws sso login --profile dev-sso-gen-agent-ro` and try again.
@@ -310,7 +312,7 @@ Run `aws sso login --profile dev-sso-gen-agent-ro` and try again.
 Always prepend `env -u ALL_PROXY -u all_proxy` to scenario runner commands.
 
 **MCP server not starting**
-Check that `generative-agent-optimization-mcp` is at `~/code/generative-agent-optimization-mcp` and that `uv sync` has been run there. The `.mcp.json` uses absolute paths to that repo.
+Ensure `uv sync` has been run in `generative-agent-optimization-mcp`. If the repo is not a sibling of this one, set `MCP_REPO_DIR` in `.env`.
 
 **`fetch_conversation.py` fails with import errors**
-Run from this repo root with `uv run python scripts/fetch_conversation.py`. This picks up the `core/` module correctly.
+Run from this repo root with `uv run python scripts/fetch_conversation.py`. If `generative-agent-optimization-mcp` is not a sibling repo, set `MCP_REPO_DIR` in `.env`.

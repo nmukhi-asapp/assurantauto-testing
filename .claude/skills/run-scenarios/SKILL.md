@@ -38,7 +38,43 @@ cd "$_VG" && env -u ALL_PROXY -u all_proxy poetry run python -m tools.scenario_r
   --output "$_REPO/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>"
 ```
 
-If the command fails (permission error, module not found, network error), present the exact command to the user and ask them to run it from their terminal, then wait for them to confirm it's running.
+If `poetry run python` fails with `ModuleNotFoundError: No module named 'generative_agent_optimization'`, it means an active conda environment is interfering with poetry's venv. Use the venv's Python directly instead:
+
+```bash
+_REPO=$PWD
+_VG=${VOICE_GENAGENT_DIR:-$HOME/code/voice-genagent}
+cd "$_VG" && env -u ALL_PROXY -u all_proxy .venv/bin/python -m tools.scenario_runner.run voice \
+  "$_REPO/scenarios/E2E" \
+  --voice-provider vapi \
+  --tr \
+  --chunk 10 \
+  --tags <tags> \
+  --gacs-branch <branch> \
+  --output "$_REPO/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>"
+```
+
+If the command still fails (permission error, network error), present the exact command to the user and ask them to run it from their terminal, then wait for them to confirm it's running.
+
+**After the run completes, check for a silent DNS failure.** If all (or nearly all) scenarios have `scenario_execution_status: "failed"` with `total_cost: 0.0` and empty `evaluation_results` in `summary.json`, it means the runner could not reach internal ASAPP services (DNS resolution failure for `gen-agent-config-service.shared.asapp.com`). This typically happens when not connected to the ASAPP VPN.
+
+In that case:
+1. Tell the user the run failed silently due to a DNS/network error, likely a missing VPN connection.
+2. Present the exact command they should run from their own terminal (with the actual values substituted in):
+
+```bash
+_REPO=<absolute-path-to-this-repo>
+_VG=<absolute-path-to-voice-genagent>
+cd "$_VG" && env -u ALL_PROXY -u all_proxy .venv/bin/python -m tools.scenario_runner.run voice \
+  "$_REPO/scenarios/E2E" \
+  --voice-provider vapi \
+  --tr \
+  --chunk <chunk> \
+  --tags <tags> \
+  --gacs-branch <branch> \
+  --output "$_REPO/scenario-runs/<company-marker>/e2e_full_<YYYYMMDD>"
+```
+
+3. Ask them to confirm once it is running, then proceed to Step 4 (monitor completion).
 
 ## Step 3: Identify Missing or Failed Scenarios
 
@@ -82,12 +118,12 @@ for e in errored:
     print(f'  ERRORED: {e}')
 ```
 
-Find the YAML file for each missing scenario and re-run it individually:
+Find the YAML file for each missing scenario and re-run it individually (use `.venv/bin/python` instead of `poetry run python` if needed):
 
 ```bash
 _REPO=$PWD
 _VG=${VOICE_GENAGENT_DIR:-$HOME/code/voice-genagent}
-cd "$_VG" && env -u ALL_PROXY -u all_proxy poetry run python -m tools.scenario_runner.run voice \
+cd "$_VG" && env -u ALL_PROXY -u all_proxy .venv/bin/python -m tools.scenario_runner.run voice \
   "$_REPO/scenarios/E2E/<path-to-scenario.yaml>" \
   --voice-provider vapi \
   --tr \

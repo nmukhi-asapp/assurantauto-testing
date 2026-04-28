@@ -100,7 +100,7 @@ Most tools require AWS SSO access (Athena queries, GACS config fetching):
 aws sso login --profile dev-sso-gen-agent-ro
 ```
 
-Your `~/.aws/config` must have the `dev-sso-gen-agent-ro` profile. Ask a teammate for the SSO configuration if you don't have it.
+Your `~/.aws/config` must have the `dev-sso-gen-agent-ro` profile. If it does not, request access [here](https://asapp.at.okta.com/next/new?q=AWS%20GenAgent%20RO%20Access%20Request&request_type=6685b12e4d2e1e0006fa56d0).
 
 ### 5. Claude Code
 

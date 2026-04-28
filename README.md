@@ -219,6 +219,7 @@ Skills are slash commands available in Claude Code sessions. They are defined in
 | **run-scenarios** | `/run-scenarios assurantauto [--branch <b>]` | Run E2E voice scenarios, generate report, classify failures |
 | **inspect-conversation** | `/inspect-conversation <id> assurantauto` | Fetch + analyze a specific production conversation |
 | **analyze-conversation** | `/analyze-conversation` | Batch analyze conversation files for issues |
+| **batch-analyze-conversations** | `/batch-analyze-conversations <dir> [--sample N]` | Score a cohort of conversations against the voice quality rubric (D1–D12) and produce an aggregate quality report |
 | **sim-and-improve** | `/sim-and-improve` | Iterative simulate → analyze → fix cycles |
 | **create-integration-from-conversation** | `/create-integration-from-conversation` | Convert a production conversation into an integration test case |
 

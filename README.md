@@ -48,7 +48,7 @@ Clone these three repos — they can live anywhere on your machine:
 | `generative-agent-time-inspector` | Timing analysis library used by `generate_report.py` |
 
 ```bash
-git clone git@github.com:ASAPPinc/voice-genagent.git
+git clone git@github.asapp.dev:ASAPPinc/voice-genagent.git
 git clone git@github.asapp.dev:ASAPPinc/generative-agent-optimization-mcp.git
 git clone git@github.com:ASAPPinc/generative-agent-time-inspector.git
 ```

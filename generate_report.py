@@ -23,17 +23,21 @@ import yaml
 
 # Add time inspector to path
 # Override with TIME_INSPECTOR_DIR env var if repos are not siblings of this repo
-_default_time_inspector = Path(__file__).parent.parent / "generative-agent-time-inspector"
+_default_time_inspector = Path(__file__).resolve().parent.parent / "generative-agent-time-inspector"
 TIME_INSPECTOR_DIR = Path(os.environ.get("TIME_INSPECTOR_DIR", str(_default_time_inspector)))
 sys.path.insert(0, str(TIME_INSPECTOR_DIR))
 
 try:
     from analyze import (
         analyze_span, TurnSpan, Activity,
-        AT_CUSTOMER, AT_DEAD_AIR, AT_BOT_SPEAKING, AT_TALKER_LLM,
+        AT_DEAD_AIR, AT_BOT_SPEAKING, AT_TALKER_LLM,
         parse_ts, ts_diff_ms,
         ACTIVITY_HEX, ROW_ORDER, ROW_SHORT_LABEL, ACTIVITY_CONFIG, fmt_ms,
     )
+    try:
+        from analyze import AT_CUSTOMER
+    except ImportError:
+        from analyze import AT_CUSTOMER_SPEECH as AT_CUSTOMER  # renamed in newer versions
     PLOTLY_AVAILABLE = True
     try:
         import plotly.graph_objects as go
@@ -198,7 +202,7 @@ def get_bot_messages_in_span(actions: list, span_start: datetime, span_end: date
 
 def build_corrected_dead_air_and_bot_speaking(
     span: TurnSpan, actions: list
-) -> tuple[list, list]:
+) -> "tuple[list, list]":
     """
     Return (bot_speaking_activities, dead_air_activities) computed correctly.
 
@@ -305,7 +309,7 @@ def get_conversation_spans(state: dict) -> list:
         # so it finds voice_assistant bot messages correctly), then replace
         # bot_speaking and dead_air with our corrected versions.
         raw_activities = analyze_span(
-            span_start, span_end, actions_in_span, simulation_mode=False
+            span_start, span_end, actions_in_span
         )
         # Strip time inspector's bot_speaking and dead_air (they overlap)
         activities = [

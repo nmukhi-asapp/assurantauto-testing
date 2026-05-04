@@ -1,0 +1,168 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-022
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are a Dealership
+  - Start by saying you need to speak to a representative
+  - When the agent asks what you need help with, say you need to check on a claim for a customer
+  - When asked for an identifier, provide your contract number VSC300022
+  - When the agent reads back the contract number, confirm it is correct
+  - When the agent provides the claim status, say you still want to speak to a phone agent
+  knowledge: You are calling from Westside Auto Group. A customer brought in their 2021 Jeep Grand
+    Cherokee (VIN 1C4RJFBG5MC771022, last 8 MC771022, contract VSC300022) for an engine repair.
+    Claim 47030022A was filed and you want to confirm its status. If asked your caller type, say
+    Dealership. You want to speak to a phone agent.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the agent offers
+    specific options, answers with just the matching option in 1-3 words ("Contract.", "Dealership.",
+    "New claim."). Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's
+    correct."). For open-ended questions, gives a direct fragment of 5-8 words — never full sentences,
+    never explanations. Never volunteers context or reasons. Occasional natural fillers before a
+    response ("Uh,", "Yeah,"). Professional dealership service advisor who wants to speak to a phone agent.
+description: Dealership caller immediately requests a phone agent. Agent must collect an identifier
+  (claim number, contract number, or VIN) and ultimately transfer the caller to a phone agent via
+  escalate_to_agent_from_ivr.
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealership
+- rules:
+  - Agent asks for a claim number, contract number, or VIN before transferring to a phone agent
+- rules:
+  - Agent eventually calls escalate_to_agent_from_ivr to transfer the caller to a phone agent
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'The GAIntent output variable is set to one of the valid values for Dealership: CARRENTAL,
+    CLAIMS, CLAIMSTATUS, NEWCLAIM, UPDATECLAIM, COVERAGEINFO, GAP, RV, GA_ERROR, ALLOTHER_QUESTIONS,
+    DEFAULT'
+id: e2e_dealer_human_request_phone_transfer
+mock_user:
+  current_timestamp: '2026-04-27'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 47030022A
+        VIN: 1C4RJFBG5MC771022
+        contractNumber: VSC300022
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        breakdownMileage: 42000
+        createdOn: '2026-04-25'
+        repairShopName: Westside Auto Group
+        repairShopId: 000CA022
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization
+          letter was sent to your facility. Please proceed with the covered repairs.
+        authorizationAmount: 950.0
+    - params: {}
+      response:
+        claimNumber: 47030022A
+        VIN: 1C4RJFBG5MC771022
+        contractNumber: VSC300022
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Engine Repair
+        breakdownMileage: 42000
+        createdOn: '2026-04-25'
+        repairShopName: Westside Auto Group
+        repairShopId: 000CA022
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization
+          letter was sent to your facility. Please proceed with the covered repairs.
+        authorizationAmount: 950.0
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5553100022'
+    - params: {}
+      response:
+        PhoneNumber: '5553100022'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5553100022'
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5553100022'
+  max_turns: 25
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- human_request
+- phone_transfer
+- regression

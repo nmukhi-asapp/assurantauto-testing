@@ -1,0 +1,177 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-014
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, Repair Facility, or Assurant Employee, say you are a Dealership
+  - When asked what you need help with, say you need to adjust an existing claim
+  - When the agent asks for the claim number, contract number, or VIN, say the case number is 49137123
+  - If the agent asks you to confirm the case number, confirm it is correct
+  - Accept the claim status or being transferred to someone who can help
+  knowledge: You are calling from Westside Motors. You want to adjust an existing claim.
+    When asked for a claim number, contract number, or VIN, you will provide a case number
+    (49137123). You do not have a claim number, contract number, or VIN handy.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Contract.", "Repair facility.", "New claim."). Confirmations are single words
+    or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions,
+    gives a direct fragment of 5-8 words — never full sentences, never explanations.
+    Never volunteers context or reasons. Never narrates actions — just reports results.
+    Occasional natural fillers before a response ("Uh,", "Yeah,").
+description: >
+  Dealership provides a case number when asked for a claim/contract/VIN. Agent should
+  recognize "case number" as a distinct identifier type and call the getClaims API
+  with it directly — NOT ask the caller to clarify whether it is a claim number,
+  contract number, or VIN.
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealership
+- rules:
+  - Agent categorizes the inquiry as an existing claim issue
+- rules:
+  - >
+    After the caller explicitly identifies their number as a case number (e.g., says
+    "case number 49137123"), the agent does NOT follow up by asking whether that number
+    is a claim number, contract number, or VIN. The agent proceeds directly to confirm
+    and look up the number without re-requesting the identifier type.
+- rules:
+  - Agent calls get_claims_case_number or getClaimsClaimNumber with the case number
+    provided by the caller, without first asking the caller to re-identify the number
+    type
+- rules:
+  - Agent presents claim status to the caller or escalates, using the data returned
+    by the lookup
+id: e2e_dealership_case_number_lookup
+mock_user:
+  current_timestamp: '2026-05-02'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    get_claims_case_number:
+    - params:
+        caseNumber: '*'
+      response:
+        claimNumber: 37030014A
+        VIN: 1HGBH41JXMN300014
+        contractNumber: VSC300014
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Transmission Replacement
+        breakdownMileage: 65000
+        createdOn: '2026-04-28'
+        repairShopName: Westside Motors
+        repairShopId: 000CA014
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 1850.0
+    - params: {}
+      response:
+        claimNumber: 37030014A
+        VIN: 1HGBH41JXMN300014
+        contractNumber: VSC300014
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Transmission Replacement
+        breakdownMileage: 65000
+        createdOn: '2026-04-28'
+        repairShopName: Westside Motors
+        repairShopId: 000CA014
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 1850.0
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 37030014A
+        VIN: 1HGBH41JXMN300014
+        contractNumber: VSC300014
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Transmission Replacement
+        breakdownMileage: 65000
+        createdOn: '2026-04-28'
+        repairShopName: Westside Motors
+        repairShopId: 000CA014
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 1850.0
+    - params: {}
+      response:
+        claimNumber: 37030014A
+        VIN: 1HGBH41JXMN300014
+        contractNumber: VSC300014
+        status: Authorization Approved
+        claimRecordType: Mechanical
+        repairDescription: Transmission Replacement
+        breakdownMileage: 65000
+        createdOn: '2026-04-28'
+        repairShopName: Westside Motors
+        repairShopId: 000CA014
+        longVerbiageStatus: The covered portion of this claim was authorized. An authorization letter was sent to your facility.
+        authorizationAmount: 1850.0
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551300014'
+    - params: {}
+      response:
+        PhoneNumber: '5551300014'
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customerType: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5551300014'
+        VIN: 'enc_vin'
+        ContractNumber: 'enc_contract'
+        ClaimNumber: 'enc_claim'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5551300014'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- existing_claim
+- case_number
+- regression

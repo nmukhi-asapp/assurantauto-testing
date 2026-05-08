@@ -22,18 +22,34 @@ Designed for use by a human annotator or an LLM judge listening to / reading a t
 
 *The most critical tier. A low score here means the call fundamentally failed.*
 
-### D1 — Goal Completion
-> *Did the user accomplish what they called about?*
+### D1 — Design Adherence / Appropriate Outcome
+> *Did the agent do what it was designed to do for this caller's intent?*
+
+This metric measures whether the bot did the **right thing** for the caller's situation, judged against the latest task configuration (`CallerIdentification`, `ContractHolderIssues`, `DealershipIssues`, `RepairShopIssues`, `EmployeeIssues`). It is **not** literal goal completion — a call where the customer asks for a human and the bot transfers them immediately may still be a *bad* call if the bot was supposed to attempt smart deflection first; conversely, a call where the bot transfers without resolving the customer's question is a *good* call when that intent is explicitly out of scope.
+
+**Scope rules (from current task configs):**
+- **In-scope** (bot must attempt the designed flow): claim status lookup, contract / coverage questions answerable from `termsStructuredText`, repair-coverage guidance, roadside transfer (Journey 6A), reimbursement self-service guidance, new-claim filing (dealer/repair-facility flows), pre-claim coverage education, contract status/expiry with odometer ask.
+- **Out-of-scope** (bot must escalate via Unified Escalation Protocol): cancellations after 30+ days unresolved, contract changes/modifications, GAP coverage, definitive coverage answers, denied claims, rental-extension/billing/system-error scenarios, add/change co-owner, contract transfer, portal login issues, and anything else the bot cannot complete.
+- **Smart Deflection (Guardrail 6)**: when a contract holder asks for an agent only once and their topic isn't in the Escalation Scenarios, bot must personalize a deflection ("I can see you have a [vehicle] on file…") before escalating. Only after the second insistence — or if topic is clearly out of scope — should it transfer.
+- **CallerIdentification task**: must NOT answer questions and must NOT escalate from this task. Its only job is to identify caller type and `change_task` to the destination.
 
 | Score | Anchor |
 |---|---|
-| 5 | Goal fully achieved; correct backend action taken; no need to call back |
-| 4 | Goal achieved but required more turns than necessary |
-| 3 | Partially achieved; minor residual issue the user must resolve elsewhere |
-| 2 | Goal not achieved; user had to repeat themselves or escalate to a human |
-| 1 | Goal failed; wrong action taken or call abandoned |
+| 5 | Bot correctly classified intent and executed the designed flow exactly. In-scope: completed the designed journey end-to-end, or transferred only after exhausting in-scope steps. Out-of-scope: recognized immediately and escalated cleanly via Unified Escalation Protocol. |
+| 4 | Right outcome with minor deviations from designed flow (extra turns, mild script drift, slightly delayed but correct decision). |
+| 3 | Partial: followed some of the designed flow but skipped or rushed steps; or the conversation cut off mid-flow without resolution despite bot being on the right path. |
+| 2 | Wrong behavior despite call being recoverable: escalated without attempting required in-scope steps (e.g., transferred without offering Smart Deflection, or without trying claim lookup); or attempted out-of-scope work it should have escalated. |
+| 1 | Critical mismatch with design: refused to escalate when explicitly required (caller stuck in loop); failed to recognize obvious out-of-scope intent and answered incorrectly; ended call when in-scope action was clearly possible; or violated CallerIdentification's "do not answer" guardrail. |
 
-**Research basis:** τ-bench database-state comparison; GA scenario test pass rate.
+**Worked examples:**
+- Customer: "Representative." Bot transfers immediately without trying Smart Deflection → **D1 = 2** (skipped designed deflection step).
+- Customer: "I want to extend my contract." Bot escalates via Unified Escalation Protocol → **D1 = 5** (correct out-of-scope recognition).
+- Customer: "What's my claim status?" Bot looks up via `getClaimsClaimNumber`, presents status, asks if anything else → **D1 = 5** (textbook Journey 2 / Step 2 execution).
+- Dealer asks bot to reopen a closed claim. Bot says "I can't reopen — you'll need a Claims Agent" then transfers → **D1 = 4** (correct out-of-scope recognition + escalation).
+- Customer wants tow. Bot collects identifier, gets to Step 1E, then transfers to Customer Care → **D1 = 2** (Journey 6A says SKIP identifier collection for roadside).
+- Customer's lookup fails twice; bot keeps re-asking instead of escalating per Step 1E → **D1 = 1** (failed to escalate when design requires it).
+
+**Research basis:** τ-bench database-state comparison; GA task-config adherence.
 
 ---
 
@@ -215,7 +231,7 @@ Designed for use by a human annotator or an LLM judge listening to / reading a t
 
 | Tier | Dimension | Default Weight |
 |---|---|---|
-| 1 — Outcomes | D1: Goal Completion | 20% |
+| 1 — Outcomes | D1: Design Adherence | 20% |
 | | D2: Information Accuracy | 10% |
 | | D3: Context Retention | 10% |
 | 2 — Flow | D4: Response Latency | 10% |

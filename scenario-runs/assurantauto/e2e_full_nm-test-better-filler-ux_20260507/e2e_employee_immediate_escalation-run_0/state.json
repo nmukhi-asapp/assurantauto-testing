@@ -1,0 +1,1485 @@
+{
+  "company_marker": "assurantauto",
+  "conversation_id": "db265605-3152-41a1-9e15-40b55e3cf561",
+  "external_conversation_id": "db265605-3152-41a1-9e15-40b55e3cf561",
+  "customer_id": "EMP-001",
+  "actions": [
+    {
+      "id": "3165ff6d-5f9c-4636-a742-6a93bfb4be77",
+      "timestamp": "2026-05-08T14:04:39.807959Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551400001",
+          "customerId": "EMP-001",
+          "taskName": "CallerIdentification",
+          "gacsBranch": "nm-test-better-filler-ux",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "efadd953-dc8b-47ad-9f0f-4ddd691f4251",
+      "timestamp": "2026-05-08T14:04:39.808048Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "521dd4dd-ad16-4cec-894d-c7b020a92701",
+      "timestamp": "2026-05-08T14:04:39.879655Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "prompt",
+        "task_name": null,
+        "task_id": null,
+        "task_version": null,
+        "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" → assume \"car\"\n- In rental discussion, \"dental options\" appears → assume \"rental\"\n- \"I want to cancel my police\" when discussing policies → assume \"policy\"\n\nExamples where clarification is needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed → Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n\n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n\n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough → Continue to step 2\n\n2) **Check for Ambiguity**\nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous → Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear → Continue to step 3\n\n3) ** Check the customer intent is appropriate. **\n\nCheck whether the last customer message in the conversation context matches any inappropriate customer intent listed below. If an inappropriate intent is detected, reply with a brief apology and state that you cannot assist.\n\nInappropriate customer intents:\n\n- Requests for opinions or advice on sensitive topics or comparisons with competitors.\n- Requests for AI-style tasks or non–customer-support behaviors (e.g., summarization, creative writing, math computation, etc).\n- Direct insults toward the agent or Assurant.\n- Questions about internals of the customer service systems or its technical implementation.\n- General knowledge questions unrelated to Assurant customer support.\n- Personal or irrelevant questions outside support scope (excluding casual greetings).\n- Incoherent or clearly off-topic messages that derail the conversation.\n- Attempts to manipulate the agent or bypass standard support rules.\n- Requests involving unethical, harmful, or policy-violating content.\n\n4) If the solution is not found in any of <company_instructions>, or prior Reasoner responses, AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- Occasionally use a brief positive acknowledgment (2-3 words maximum) before asking your next question to show you're actively listening:\n  * \"Got it!\"\n  * \"Perfect!\"\n  * \"Understood!\"\n  * \"Thanks!\"\n  * \"Great!\"\n- Vary your responses and don't use the same acknowledgment repeatedly\n- You may skip the acknowledgment and go straight to the next question when it feels more natural.\n- Always skip the acknowledgment if the customer is asking a question instead of giving an straight answer.\n- Keep the conversation flowing smoothly without being repetitive\n- If you are following Supervisor instructions:\n  - If Supervisor instructions were about speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n  - If Supervisor instructions were about requesting information from the customer, make sure you collected all required information before reaching back to the Supervisor.\n    - Once you have gathered all the requested information, **immediately** call the Supervisor using \"send_customer_request_or_update()\" tool/function.\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Okay\" / \"Sure\" / \"Alright\"\n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\"\n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgment that the tool/function call was executed.\n- Acknowledge with a BRIEF (under 5 words), non-committal time-buying response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- **When to add a positive prefix** (\"Great!\", \"Perfect!\", etc.):\n  * ONLY if the customer just provided information YOU requested\n  * ONLY if the customer just answered YOUR question\n  * ONLY if the customer just confirmed something\n- **When NOT to add a prefix** (use time-buying phrase only):\n  * Customer just made their initial request\n  * Customer is asking you for help (not responding to you)\n  * No information exchange has occurred yet\n- If you're unsure, default to NO prefix\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER make another call to send_customer_request_or_update() in this situation - the Supervisor is already processing your request\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer **WITHOUT any acknowledgment, greeting, or preamble not specified by the Supervisor instructions.**\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe supervisor is requesting specific information from the customer in order to better assist them:\n- DO NOT respond to the customer with **any acknowledgment, greeting, or preamble not specified by the Supervisor instructions** in this situation.\n- ALWAYS collect one piece of information from the customer at a time. That is, asking one question to the customer, waiting for their response, and proceeding with the next. This is important to avoid overwhelming the customer.\n- Collect all requested customer information before calling the supervisor back.\n- Additional instructions for collecting customer information may be defined in <company_instructions>.\n\n\n### Wrap-up Conversation Protocol\nStart the Wrap-up Conversation Protocol ONLY when:\n - all Supervisor instructions have been followed\n - you are not waiting for any Supervisor response\n - the customer intent has been resolved according to them\n - Whenever the customer says \"No\" to topic-related follow-up question. This does NOT mean they don't need anything else. This mean they don't need assistance with their current question but might have another question or other request.\n\n Do this Steps:\n\n1. You MUST get explicit confirmation from the customer that they don't have any other question or assistance with anything else to proceed to wrap-up the conversation.\n  - If you haven't already ask \"Is there any other question I can help you with?\" / \"Is there anything else I can assist with?\"\n    - Only if the customer says NO to your explicit question proceed to the next step (2).\n\n2. Call \"end_of_conversation()\" tool/function call to wrap up the conversation. A farewell message will be automatically delivered to the customer.\n    - Do NOT say anything to the customer when calling this function.\n    - No further steps from here — end of protocol.\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - **All conversations with the customer must be conducted in English.** You must speak, respond, and interact with customers exclusively in English throughout the entire conversation.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n  - Use the \"Speaking Style Output Formatting\" guidelines below convert numbers, currencies, acronyms, etc. to the correct format so that a Text-to-Speech system can read them aloud properly.\n\n### Speaking Style Output Formatting Guidelines\nUse the following guidelines to format your output text. Additional speaking style and formatting rules may be defined in <company_instructions>; if so, those rules take precedence over these general guidelines.\n\n#### Numbers\n- **Money/Currency**: Keep as-is e.g. \"$30\" → \"$30\" | \"$0.50\" → \"$0.50\" | \"$30,500\" → \"$30,500\"\n- **Numbers**: Keep as-is e.g. \"3.14\" → \"3.14\" | \"15%\" → \"15%\"\n- **Phone**: \"555-0123\" → \"five five five, zero one two three\"\n- **Dates**: \"12/25/2024\" → \"December twenty-fifth, twenty twenty-four\"\n- **Time**: \"3:30 PM\" → \"three thirty P M\"\n\n#### Acronyms & Abbreviations\n- **Spell out with hyphens**: \"CEO\" → \"C-E-O\" | \"API\" → \"A-P-I\" | \"HTML\" → \"H-T-M-L\"\n- **Exceptions** (pronounceable as words): NASA, RADAR, PIN → keep as-is\n- **Common**: \"Dr.\" → \"Doctor\" | \"Mr.\" → \"Mister\" | \"etc.\" → \"et cetera\" | \"vs.\" → \"versus\"\n\n#### Symbols & Units\n- **Symbols**: \"&\" → \"and\" | \"@\" → \"at\" | \"#\" → \"number\" | \"+\" → \"plus\" | \"/\" → \"forward slash\"\n- **Units**: \"5ft\" → \"five feet\" | \"10mph\" → \"ten miles per hour\" | \"25°C\" → \"twenty-five degrees Celsius\"\n- **Email**: \"john@example.com\" → \"john at example dot com\"\n- **URLs**: \"www.BWTyellow.org/find-message\" → \"w, w, w, dot, B, W, T, yellow, dot org, forward slash, find, hyphen, message\"\n\nIMPORTANT: All the speaking style rules apply on Supervisor (Reasoner) instructions as well.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you have already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n\nWhen the caller identifies themselves as a customer, dealer, repair facility, or employee \nin response to the identification question, immediately call the Supervisor using \nsend_customer_request_or_update() — do NOT attempt to handle it yourself.\n\nWhen you are calling the supervisor for routing the call for the very first time, tell the caller exactly this VERBATIM: \"Hmm, just give me a second while I look up your account\"\n\n\n\n</company_instructions>\n### Company Large Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "company_name": "<redacted>",
+          "current_datetime": "Day: Friday, Date: 2026-05-08, Time: 10:04AM EDT (-0400)",
+          "channel_type": "voice",
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "taskName": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "ac6777e7-2cf4-425d-9ef5-e6276d92449e",
+      "timestamp": "2026-05-08T14:04:39.879710Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "When the caller identifies themselves as a customer, dealer, repair facility, or employee \nin response to the identification question, immediately call the Supervisor using \nsend_customer_request_or_update() — do NOT attempt to handle it yourself.\n\nWhen you are calling the supervisor for routing the call for the very first time, tell the caller exactly this VERBATIM: \"Hmm, just give me a second while I look up your account\"",
+        "available_functions": [
+          "send_customer_request_or_update",
+          "end_of_conversation"
+        ],
+        "template_variables": {
+          "company_name": "<redacted>",
+          "current_datetime": "Day: Friday, Date: 2026-05-08, Time: 10:04AM EDT (-0400)",
+          "channel_type": "voice",
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "taskName": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "b5f30299-ef94-4d67-a9ee-3c931a60544a",
+      "timestamp": "2026-05-08T14:04:42.111363Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "input_variables",
+      "input_variables": {
+        "variables": {
+          "PhoneNumber": "5551400001",
+          "customerId": "EMP-001",
+          "gacsBranch": "nm-test-better-filler-ux",
+          "currentDatetime": "2026-02-20T00:00:00"
+        }
+      }
+    },
+    {
+      "id": "75f1c64c-5809-4754-b811-d7d16f23b366",
+      "timestamp": "2026-05-08T14:04:42.111453Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "CallerIdentification",
+      "task_metadata": {
+        "task_id": "unknown",
+        "task_version": "unknown",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "b56867af-07ec-4c42-8bda-3b9e3aef1a4f",
+      "timestamp": "2026-05-08T14:04:42.115621Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "decrypt_variables",
+        "parameters": {
+          "PhoneNumber": "5551400001"
+        },
+        "request_id": "1163e739-7682-4c6a-b11e-0717e1d7b029",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "ac179122-837a-4864-8353-dcc3f5eda78d",
+      "timestamp": "2026-05-08T14:04:42.116476Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "decrypt_variables",
+          "parameters": {
+            "PhoneNumber": "5551400001"
+          },
+          "request_id": "1163e739-7682-4c6a-b11e-0717e1d7b029",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "PhoneNumber": "5551400001"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "df82a95b-2e46-4459-ab72-7f227c2f7066",
+      "timestamp": "2026-05-08T14:04:42.116596Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "ClaimNumber_decrypted": null,
+        "ContractNumber_decrypted": null,
+        "PhoneNumber_decrypted": "5551400001",
+        "VIN_decrypted": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "527de2c2-908a-4dad-8ad7-a9e6cd3d3bce",
+      "timestamp": "2026-05-08T14:04:42.117548Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "get_contract_and_claims_data_ivr",
+        "parameters": {
+          "PhoneNumber": "5551400001"
+        },
+        "request_id": "95c6bb8d-4b2a-44e4-be98-fc3924e72e26",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "4712ff5d-1e3b-454e-a933-516d0c4c9cf5",
+      "timestamp": "2026-05-08T14:04:42.117896Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "get_contract_and_claims_data_ivr",
+          "parameters": {
+            "PhoneNumber": "5551400001"
+          },
+          "request_id": "95c6bb8d-4b2a-44e4-be98-fc3924e72e26",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "43840347-afa5-4022-86c2-5b54a8041786",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "success": false
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "055a3a65-013d-463f-ad23-dccb761129be",
+      "timestamp": "2026-05-08T14:04:42.117981Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "VIN_out": null,
+        "ContractNumber_out": null,
+        "ClaimNumber_out": null,
+        "success": null,
+        "roadsideAdministratorPhoneNumber": null,
+        "salesforceID": null
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "c0f3904c-703d-479e-83be-d7414dec80cd",
+      "timestamp": "2026-05-08T14:04:42.118349Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "is_repair_facility",
+        "parameters": {
+          "PhoneNumber": "5551400001"
+        },
+        "request_id": "c37933ef-8070-4ed2-bece-228fd1ce06fd",
+        "external_request_id": null,
+        "function_type": "api_connection",
+        "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+        "function_version": "0",
+        "is_confirmed": true,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "a95fa1c1-9d4a-472d-95ba-4cb4752312d6",
+      "timestamp": "2026-05-08T14:04:42.118624Z",
+      "source_system": "enter_task_function_processor",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "is_repair_facility",
+          "parameters": {
+            "PhoneNumber": "5551400001"
+          },
+          "request_id": "c37933ef-8070-4ed2-bece-228fd1ce06fd",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "50b5c0db-1f0e-453b-aae3-a334704e4604",
+          "function_version": "0",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "repairFacilityOrSellingDealer": false
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "d1f50a60-a2dc-4534-960c-9e4dea7c6d45",
+      "timestamp": "2026-05-08T14:04:42.140979Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\n\n\n   Thanks for calling Assurant! To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\n\n\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "29184483-2be5-4ef1-8e23-1d90db3d1a3a",
+      "timestamp": "2026-05-08T14:04:42.142025Z",
+      "source_system": "welcome_message",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"\n\n\n\n   Thanks for calling Assurant! To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\n\n\n\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "8aa8c74c-ed8a-4dec-892a-f9dfd3879b76",
+      "timestamp": "2026-05-08T14:04:42.142127Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "\n\n\n\n   Thanks for calling Assurant! To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\n\n\n",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "0e0fd4fb-4244-4a43-ac3f-24f8ec908605",
+      "timestamp": "2026-05-08T14:04:56.398127Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": ". Thanks for calling Assurant! To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 14256
+    },
+    {
+      "id": "aa3bffd7-b263-42de-bbc6-7f4750a49aba",
+      "timestamp": "2026-05-08T14:05:00.379177Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Assurant Employee.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "904b1f4e-ba6e-436a-9949-7c06371689bb",
+      "timestamp": "2026-05-08T14:05:01.400609Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Caller identified as an Assurant employee."
+        },
+        "request_id": "call_BlNbqfgLu9s9wfcha00wKv6K",
+        "external_request_id": "0a491643-d112-47a3-aac9-4a37688b6579",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "de9c070d-ceb6-4a11-83d8-3ab852aca382",
+      "timestamp": "2026-05-08T14:05:01.401168Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Caller identified as an Assurant employee.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "488e20c0-ccf9-46e3-9632-bdb7e995db90",
+      "timestamp": "2026-05-08T14:05:01.421908Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n**You MUST NOT not clarify exactly what the caller needs help with. Just identify the caller type and route the caller.**\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Immediately call set_customer_type with the appropriate caller type, then call change_task to change to the appropriate task following the instrutions that appear below. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n# Escalation Requests During Identification\nIf the caller requests to speak to a live agent or representative (also known as \"rep\") at any point during this task:\n- Do NOT attempt to escalate from this task. This task does not have escalation capability.\n- Complete caller identification and routing first using the available data (do not ask the caller why they are calling):\n  - If caller type can be determined from `is_repair_facility` / `get_contract_and_claims_data_ivr` results, call `set_customer_type(...)` and `change_task(...)` immediately.\n  - If caller type is still unknown (data not yet available or ambiguous), ask the caller their type, then route.\n- The destination task will handle the escalation immediately upon arrival.\n\n**CORRECT:**\n  Customer: \"Representative\"\n  → Determine caller type from available data or ask, then call `set_customer_type(...)` and `change_task(...)`. Do not attempt to escalate here.\n\n**WRONG:**\n  Customer: \"Representative\"\n  → Try to escalate or transfer from CallerIdentification. This task has no escalation function.\n\n# Step 1 — Routing Based on Caller Type\n\nYou MUST ask the caller: \"To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\"\n  - If the customer states that they are a repair facility then\n      Call `set_customer_type(\"repairFacility\")`\n      Call `change_task(task_name=\"RepairShopIssues\")`\n  - If the customer states that they are a dealership then\n      Call `set_customer_type(\"dealership\")`\n      Call `change_task(task_name=\"DealershipIssues\")`\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 2 — If Caller Does Not Understand the Options / Asks Something else\n- If the caller says their caller type is \"Service\"\n    Ask them whether they are a repair facility or calling from a dealership\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_customer_type(\"contractHolder\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller's type is already determined, route immediately — do not respond to their question. If the caller's type is not yet determined, ask them for their caller type.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "set_customer_type",
+          "decrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": null,
+            "ContractNumber_out": null,
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": null,
+            "salesforceID": null
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "ccfcf45d-014f-4bf0-ae2c-1aea8b2b5dba",
+      "timestamp": "2026-05-08T14:05:02.338000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Hmm, just give me a second while I look up your account.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "c813e7bf-02ce-47e2-ae7d-dd2bfbe7fec6",
+      "timestamp": "2026-05-08T14:05:04.272358Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5001,
+        "num_output_tokens": 70,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_1e248a4bffb849deb8f7b6cfa7b3c404",
+        "llm_id": "litellm",
+        "cost": 0.004418,
+        "call_duration": 2506,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "39a525b5-0e53-4e3c-a4a0-8d80226cb248",
+      "timestamp": "2026-05-08T14:05:04.273006Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(2.1) The caller has been identified as an Assurant employee, which matches one of the caller types in the task instructions. (2.2) The next action requires using the set_customer_type and change_task APIs to route the caller to the correct task."
+    },
+    {
+      "id": "bd4743be-0835-4296-8844-6aa8622cfaee",
+      "timestamp": "2026-05-08T14:05:04.274687Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "set_customer_type",
+        "parameters": {
+          "user_type": "employee"
+        },
+        "request_id": "300836e0-0883-4b14-968b-62e159c3f270",
+        "external_request_id": null,
+        "function_type": "set_context",
+        "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "6263c04f-9db6-4dba-82e1-4c276849995a",
+      "timestamp": "2026-05-08T14:05:04.277582Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "set_customer_type",
+          "parameters": {
+            "user_type": "employee"
+          },
+          "request_id": "300836e0-0883-4b14-968b-62e159c3f270",
+          "external_request_id": null,
+          "function_type": "set_context",
+          "function_id": "226e532e-6c79-421e-a12b-3a7f78caeb4a",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "customer_type": {
+            "value": "employee",
+            "description": "The customer type for this call"
+          }
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "81fe4a21-6316-4df9-baa7-b14921f7429a",
+      "timestamp": "2026-05-08T14:05:04.277656Z",
+      "source_system": "function_caller_set_context",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "customer_type": "employee"
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "25cc3a7e-7675-429c-a653-87fa21a2f099",
+      "timestamp": "2026-05-08T14:05:04.293652Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "CallerIdentification",
+        "task_id": "79d8fd5e-d040-41a3-92c2-3bcd70706588",
+        "task_version": "0",
+        "content": "# Objective\nIdentify the type of caller and immediately route them to the correct task. Do not attempt to\nanswer any customer questions in this task or ask the customer why they are calling.\nYour only job is to identify who they are, and route.\n\n# CRITICAL GUARDRAIL — Read Before Anything Else\nYou must NEVER answer any customer question in this task — not about claims, contracts, coverage, status, or any other topic.\nEven if the data is already available in the conversation, do NOT use it to answer. Route the caller first.\n**You MUST NOT not clarify exactly what the caller needs help with. Just identify the caller type and route the caller.**\n\nCustomer: \"What is the status of my claim?\"\n  - CORRECT: Immediately call set_customer_type with the appropriate caller type, then call change_task to change to the appropriate task following the instrutions that appear below. Do not answer the claim question.\n  - WRONG: Read the claim status from the available data and tell the customer. This task does not answer questions — it only routes.\n\n# Escalation Requests During Identification\nIf the caller requests to speak to a live agent or representative (also known as \"rep\") at any point during this task:\n- Do NOT attempt to escalate from this task. This task does not have escalation capability.\n- Complete caller identification and routing first using the available data (do not ask the caller why they are calling):\n  - If caller type can be determined from `is_repair_facility` / `get_contract_and_claims_data_ivr` results, call `set_customer_type(...)` and `change_task(...)` immediately.\n  - If caller type is still unknown (data not yet available or ambiguous), ask the caller their type, then route.\n- The destination task will handle the escalation immediately upon arrival.\n\n**CORRECT:**\n  Customer: \"Representative\"\n  → Determine caller type from available data or ask, then call `set_customer_type(...)` and `change_task(...)`. Do not attempt to escalate here.\n\n**WRONG:**\n  Customer: \"Representative\"\n  → Try to escalate or transfer from CallerIdentification. This task has no escalation function.\n\n# Step 1 — Routing Based on Caller Type\n\nYou MUST ask the caller: \"To best serve you, could you first tell me if you are a customer calling about your own contract, a dealer selling Assurant products, an independent professional repair facility, or an Assurant employee?\"\n  - If the customer states that they are a repair facility then\n      Call `set_customer_type(\"repairFacility\")`\n      Call `change_task(task_name=\"RepairShopIssues\")`\n  - If the customer states that they are a dealership then\n      Call `set_customer_type(\"dealership\")`\n      Call `change_task(task_name=\"DealershipIssues\")`\n  - If the customer states that they are an employee\n      Call `set_customer_type(\"employee\")`\n      Call `change_task(task_name=\"EmployeeIssues\")`\n  - If the customer states that they are a contract holder\n      Call `set_customer_type(\"contractHolder\")`\n      Call `change_task(task_name=\"ContractHolderIssues\")`\n\n# Step 2 — If Caller Does Not Understand the Options / Asks Something else\n- If the caller says their caller type is \"Service\"\n    Ask them whether they are a repair facility or calling from a dealership\n- If after one follow-up the caller still cannot identify their type, OR says something else treat them as Other and\ncall `set_customer_type(\"contractHolder\")` followed by `change_task(task_name=\"ContractHolderIssues\")`\n\n\n# Important Rules\n- Never answer questions about contracts, claims, coverage, or any other topic in this task.\n  If the caller's type is already determined, route immediately — do not respond to their question. If the caller's type is not yet determined, ask them for their caller type.\n- Never attempt to guess or construct a task name. Only use the exact task names specified above.\n- Do not confirm or summarise the routing to the caller. Just route.",
+        "available_functions": [
+          "is_repair_facility",
+          "get_contract_and_claims_data_ivr",
+          "set_customer_type",
+          "decrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": null,
+            "ContractNumber_out": null,
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": null,
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "CallerIdentification"
+        }
+      }
+    },
+    {
+      "id": "641f22a6-1912-4375-ab0b-e581771d8755",
+      "timestamp": "2026-05-08T14:05:05.357000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Hmm, just give me a second while I look up your account.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 3019
+    },
+    {
+      "id": "e03eac83-d291-4ee2-a91f-c4ceeac6a78a",
+      "timestamp": "2026-05-08T14:05:05.491414Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5155,
+        "num_output_tokens": 61,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_40637ad903a3461da8a90182bb9cb111",
+        "llm_id": "litellm",
+        "cost": 0.004653999999999999,
+        "call_duration": 1178,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "61298254-1c46-43db-ad8e-acf6477f3b5b",
+      "timestamp": "2026-05-08T14:05:05.492208Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(3.5) The set_customer_type API call was successful and the caller is identified as an employee. (4.1) My next action is to route the caller to the EmployeeIssues task using the change_task API."
+    },
+    {
+      "id": "337965ea-8545-4ca7-a664-9ff0e7c93bb4",
+      "timestamp": "2026-05-08T14:05:05.493530Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "change_task",
+        "parameters": {
+          "task_name": "EmployeeIssues"
+        },
+        "request_id": "e2e8608e-89c8-4b91-99a6-c3122e032476",
+        "external_request_id": null,
+        "function_type": "system",
+        "function_id": "system_fn__change_task",
+        "function_version": "1",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "50b9739f-4af1-4fce-b879-feb0550ae665",
+      "timestamp": "2026-05-08T14:05:05.493916Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "change_task",
+          "parameters": {
+            "task_name": "EmployeeIssues"
+          },
+          "request_id": "e2e8608e-89c8-4b91-99a6-c3122e032476",
+          "external_request_id": null,
+          "function_type": "system",
+          "function_id": "system_fn__change_task",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {
+          "answer": "Switching to task: EmployeeIssues"
+        },
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "0c546ec1-5fd7-4429-930e-778c88af1055",
+      "timestamp": "2026-05-08T14:05:05.493985Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "exit_task",
+      "task_name": "EmployeeIssues",
+      "task_metadata": {
+        "task_id": "121bcdfc-7b32-4827-babd-5b86192a9002",
+        "task_version": "0",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "ad42d3e7-75f5-49d9-9d28-2f6a6ddcbefe",
+      "timestamp": "2026-05-08T14:05:05.494019Z",
+      "source_system": "function_caller_change_task",
+      "trial_mode_id": null,
+      "type": "enter_task",
+      "task_name": "EmployeeIssues",
+      "task_metadata": {
+        "task_id": "121bcdfc-7b32-4827-babd-5b86192a9002",
+        "task_version": "0",
+        "enable_core_prompt_override": false
+      }
+    },
+    {
+      "id": "fce4964f-7519-43f5-ab14-f28892747d3f",
+      "timestamp": "2026-05-08T14:05:05.523032Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "EmployeeIssues",
+        "task_id": "121bcdfc-7b32-4827-babd-5b86192a9002",
+        "task_version": "0",
+        "content": "\n\n\n\n\n\nImmediately transfer the caller to a human agent by calling `escalate_to_agent_from_ivr` following the **Unified Escalation Protocol**\n\n## Check is queue is open\n\n\n\n\n\n\nYou will need to call the API `get_hoop_message`. set **ALL** of the following arguments using these rules:\n- ** callerType ** set is as nonContractHolder\n- ** intent ** set based on the caller's primary reason for calling:\n`\n  - Any reason for calling → `'ALLOTHER_QUESTIONS'`\n`\n  - Do not set `GAIntent` to any value other than the ones listed above.\n- ** isCSOpen ** set it to `false`\n- ** isClaimsOpen ** set it to `false`\n- ** isPaymentOpen ** set it to `false`\n- ** isPremOpen ** set it to `false`\n- ** isRVOpen ** set it to `false`\n\n\n**`get_hoop_message` has not been called yet. Call it now with the arguments above before proceeding.**\n",
+        "available_functions": [
+          "escalate_to_agent_from_ivr",
+          "encrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": null,
+            "ContractNumber_out": null,
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": null,
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>"
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "EmployeeIssues"
+        }
+      }
+    },
+    {
+      "id": "bfe85864-070d-4305-8d0c-589c7962c8a6",
+      "timestamp": "2026-05-08T14:05:06.956521Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5363,
+        "num_output_tokens": 78,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_73335b05225044a2aa7644c3f15aea14",
+        "llm_id": "litellm",
+        "cost": 0.005205999999999999,
+        "call_duration": 1413,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "8eb8b059-11d8-4c1d-ae0c-53747d7be08f",
+      "timestamp": "2026-05-08T14:05:06.959189Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(2.1) The caller is an Assurant employee and has been routed to the EmployeeIssues task, but there are no specific task instructions for EmployeeIssues. (6.1) I am unsure if there is a better task to handle the employee's request, so I should use select_task() to check for a better match."
+    },
+    {
+      "id": "f8e20bcd-18de-4f0b-a685-39d1d5d0e39e",
+      "timestamp": "2026-05-08T14:05:06.960335Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "select_task",
+        "parameters": {},
+        "request_id": "8a5dd473-9c7a-46e4-a4b0-79a2d9e024bb",
+        "external_request_id": null,
+        "function_type": "system",
+        "function_id": "system_fn__select_task",
+        "function_version": "1",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "e32dfe22-86e0-4fec-8434-30b12b9d2b02",
+      "timestamp": "2026-05-08T14:05:11.988276Z",
+      "source_system": "function_caller_select_task",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "bedrock-claude-4-sonnet",
+        "num_input_tokens": 594,
+        "num_output_tokens": 50,
+        "prompt_type": "task_selector",
+        "request_id": "",
+        "llm_id": "litellm",
+        "cost": 0.002532,
+        "call_duration": 5019,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "a895668d-81c4-4c73-84d2-b48068b9078b",
+      "timestamp": "2026-05-08T14:05:11.988665Z",
+      "source_system": "function_caller_select_task",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "select_task",
+          "parameters": {},
+          "request_id": "8a5dd473-9c7a-46e4-a4b0-79a2d9e024bb",
+          "external_request_id": null,
+          "function_type": "system",
+          "function_id": "system_fn__select_task",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": false,
+        "response": null,
+        "last_action_id": null,
+        "error": "No task to switch to"
+      }
+    },
+    {
+      "id": "3b9d6696-a296-49ba-8b91-0c578787a71c",
+      "timestamp": "2026-05-08T14:05:12.014656Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "EmployeeIssues",
+        "task_id": "121bcdfc-7b32-4827-babd-5b86192a9002",
+        "task_version": "0",
+        "content": "\n\n\n\n\n\nImmediately transfer the caller to a human agent by calling `escalate_to_agent_from_ivr` following the **Unified Escalation Protocol**\n\n## Check is queue is open\n\n\n\n\n\n\nYou will need to call the API `get_hoop_message`. set **ALL** of the following arguments using these rules:\n- ** callerType ** set is as nonContractHolder\n- ** intent ** set based on the caller's primary reason for calling:\n`\n  - Any reason for calling → `'ALLOTHER_QUESTIONS'`\n`\n  - Do not set `GAIntent` to any value other than the ones listed above.\n- ** isCSOpen ** set it to `false`\n- ** isClaimsOpen ** set it to `false`\n- ** isPaymentOpen ** set it to `false`\n- ** isPremOpen ** set it to `false`\n- ** isRVOpen ** set it to `false`\n\n\n**`get_hoop_message` has not been called yet. Call it now with the arguments above before proceeding.**\n",
+        "available_functions": [
+          "escalate_to_agent_from_ivr",
+          "encrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": null,
+            "ContractNumber_out": null,
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": null,
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "select_task": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "EmployeeIssues"
+        }
+      }
+    },
+    {
+      "id": "e3f4bed8-8706-449b-9a34-65d93ce246ba",
+      "timestamp": "2026-05-08T14:05:14.050068Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5498,
+        "num_output_tokens": 118,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_81f0a5da07b541778294847ca74c7ed3",
+        "llm_id": "litellm",
+        "cost": 0.0040680000000000004,
+        "call_duration": 2014,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "59d68364-3675-4cc7-9e01-4720c03dd9b0",
+      "timestamp": "2026-05-08T14:05:14.053544Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(6.3) There are no task instructions or APIs available to assist the employee caller further, and select_task() did not find a better task. (6.7) I need to instruct the Talker to apologize and ask if there is anything else the caller needs help with."
+    },
+    {
+      "id": "52c7262c-a6b4-4b1d-bf0f-8be7ec6e3688",
+      "timestamp": "2026-05-08T14:05:14.053545Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Apologize to the caller and ask if there is anything else they need assistance with today. If they have another request, get the details and call me back with their new question or concern. If not, thank them for calling and wish them a good day.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "fff2641b-2d7f-4975-a51e-d25f0b10195f",
+      "timestamp": "2026-05-08T14:05:14.054851Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "{\n    \"reasoner_response\": \"Apologize to the caller and ask if there is anything else they need assistance with today. If they have another request, get the details and call me back with their new question or concern. If not, thank them for calling and wish them a good day.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "42be10bf-f151-41f1-8ed5-827df6ea9391",
+      "timestamp": "2026-05-08T14:05:14.055125Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Caller identified as an Assurant employee."
+          },
+          "request_id": "call_BlNbqfgLu9s9wfcha00wKv6K",
+          "external_request_id": "0a491643-d112-47a3-aac9-4a37688b6579",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Apologize to the caller and ask if there is anything else they need assistance with today. If they have another request, get the details and call me back with their new question or concern. If not, thank them for calling and wish them a good day.",
+        "last_action_id": "52c7262c-a6b4-4b1d-bf0f-8be7ec6e3688",
+        "error": null
+      }
+    },
+    {
+      "id": "4b547e22-2065-4c45-a8ec-c4678d63fd92",
+      "timestamp": "2026-05-08T14:05:15.160000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Is there anything else you need assistance with today?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "83af4f63-1936-4926-b610-28e289f96edf",
+      "timestamp": "2026-05-08T14:05:17.854000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Is there anything else you need assistance with today?",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 2694
+    },
+    {
+      "id": "5596e213-ed29-48eb-a6b4-cf5f5c8b6ac7",
+      "timestamp": "2026-05-08T14:05:20.801425Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Yeah, I'm calling about a customer claim I'm handling internally. Need to speak with someone about it.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "eb22e6d4-7974-4322-91c3-ff4b9bb9c15e",
+      "timestamp": "2026-05-08T14:05:22.013812Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "send_customer_request_or_update",
+        "parameters": {
+          "customer_request_or_update": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim."
+        },
+        "request_id": "call_I50mEOU9o3feAG4P8yplHBj0",
+        "external_request_id": "0b979bf6-b8f7-4a27-adfe-654cccf371d8",
+        "function_type": "unknown",
+        "function_id": "unknown",
+        "function_version": "unknown",
+        "is_confirmed": null,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "8a9e2a03-8619-4c5b-a3e9-47dbce49015b",
+      "timestamp": "2026-05-08T14:05:22.014373Z",
+      "source_system": "customer",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+        "sender": "customer",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "ffc69068-b931-4467-9afb-0042d6b62b9c",
+      "timestamp": "2026-05-08T14:05:22.044413Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "instructions",
+      "instructions_metadata": {
+        "instruction_type": "task",
+        "task_name": "EmployeeIssues",
+        "task_id": "121bcdfc-7b32-4827-babd-5b86192a9002",
+        "task_version": "0",
+        "content": "\n\n\n\n\n\nImmediately transfer the caller to a human agent by calling `escalate_to_agent_from_ivr` following the **Unified Escalation Protocol**\n\n## Check is queue is open\n\n\n\n\n\n\nYou will need to call the API `get_hoop_message`. set **ALL** of the following arguments using these rules:\n- ** callerType ** set is as nonContractHolder\n- ** intent ** set based on the caller's primary reason for calling:\n`\n  - Any reason for calling → `'ALLOTHER_QUESTIONS'`\n`\n  - Do not set `GAIntent` to any value other than the ones listed above.\n- ** isCSOpen ** set it to `false`\n- ** isClaimsOpen ** set it to `false`\n- ** isPaymentOpen ** set it to `false`\n- ** isPremOpen ** set it to `false`\n- ** isRVOpen ** set it to `false`\n\n\n**`get_hoop_message` has not been called yet. Call it now with the arguments above before proceeding.**\n",
+        "available_functions": [
+          "escalate_to_agent_from_ivr",
+          "encrypt_variables",
+          "change_task",
+          "select_task"
+        ],
+        "template_variables": {
+          "vars": {
+            "ClaimNumber_decrypted": null,
+            "ContractNumber_decrypted": null,
+            "PhoneNumber_decrypted": "<redacted>",
+            "VIN_decrypted": null,
+            "VIN_out": null,
+            "ContractNumber_out": null,
+            "ClaimNumber_out": null,
+            "success": null,
+            "roadsideAdministratorPhoneNumber": null,
+            "salesforceID": null,
+            "customer_type": "<redacted>"
+          },
+          "input_vars": {
+            "PhoneNumber": "<redacted>",
+            "customerId": "<redacted>",
+            "gacsBranch": "<redacted>",
+            "currentDatetime": "<redacted>"
+          },
+          "function_responses": {
+            "decrypt_variables": "<redacted>",
+            "get_contract_and_claims_data_ivr": "<redacted>",
+            "is_repair_facility": "<redacted>",
+            "set_customer_type": "<redacted>",
+            "change_task": "<redacted>",
+            "select_task": null
+          },
+          "current_datetime": "Day: Thursday, Date: 2026-02-19, Time: 07:00PM EST (-0500)",
+          "channel_type": "voice",
+          "queue_status": {
+            "general": true
+          },
+          "task_name": "EmployeeIssues"
+        }
+      }
+    },
+    {
+      "id": "f8a96847-40b9-4165-8e85-a23c41c24fd4",
+      "timestamp": "2026-05-08T14:05:22.835000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "One moment please.",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "0355ee14-10b1-47cc-9b93-b7cc73063ded",
+      "timestamp": "2026-05-08T14:05:24.042000Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "One moment please. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 1207
+    },
+    {
+      "id": "56351b3c-2b80-4543-83e3-f54dbe3e5b8c",
+      "timestamp": "2026-05-08T14:05:27.578431Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "llm_request",
+      "llm_request": {
+        "model": "openai-gpt-4.1",
+        "num_input_tokens": 5647,
+        "num_output_tokens": 277,
+        "prompt_type": "task_reasoner",
+        "request_id": "req_72b7823e9cdb4eeb80914011230ba1b9",
+        "llm_id": "litellm",
+        "cost": 0.00583,
+        "call_duration": 5512,
+        "prompt_input": null,
+        "llm_response_text": null
+      }
+    },
+    {
+      "id": "655ccb20-00ae-4464-be62-5e313236dce1",
+      "timestamp": "2026-05-08T14:05:27.579041Z",
+      "source_system": "task_bot",
+      "trial_mode_id": null,
+      "type": "thought",
+      "thought": "(1.1) The caller is an Assurant employee requesting to speak with someone regarding a customer claim they are handling internally. (1.2) The goal is clear: they want to be connected to an agent for claim-related assistance. (2.1) The available task instructions specify to escalate to a human agent using escalate_to_agent_from_ivr for EmployeeIssues. (2.2) The next action requires using the escalate_to_agent_from_ivr API to transfer the call."
+    },
+    {
+      "id": "0c2e2535-3740-46fc-8fcd-ad85504be0d9",
+      "timestamp": "2026-05-08T14:05:27.581533Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Hold on while I transfer you to an Agent.",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "b031e220-5147-4f9d-9c37-f50cb78ecb56",
+      "timestamp": "2026-05-08T14:05:27.582710Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Say: \"Hold on while I transfer you to an Agent.\"",
+        "sender": "system",
+        "is_synthetic_interim_message": false
+      }
+    },
+    {
+      "id": "71f8bd75-ce18-4ea9-a47f-6154bbe88add",
+      "timestamp": "2026-05-08T14:05:27.582884Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message",
+      "message": {
+        "text": "Hold on while I transfer you to an Agent.",
+        "sender": "bot",
+        "is_synthetic_interim_message": true
+      }
+    },
+    {
+      "id": "9c207950-a203-4662-b7f3-d5e29d34ba39",
+      "timestamp": "2026-05-08T14:05:27.583081Z",
+      "source_system": "voice_digital_ga",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim."
+          },
+          "request_id": "call_I50mEOU9o3feAG4P8yplHBj0",
+          "external_request_id": "0b979bf6-b8f7-4a27-adfe-654cccf371d8",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": null,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": "Hold on while I transfer you to an Agent.",
+        "last_action_id": "0c2e2535-3740-46fc-8fcd-ad85504be0d9",
+        "error": null
+      }
+    },
+    {
+      "id": "c149270e-5cfb-42fb-8bc4-c82c10bc0d27",
+      "timestamp": "2026-05-08T14:05:27.583313Z",
+      "source_system": "function_caller",
+      "trial_mode_id": null,
+      "type": "function_request",
+      "function_request": {
+        "function_name": "escalate_to_agent_from_ivr",
+        "parameters": {
+          "GAIntent": "ALLOTHER_QUESTIONS",
+          "contractFoundBy": "PhoneNumber",
+          "Identified": false,
+          "GACallerType": "Employee",
+          "TransferReason": "CallerRequestedAgent",
+          "VIN": "",
+          "ClaimNumber": "",
+          "ContractNumber": "",
+          "ClaimStatus": "Other",
+          "roadsideAdministratorPhoneNumber": "",
+          "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+          "escalation_agent_verbiage": "an Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "",
+          "PhoneNumber": "5551400001",
+          "TFN_DNIS": "",
+          "Timestamp": "2026-02-19T19:00:00-05:00",
+          "productType": "",
+          "salesforceID": ""
+        },
+        "request_id": "6053c6df-7281-4a8a-bb44-e109ada5ee04",
+        "external_request_id": null,
+        "function_type": "system_transfer",
+        "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+        "function_version": "0",
+        "is_confirmed": false,
+        "trial_mode_metadata": null
+      }
+    },
+    {
+      "id": "5d269dff-b874-4835-8851-89f9c84cd7f3",
+      "timestamp": "2026-05-08T14:05:27.605496Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "function_response",
+      "function_response": {
+        "request": {
+          "function_name": "escalate_to_agent_from_ivr",
+          "parameters": {
+            "GAIntent": "ALLOTHER_QUESTIONS",
+            "contractFoundBy": "PhoneNumber",
+            "Identified": false,
+            "GACallerType": "Employee",
+            "TransferReason": "CallerRequestedAgent",
+            "VIN": "",
+            "ClaimNumber": "",
+            "ContractNumber": "",
+            "ClaimStatus": "Other",
+            "roadsideAdministratorPhoneNumber": "",
+            "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+            "escalation_agent_verbiage": "an Agent",
+            "caseNumber": "",
+            "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+            "CiscoCallId": "",
+            "IVR_Context": "",
+            "Language": "",
+            "MenuCallType": "",
+            "PhoneNumber": "5551400001",
+            "TFN_DNIS": "",
+            "Timestamp": "2026-02-19T19:00:00-05:00",
+            "productType": "",
+            "salesforceID": ""
+          },
+          "request_id": "6053c6df-7281-4a8a-bb44-e109ada5ee04",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "success": true,
+        "response": {},
+        "last_action_id": null,
+        "error": null
+      }
+    },
+    {
+      "id": "a7a33116-ec56-4e43-9803-9fc42f1b17e6",
+      "timestamp": "2026-05-08T14:05:27.605566Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "set_variables",
+      "reference_variables": {
+        "GAIntent": "ALLOTHER_QUESTIONS",
+        "contractFoundBy": "PhoneNumber",
+        "Identified": false,
+        "GACallerType": "Employee",
+        "TransferReason": "CallerRequestedAgent",
+        "VIN": "",
+        "ClaimNumber": "",
+        "ContractNumber": "",
+        "ClaimStatus": "Other",
+        "roadsideAdministratorPhoneNumber": "",
+        "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+        "escalation_agent_verbiage": "an Agent",
+        "caseNumber": "",
+        "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+        "CiscoCallId": "",
+        "IVR_Context": "",
+        "Language": "",
+        "MenuCallType": "",
+        "PhoneNumber": "5551400001",
+        "TFN_DNIS": "",
+        "Timestamp": "2026-02-19T19:00:00-05:00",
+        "productType": "",
+        "salesforceID": ""
+      },
+      "sensitive_variables": []
+    },
+    {
+      "id": "f69fefb7-29e2-49fb-9094-171e8aaa04e0",
+      "timestamp": "2026-05-08T14:05:27.605682Z",
+      "source_system": "function_caller_system_transfer",
+      "trial_mode_id": null,
+      "type": "system_transfer",
+      "system_transfer_metadata": {
+        "transfer_function_request": {
+          "function_name": "escalate_to_agent_from_ivr",
+          "parameters": {
+            "GAIntent": "ALLOTHER_QUESTIONS",
+            "contractFoundBy": "PhoneNumber",
+            "Identified": false,
+            "GACallerType": "Employee",
+            "TransferReason": "CallerRequestedAgent",
+            "VIN": "",
+            "ClaimNumber": "",
+            "ContractNumber": "",
+            "ClaimStatus": "Other",
+            "roadsideAdministratorPhoneNumber": "",
+            "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+            "escalation_agent_verbiage": "an Agent",
+            "caseNumber": "",
+            "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+            "CiscoCallId": "",
+            "IVR_Context": "",
+            "Language": "",
+            "MenuCallType": "",
+            "PhoneNumber": "5551400001",
+            "TFN_DNIS": "",
+            "Timestamp": "2026-02-19T19:00:00-05:00",
+            "productType": "",
+            "salesforceID": ""
+          },
+          "request_id": "6053c6df-7281-4a8a-bb44-e109ada5ee04",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d",
+          "function_version": "0",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        },
+        "reference_variables": {
+          "ClaimNumber_decrypted": null,
+          "ContractNumber_decrypted": null,
+          "PhoneNumber_decrypted": "5551400001",
+          "VIN_decrypted": null,
+          "VIN_out": null,
+          "ContractNumber_out": null,
+          "ClaimNumber_out": null,
+          "success": null,
+          "roadsideAdministratorPhoneNumber": "",
+          "salesforceID": "",
+          "customer_type": "employee",
+          "GAIntent": "ALLOTHER_QUESTIONS",
+          "contractFoundBy": "PhoneNumber",
+          "Identified": false,
+          "GACallerType": "Employee",
+          "TransferReason": "CallerRequestedAgent",
+          "VIN": "",
+          "ClaimNumber": "",
+          "ContractNumber": "",
+          "ClaimStatus": "Other",
+          "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+          "escalation_agent_verbiage": "an Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "",
+          "PhoneNumber": "5551400001",
+          "TFN_DNIS": "",
+          "Timestamp": "2026-02-19T19:00:00-05:00",
+          "productType": ""
+        },
+        "transfer_variables": {
+          "GAIntent": "ALLOTHER_QUESTIONS",
+          "contractFoundBy": "PhoneNumber",
+          "Identified": false,
+          "GACallerType": "Employee",
+          "TransferReason": "CallerRequestedAgent",
+          "VIN": "",
+          "ClaimNumber": "",
+          "ContractNumber": "",
+          "ClaimStatus": "Other",
+          "roadsideAdministratorPhoneNumber": "",
+          "Question": "Assurant employee calling about a customer claim they are handling internally. Requesting to speak with someone regarding the claim.",
+          "escalation_agent_verbiage": "an Agent",
+          "caseNumber": "",
+          "escalation_reason_description": "Employee needs to discuss a customer claim with an agent.",
+          "CiscoCallId": "",
+          "IVR_Context": "",
+          "Language": "",
+          "MenuCallType": "",
+          "PhoneNumber": "5551400001",
+          "TFN_DNIS": "",
+          "Timestamp": "2026-02-19T19:00:00-05:00",
+          "productType": "",
+          "salesforceID": ""
+        },
+        "sensitive_variables": [],
+        "is_escalation": true
+      }
+    },
+    {
+      "id": "c845edba-b9c6-46c3-ae80-0e48d9b90b80",
+      "timestamp": "2026-05-08T14:05:29.858884Z",
+      "source_system": "voice_assistant",
+      "trial_mode_id": null,
+      "type": "message_audio_completed",
+      "message": {
+        "text": "Hold on while I transfer you to an Agent. ",
+        "sender": "bot",
+        "is_synthetic_interim_message": false
+      },
+      "duration_ms": 2276
+    },
+    {
+      "id": "d6642a55-8276-43b6-a6af-e0bcef4165d8",
+      "timestamp": "2026-05-08T14:05:30.633523Z",
+      "source_system": "voice_orchestrator",
+      "trial_mode_id": null,
+      "type": "disconnect",
+      "disconnect_metadata": {
+        "reason": "completed",
+        "message": "DigitalGenAgent said: 'Transfer to system'",
+        "conversation_duration_ms": 48525
+      }
+    }
+  ],
+  "current_datetime": null,
+  "generative_agent_version": null,
+  "conversation_type": "voice"
+}

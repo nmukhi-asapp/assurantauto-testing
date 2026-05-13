@@ -200,6 +200,42 @@ Analyzes conversation files in `fetched_conversations/` or a path you specify. D
 
 ---
 
+## Batch Quality Analysis (rubric-based)
+
+```
+/batch-analyze-conversations <directory> [--sample N] [--dimensions D1,D3,D12] [--rubric path/to/rubric.md]
+```
+
+Scores a directory of locally downloaded conversation JSONs against the **ASAPP Voice Quality Rubric** (dimensions D1–D12) and produces an aggregate Markdown report.
+
+**Inputs:**
+- `directory` (required): folder containing conversation JSONs in the form `platform::COMPANY::CONV_ID::*.json`. Typical sources:
+  - `fetched_conversations/` (from `/inspect-conversation` or `scripts/fetch_conversation.py`)
+  - Output of `mcp__data-sampling__fetch_random_conversations`
+- `--sample N` (optional): cap the number of conversations scored. Use `20`–`30` for a quick read; omit for the full set.
+- `--dimensions` (optional): comma-separated subset (e.g. `D1,D3,D12`) to focus on. Default scores every dimension assessable from a transcript.
+- `--rubric` (optional): path to a rubric Markdown file. Defaults to `voice_quality_rubric.md` in the repo root — that file is the canonical AssurantAuto rubric and is used automatically.
+
+**Example:**
+
+```
+/batch-analyze-conversations fetched_conversations --sample 25
+```
+
+**Output:**
+A Markdown report saved as `<directory>_quality_report_<YYYY-MM-DD>.md` next to the input directory, containing:
+1. Summary table (mean score, % below 3.0, safety flags, transfers, abandonments)
+2. Dimension heatmap sorted by worst-performing dimension
+3. Flagged conversations (safety violations, hallucinations, abandonments, score < 2.5)
+4. Three representative transcripts (best, worst, most unusual)
+
+**Notes:**
+- D7 (Speech Naturalness) and D11 (Acoustic Robustness) require audio and are marked N/A; their weights are redistributed across scored dimensions.
+- D4 (latency) and D9 (verbosity) are computed directly from the JSON; the rest are scored by an LLM, one conversation at a time.
+- Conversations without any `message` actions are marked "transcript unavailable."
+
+---
+
 ## Iterative Improvement (sim-and-improve)
 
 ```

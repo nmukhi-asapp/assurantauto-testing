@@ -18,10 +18,15 @@ evaluations:
   - Agent calls get_contract_and_claims_data_ivr before answering the customer's substantive questions
 - rules:
   - Agent recognizes the urgent roadside assistance need
-- rules:
-  - Agent provides the roadside administrator phone number (1-866-603-5420) to the customer before or alongside escalating
-- rules:
-  - Agent does NOT simply transfer without providing the roadside phone number
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent passed to escalate_to_agent_from_ivr is 'ROADSIDE_ASSISTANCE'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The roadsideAdministratorPhoneNumber parameter passed to escalate_to_agent_from_ivr
+    is set to the roadside administrator phone number from the contract data (1-866-603-5420)
 - rules:
   - Agent escalates using escalate_to_agent_from_ivr or escalate_to_live_agent for immediate roadside assistance, OR informs
     the customer that agents are not currently available due to business hours
@@ -458,6 +463,33 @@ mock_user:
     - params: {}
       response:
         PhoneNumber: '5551000016'
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    send_sms_to_phone:
+    - params:
+        PhoneNumber_decrypted: '*'
+        customer_type: '*'
+      response:
+        success: true
+    - params: {}
+      response:
+        success: true
 name: null
 seed: null
 settings:

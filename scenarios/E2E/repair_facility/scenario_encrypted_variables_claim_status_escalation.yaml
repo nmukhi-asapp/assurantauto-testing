@@ -26,11 +26,12 @@ evaluations:
 - rules:
   - Agent routes to RepairShopIssues after the caller identifies as a repair facility
 - rules:
-  - Agent looks up the claim using claim number 37020301A and provides the status
-    to the caller
+  - Agent looks up the claim using any valid identifier (claim number 37020301A,
+    contract number, or last 8 of VIN) and provides the status to the caller
 - rules:
-  - The decrypted phone number (1064378068, not the encrypted value) is used as the
-    PhoneNumber parameter in is_repair_facility or send_sms_to_phone
+  - The decrypted phone number (1064378068, not the encrypted value) is used in is_repair_facility
+    or send_sms_to_phone — accept any param name that conveys the decrypted phone
+    (e.g., PhoneNumber or PhoneNumber_decrypted)
 - rules:
   - Agent calls encrypt_variables before calling escalate_to_agent_from_ivr
 - rules:
@@ -84,12 +85,12 @@ mock_user:
     send_sms_to_phone:
     - params:
         PhoneNumber_decrypted: '1064378068'
-        customerType: '*'
+        customer_type: '*'
       response:
         success: true
     - params:
         PhoneNumber_decrypted: '*'
-        customerType: '*'
+        customer_type: '*'
       response:
         success: true
     - params:
@@ -248,6 +249,24 @@ mock_user:
       response:
         success: true
         TransferReason: ClaimStatus
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
 name: null
 seed: null
 settings:

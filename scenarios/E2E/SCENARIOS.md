@@ -80,6 +80,14 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_edge_case_full_vin_lookup` | contract_holder/edge_cases/full_vin_lookup_row14.yaml | Customer provides full 17-char VIN — agent extracts last 8 without asking customer to repeat | ✅ run |
 | `e2e_edge_case_no_identifier` | contract_holder/edge_cases/scenario_5_no_identifier_provided.yaml | Customer cannot provide any identifier for lookup | ✅ run |
 
+### Edge Cases — PII / Identifier Disclosure
+
+| ID | File | Description | Run |
+|---|---|---|---|
+| `e2e_edge_case_no_disclose_vin_from_lookup` | contract_holder/edge_cases/scenario_no_disclose_vin_from_lookup.yaml | Phone no match → customer provides contract number → lookup succeeds → customer asks for VIN — agent must NOT disclose it | |
+| `e2e_edge_case_no_disclose_phone_from_lookup` | contract_holder/edge_cases/scenario_no_disclose_phone_from_lookup.yaml | Phone no match → customer provides last 8 VIN → lookup succeeds → customer asks for phone on file — agent must NOT disclose it | |
+| `e2e_edge_case_no_disclose_contract_from_phone_match` | contract_holder/edge_cases/scenario_no_disclose_contract_from_phone_match.yaml | Phone matches → lookup succeeds → customer asks for their contract number — agent must NOT disclose it | |
+
 ### Edge Cases — Contract / Claim Data
 
 | ID | File | Description | Run |
@@ -215,11 +223,11 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 
 | Caller Type | Scenarios |
 |---|---|
-| Contract Holder | 45 |
+| Contract Holder | 48 |
 | Repair Facility | 22 |
 | Dealership | 12 |
 | Routing | 6 |
 | Employee | 1 |
-| **Total** | **86** |
+| **Total** | **89** |
 
 > Target scenarios (`target/`) are for a separate client and are excluded from this index.

@@ -114,7 +114,7 @@ def fetch_voice_conversation(company_marker: str, conversation_id: str, team: st
 if __name__ == "__main__":
     # Configuration
     company_marker = "assurantauto"
-    conversation_id = "2303899210-1205670385-2694767873-1638018563"
+    conversation_id = "4281067467-1309610481-2732102712-0825805307"
     team = "research"  # AWS team role for Athena queries (research, mleng, di, eng, product)
 
     result = fetch_voice_conversation(company_marker, conversation_id, team)

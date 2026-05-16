@@ -6,10 +6,10 @@ customer:
   - When the agent asks whether you are a customer, dealer, repair facility, or Assurant
     employee, say you are a customer calling about your contract
   - Do not volunteer the reason you are calling — wait for the agent to ask
+  - When the agent asks for a phone number tied to your contract, say you don't remember the phone number on your account
   - When the agent asks for a claim number, contract number, or VIN, provide your
     contract number 'VSC887701'
   - If the agent asks what type of number it is, say it is your contract number
-  - When the agent reads back the number and asks you to confirm, say yes
   knowledge: You are a contract holder. Your contract number is VSC887701. Start by
     saying 'I have a question about my contract.'
   personality: Responds like a real caller on a phone IVR. Extremely terse. When
@@ -30,7 +30,7 @@ evaluations:
   - Agent routes to the Contract Holder service flow after customer identifies as
     a Contract Holder
 - rules:
-  - After the customer identifies as a Contract Holder, agent asks for a claim number,
+  - After the customer identifies as a Contract Holder, agent asks for the phone number tied to their contract, then asks for a claim number,
     contract number, or the last 8 characters of their VIN before asking 'Is there
     anything else I can help you with?' or ending the call
 - rules:
@@ -39,8 +39,7 @@ evaluations:
   - Agent asks the customer for an identifier (claim number, contract number, or VIN)
     as its first substantive action in ContractHolderIssues
 - rules:
-  - Agent calls get_contract_and_claims_data_ivr using the customer-confirmed contract
-    number
+  - Agent calls get_contract_and_claims_data_ivr using the contract number provided by the customer
 id: e2e_ch_ani_failure_asks_for_identifier
 mock_user:
   current_timestamp: '2026-04-29'
@@ -101,10 +100,9 @@ mock_user:
     - params: {}
       response:
         repairFacilityOrSellingDealer: false
-    send_sms_to_phone:
+    send_sms_contract_holder:
     - params:
         PhoneNumber_decrypted: '*'
-        customer_type: '*'
       response:
         success: true
         message: Successful web registration

@@ -1,0 +1,183 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-IDLOOP-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks your caller type, say you are an independent repair facility
+  - Tell the agent you need to speak to an agent about updating a claim
+  - When the agent asks for an identifier, provide the last 8 characters of the VIN
+    as "N8J2K7R1"
+  - If the agent says it could not find your account and asks for another identifier,
+    provide claim number "84739201"
+  - If the agent asks for a VIN again after already trying that, provide "N8J2K7R1"
+    again
+  - Do NOT hang up if the agent asks you to call back — say you were told to call
+    this number and you need to speak to someone
+  knowledge: You are an independent repair facility. A customer's 2020 Ford Explorer
+    is in your shop and you need to update an existing claim with Assurant. You want
+    to speak to a claims agent. You have the last 8 of the VIN (N8J2K7R1) and a claim
+    number (84739201). The system will not find your account with either identifier.
+    You expect to be transferred to a human agent — not told to call back.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When
+    the agent offers specific options, answers with just the matching option in 1-3
+    words ("Repair facility.", "Update claim.", "Agent."). Confirmations are single
+    words ("Yes.", "Correct."). Busy shop worker, frustrated when given the runaround.
+    Pushes back firmly if told to call back after already providing two identifiers.
+description: Repair facility calls to update a claim and requests an agent — two consecutive
+  identifier lookups fail (VIN then claim number) — agent should transfer to a live
+  agent rather than ending the call. Also validates agent does NOT ask for VIN a second
+  time after it already failed. Reproduces production issues from conv 0700046509.
+  Same identifier-loop fix applies to DealershipIssues (tested separately).
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - After a VIN lookup fails, agent asks for a DIFFERENT identifier type (claim number
+    or contract number) — agent does NOT ask for the VIN again
+- rules:
+  - After two consecutive identifier lookup failures, agent calls escalate_to_agent_from_ivr
+    to transfer the caller rather than ending the call or asking the customer to call
+    back
+- rules:
+  - Agent does NOT produce a "please call back" or "I'm unable to complete the transfer"
+    message as a final response after two failed identifier lookups when the caller
+    has requested an agent
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "The GAIntent output variable is set to one of the valid values for Repair Facility:\
+    \ CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT,\
+    \ UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT"
+id: e2e_rf_identifier_loop_agent_transfer
+mock_user:
+  current_timestamp: '2026-05-19'
+  description: null
+  id: null
+  mock_responses:
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+    - params: {}
+      response:
+        success: false
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        success: false
+        claims: []
+    - params: {}
+      response:
+        success: false
+        claims: []
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        success: false
+        claims: []
+    - params: {}
+      response:
+        success: false
+        claims: []
+    getClaimsContractNumber:
+    - params:
+        channel: '*'
+        contractNumber: '*'
+        userType: '*'
+      response:
+        success: false
+        claims: []
+    - params: {}
+      response:
+        success: false
+        claims: []
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '7815550042'
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '7815550042'
+    - params: {}
+      response:
+        PhoneNumber: '7815550042'
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '7815550042'
+  max_turns: 22
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- identifier_loop
+- agent_transfer
+- regression

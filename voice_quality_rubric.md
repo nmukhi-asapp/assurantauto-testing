@@ -8,13 +8,21 @@ Designed for use by a human annotator or an LLM judge listening to / reading a t
 
 ## Score Scale (all dimensions)
 
-| Score | Label |
-|---|---|
-| 5 | Excellent — meets or exceeds expectation |
-| 4 | Good — minor issue with no real consequence |
-| 3 | Acceptable — noticeable issue, conversation recoverable |
-| 2 | Poor — clear failure, user experience degraded |
-| 1 | Failing — fundamental breakdown |
+> **2026-05-13 re-anchoring.** Earlier versions of this rubric defined 3 as "Acceptable — recoverable." In practice that drove central-tendency bias: most calls landed in 3.5–4.5, and a 3.5 read as "fine" when the call actually had significant issues. **Every level has been tightened one notch.** A score of 3 now means the conversation had a clear, noticeable problem that would fail an internal QA review. **Treat 3.5 as "borderline failing," not "acceptable."** Prior weeks' scores were generated under the old anchors and are not directly comparable; re-score history before doing WoW comparisons.
+
+| Score | Label | Plain-language meaning |
+|---|---|---|
+| 5 | No issues | Did the right thing, no observable defects |
+| 4 | Essentially right | Trivial deviation only, zero impact on outcome or experience |
+| 3 | Clear problem | Noticeable issue affecting the caller's experience; **would fail internal QA review** |
+| 2 | Wrong / failed | Wrong outcome or significant failure of this dimension |
+| 1 | Critical breakdown | Fundamental failure of the dimension's contract |
+
+**Calibration anchors:**
+- **5 is rare.** Reserve for calls where you cannot identify *anything* to nitpick on this dimension.
+- **4 is the common-good case** — the call worked but you noticed one trivial thing.
+- **3 means there is a real problem.** Not a catastrophe, but you would not show this call to a customer as a positive example.
+- The midpoint of the rubric is therefore **3**, not 3.5. A 3.5 weighted average is *below* the OK line.
 
 ---
 
@@ -35,18 +43,20 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Bot correctly classified intent and executed the designed flow exactly. In-scope: completed the designed journey end-to-end, or transferred only after exhausting in-scope steps. Out-of-scope: recognized immediately and escalated cleanly via Unified Escalation Protocol. |
-| 4 | Right outcome with minor deviations from designed flow (extra turns, mild script drift, slightly delayed but correct decision). |
-| 3 | Partial: followed some of the designed flow but skipped or rushed steps; or the conversation cut off mid-flow without resolution despite bot being on the right path. |
-| 2 | Wrong behavior despite call being recoverable: escalated without attempting required in-scope steps (e.g., transferred without offering Smart Deflection, or without trying claim lookup); or attempted out-of-scope work it should have escalated. |
+| 5 | Bot followed the designed flow exactly. In-scope: completed the journey end-to-end (or transferred only after exhausting in-scope steps). Out-of-scope: recognized immediately and escalated cleanly via Unified Escalation Protocol. Zero design deviation. |
+| 4 | Essentially correct outcome; only trivial deviation (one redundant turn, one mild script-drift line) with no impact on the caller's experience or outcome. |
+| 3 | Noticeable design deviation that affected the call: partial flow execution, skipped/rushed required steps (e.g., omitted Smart Deflection), 3+ unnecessary turns added, or correct outcome reached only after avoidable friction. Caller likely noticed. |
+| 2 | Wrong behavior: escalated when in-scope without attempting the designed flow, attempted out-of-scope work that should have escalated, or transferred without offering a required step. Outcome wrong even if recoverable. |
 | 1 | Critical mismatch with design: refused to escalate when explicitly required (caller stuck in loop); failed to recognize obvious out-of-scope intent and answered incorrectly; ended call when in-scope action was clearly possible; or violated CallerIdentification's "do not answer" guardrail. |
 
-**Worked examples:**
-- Customer: "Representative." Bot transfers immediately without trying Smart Deflection → **D1 = 2** (skipped designed deflection step).
-- Customer: "I want to extend my contract." Bot escalates via Unified Escalation Protocol → **D1 = 5** (correct out-of-scope recognition).
-- Customer: "What's my claim status?" Bot looks up via `getClaimsClaimNumber`, presents status, asks if anything else → **D1 = 5** (textbook Journey 2 / Step 2 execution).
-- Dealer asks bot to reopen a closed claim. Bot says "I can't reopen — you'll need a Claims Agent" then transfers → **D1 = 4** (correct out-of-scope recognition + escalation).
+**Worked examples (under re-anchored scale):**
+- Customer: "Representative." Bot transfers immediately without trying Smart Deflection → **D1 = 2** (skipped a required designed step — wrong behavior).
+- Customer: "I want to extend my contract." Bot escalates immediately via Unified Escalation Protocol → **D1 = 5** (clean out-of-scope recognition; no deviation).
+- Customer: "What's my claim status?" Bot looks up via `getClaimsClaimNumber`, presents status, asks if anything else → **D1 = 5** (textbook Journey 2 / Step 2).
+- Dealer asks bot to reopen a closed claim. Bot says "I can't reopen — you'll need a Claims Agent" then transfers → **D1 = 4** (correct outcome with one extra clarifying turn; previously a 4, still 4).
+- Same scenario as above but bot first quoted a policy in error before saying "you'll need an agent" → **D1 = 3** (right outcome reached but with a clear mistake along the way).
 - Customer wants tow. Bot collects identifier, gets to Step 1E, then transfers to Customer Care → **D1 = 2** (Journey 6A says SKIP identifier collection for roadside).
+- Bot answered the caller's question during CallerIdentification (which must `change_task` only, not answer) → **D1 = 1** (violated explicit guardrail).
 - Customer's lookup fails twice; bot keeps re-asking instead of escalating per Step 1E → **D1 = 1** (failed to escalate when design requires it).
 
 **Research basis:** τ-bench database-state comparison; GA task-config adherence.
@@ -58,11 +68,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | All statements accurate; agent hedges appropriately when uncertain |
-| 4 | Mostly accurate; minor imprecision with no material consequence |
-| 3 | One factual error or ungrounded claim that was caught and corrected |
-| 2 | Material factual error that went uncorrected |
-| 1 | Hallucination or policy violation with direct negative consequence |
+| 5 | All statements accurate; agent hedges appropriately when uncertain. Zero errors. |
+| 4 | Essentially accurate; one trivial imprecision (e.g. slightly imprecise phrasing) with no material consequence. |
+| 3 | A factual error or ungrounded claim occurred. Even if it was caught and corrected, the caller saw the wrong answer first. |
+| 2 | Material factual error that went uncorrected. |
+| 1 | Hallucination or policy violation with direct negative consequence (wrong backend action, misleading info acted on). |
 
 ---
 
@@ -71,11 +81,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | No repeated questions; all information carried forward across turns |
-| 4 | One minor lapse, quickly recovered |
-| 3 | One instance of a repeated question or forgotten detail |
-| 2 | Multiple context failures; user had to re-explain themselves |
-| 1 | Complete loss of context; circular or incoherent conversation |
+| 5 | No repeated questions; all information carried forward across turns. Zero context defects. |
+| 4 | One trivial lapse — agent rephrased a fact slightly but did not lose it; immediately recovered. |
+| 3 | One clear repeated question or forgotten detail the caller noticed. Conversation continued but felt clunky. |
+| 2 | Multiple context failures; user had to re-explain themselves. |
+| 1 | Complete loss of context; circular or incoherent conversation. |
 
 **Research basis:** SpokenWOZ cross-turn slot detection; split-turn challenge (IVR eval doc Q3).
 
@@ -88,11 +98,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Responses within ~1s; thinking time is verbally bridged ("Let me look that up…") |
-| 4 | 1–2 pauses of 1.5–3s, acknowledged with a filler |
-| 3 | Occasional unacknowledged silences (2–4s); conversation recoverable |
-| 2 | Frequent dead air (>4s) without acknowledgment; breaks conversational flow |
-| 1 | Severe latency (>5s) multiple times; user confused or abandons |
+| 5 | Responses within ~1s; any thinking time is verbally bridged ("Let me look that up…"). No unbridged dead air. |
+| 4 | One brief unbridged pause ≤2s, or 1–2 acknowledged pauses 1.5–3s. Not flow-breaking. |
+| 3 | Occasional unacknowledged silences (2–4s) noticeable to the caller; flow disrupted. |
+| 2 | Frequent dead air (>4s) without acknowledgment; clearly breaks conversational flow. |
+| 1 | Severe latency (>5s) multiple times; caller confused or abandons. |
 
 > **Note:** Distinguish *reasoning latency* (API/KB calls) from *response latency*. A verbally
 > acknowledged wait ("I'm pulling that up") should not penalize the score. Research identifies
@@ -105,11 +115,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Yields floor immediately on real interruptions; correctly ignores backchannels ("mm-hm", "right"); no agent-initiated over-talk |
-| 4 | One minor misstep (slight delay yielding floor, or brief false trigger on a backchannel) |
-| 3 | 1–2 clear failures; conversation recoverable |
-| 2 | Frequent over-talk or consistent failure to detect real interruptions |
-| 1 | Agent routinely speaks over user or responds to every user sound as a floor claim |
+| 5 | Yields floor immediately on real interruptions; correctly ignores backchannels ("mm-hm", "right"); no agent-initiated over-talk. |
+| 4 | One trivial misstep (slight delay yielding floor, or brief false trigger on a backchannel) with no caller-noticeable impact. |
+| 3 | 1–2 clear failures the caller noticed — bot talked over them or false-triggered on a backchannel. |
+| 2 | Frequent over-talk or repeated failure to detect real interruptions. |
+| 1 | Agent routinely speaks over user, or responds to every user sound as a floor claim. |
 
 **Research basis:** Kyoto/Skantze paper — human-system switching pause: 1–3s; GA Voice TDD turn-taking evaluation; Holistic Audio Framework Q2.
 
@@ -120,11 +130,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Proactively confirms ambiguous info; misunderstandings corrected gracefully in the same turn |
-| 4 | Corrected when user pointed it out; clarification questions well-formed |
-| 3 | Recovery attempted but took multiple turns; slightly clunky |
-| 2 | Failed to catch or act on a clear user correction; user had to repeat multiple times |
-| 1 | Misunderstanding never addressed; wrong action persisted |
+| 5 | Proactively confirms ambiguous info; misunderstandings corrected gracefully in the same turn. |
+| 4 | Self-corrected when the user pointed something out; clarification questions clean and immediate. |
+| 3 | Recovery happened but took multiple turns and felt clunky to the caller; or bot asked a clarifying question that the caller had effectively already answered. |
+| 2 | Failed to catch or act on a clear user correction; user had to repeat multiple times. |
+| 1 | Misunderstanding never addressed; wrong action persisted. |
 
 **Research basis:** SpokenWOZ repair detection; Holistic Audio Framework Q8; IVR eval doc Q2.
 
@@ -137,11 +147,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Natural-sounding; appropriate variation in pace and emphasis; no audio artifacts |
-| 4 | Mostly natural; minor prosody oddities (slightly flat intonation) |
-| 3 | Noticeable but tolerable robotic quality; fully intelligible |
-| 2 | Clearly robotic or artifact-ridden; pitch or speed anomalies are distracting |
-| 1 | Unintelligible or severely distorted (chipmunk/demon pitch; clipping) |
+| 5 | Natural-sounding; appropriate variation in pace and emphasis; no audio artifacts. |
+| 4 | Essentially natural; one trivial prosody oddity (e.g., slightly flat intonation on a single phrase). |
+| 3 | Clearly robotic quality the caller would notice; still intelligible. |
+| 2 | Robotic or artifact-ridden; pitch or speed anomalies distracting. |
+| 1 | Unintelligible or severely distorted (chipmunk/demon pitch; clipping). |
 
 **Research basis:** Holistic Audio Framework `human_likeness` and `naturalness_score`; MOS evaluation methodology; VGA eval human eval section.
 
@@ -152,11 +162,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Tone adapts to context — empathetic when user is distressed, professional during business exchanges |
-| 4 | Appropriate for most of the call; one minor tone mismatch |
-| 3 | Generally adequate but noticeably stiff, flat, or over-enthusiastic in places |
-| 2 | Clear mismatch (e.g. cheerful when user is upset) or monotone throughout |
-| 1 | Tone actively undermines experience (robotic coldness, fake/cringey enthusiasm) |
+| 5 | Tone adapts to context — empathetic when user is distressed, professional during business exchanges. |
+| 4 | Appropriate throughout; one trivial tone mismatch with no real impact. |
+| 3 | Noticeably stiff, flat, or over-enthusiastic in multiple places; caller would notice the misfit. |
+| 2 | Clear mismatch (e.g. cheerful when user is upset) or monotone throughout. |
+| 1 | Tone actively undermines experience (robotic coldness, fake/cringey enthusiasm). |
 
 **Research basis:** Holistic Audio Framework Q5 ("do-not-be-that-polite effect"), Q6 (conflict markers); IVR eval doc Q8.
 
@@ -167,11 +177,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Responses are right-sized; complex info chunked into listenable pieces; no unnecessary filler |
-| 4 | Slightly verbose in 1–2 turns; not disruptive |
-| 3 | Regularly over-explains; slows interaction |
-| 2 | Consistently too long; user must listen through unnecessary content before they can speak |
-| 1 | Agent dominates the conversation; user rarely gets to respond; feels like being read a script |
+| 5 | Responses are right-sized; complex info chunked into listenable pieces; no unnecessary filler. |
+| 4 | Slightly verbose in 1–2 turns; caller experience unaffected. |
+| 3 | Regularly over-explains; slows the interaction noticeably and the caller waits through extra content. |
+| 2 | Consistently too long; user has to listen through unnecessary content before they can speak. |
+| 1 | Agent dominates the conversation; user rarely gets to respond; feels like being read a script. |
 
 **Research basis:** Written-vs-spoken language differences (IVR eval doc Q1); agent talk ratio (Voice Evaluation doc).
 
@@ -184,11 +194,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Correctly interprets speech with fillers ("um", "uh-huh"), self-corrections, incomplete utterances, and split-turn information |
-| 4 | Handles most spoken language well; occasional miss on a repair or filler |
-| 3 | Works with clean speech but struggles with natural disfluency |
-| 2 | Frequently misinterprets spoken input; requires user to speak unnaturally clearly |
-| 1 | Cannot handle natural speech; breaks on common phenomena like "I mean…" or letter-by-letter info |
+| 5 | Correctly interprets speech with fillers ("um", "uh-huh"), self-corrections, incomplete utterances, and split-turn information. |
+| 4 | Handles spoken language well throughout; one trivial miss with no impact (e.g. a filler not perfectly parsed but inferred from context). |
+| 3 | Works with clean speech but visibly struggles with natural disfluency; caller had to rephrase or speak more clearly at least once. |
+| 2 | Frequently misinterprets spoken input; requires user to speak unnaturally clearly. |
+| 1 | Cannot handle natural speech; breaks on common phenomena like "I mean…" or letter-by-letter info. |
 
 **Research basis:** SpokenWOZ disfluency/cross-turn reasoning findings; HOW ROBUST R U? (Alexa); IVR eval doc Q1–Q3.
 
@@ -199,11 +209,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Maintains accuracy in moderate background noise; correctly identifies when audio quality is the problem and responds appropriately |
-| 4 | Minor accuracy degradation in noisy conditions; still functional |
-| 3 | Noticeable failures with background noise; conversation eventually recoverable |
-| 2 | Background noise causes significant errors; system treats ambient sounds as speech (false barge-ins) |
-| 1 | System fails in any non-ideal acoustic condition |
+| 5 | Maintains accuracy in moderate background noise; correctly identifies when audio quality is the problem and responds appropriately. |
+| 4 | Trivial accuracy dip in noisy conditions with no caller-noticeable impact. |
+| 3 | Noticeable failures caused by background noise; conversation continued but caller had to compensate. |
+| 2 | Background noise causes significant errors; system treats ambient sounds as speech (false barge-ins). |
+| 1 | System fails in any non-ideal acoustic condition. |
 
 **Research basis:** VGA Overview "Robustness in Challenging Acoustic Conditions"; Holistic Audio Framework Q7; WER degradation metrics.
 
@@ -216,11 +226,11 @@ This metric measures whether the bot did the **right thing** for the caller's si
 
 | Score | Anchor |
 |---|---|
-| 5 | Required disclosures spoken; no prohibited actions; PII handled correctly; safe throughout |
-| 4 | Minor policy deviation with no material consequence |
-| 3 | Policy issue present but recovered before harm |
-| 2 | Policy violation that caused user confusion or potential harm |
-| 1 | Critical failure — prohibited action taken, required disclosure missed, PII mishandled |
+| 5 | All required disclosures spoken on time; no prohibited actions; PII handled correctly; safe throughout. |
+| 4 | One trivial policy deviation with no material consequence (e.g. a disclosure slightly reordered but present). |
+| 3 | A policy issue occurred. Even if no harm resulted, this would fail compliance review. |
+| 2 | Policy violation that caused user confusion or potential harm. |
+| 1 | Critical failure — prohibited action taken, required disclosure missed, PII mishandled. |
 
 > **Hard rule:** Any D12 score of 1 or 2 flags the conversation for immediate review,
 > regardless of overall score.
@@ -246,6 +256,16 @@ This metric measures whether the bot did the **right thing** for the caller's si
 | | **Total** | **100%** |
 
 **Final score** = weighted average on a 1–5 scale.
+
+**Interpreting the weighted average under the re-anchored scale:**
+
+| Weighted score | Interpretation |
+|---|---|
+| ≥ 4.5 | Strong call — no real defects |
+| 4.0 – 4.5 | Solid call with at most trivial deviations |
+| 3.5 – 4.0 | Borderline — one or two dimensions had clear problems |
+| 3.0 – 3.5 | **Failing** — multiple dimensions had clear problems; would fail internal QA |
+| < 3.0 | Bad call — wrong outcome or significant failures |
 
 > Weights are tunable per customer — a customer with strict latency SLAs (e.g. sub-2s requirement)
 > would warrant increasing D4's weight accordingly.

@@ -1,0 +1,304 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-NEWCLAIM-MULTI-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a customer, dealer, repair facility, or Assurant
+    employee, say you are a dealer
+  - Tell the agent you want to start a new claim
+  - When asked if you have already submitted the claim online, say yes
+  - When the agent asks for your claim number, contract number, or VIN — say you
+    don't have a claim number. If they ask for VIN or contract number, provide the
+    last 8 of the VIN 'KN571342'
+  - If the agent asks whether KN571342 is a contract number or VIN, say it is the
+    last 8 of the VIN
+  - If the agent asks again what you need help with or what you need before they can
+    connect you, say 'Start a new claim' and ask to speak to a claims adjuster
+  - If the agent asks for the VIN one more time as part of getting you connected,
+    provide 'KN571342' again
+  - Accept the transfer to a Claims Agent
+  knowledge: You are a service advisor at Hemet CDJR. The vehicle is a 2019 Ram 1500
+    (VIN 1C6SRFCT3KN571342, last 8 KN571342), contract number AU6RX0135748. You submitted
+    a new claim online yesterday (May 27, 2026) but do not have the claim number yet.
+    You want to speak to a claims adjuster about it. You are not patient — you expect
+    to be connected quickly.
+  personality: Responds like a real caller on a phone IVR. Terse and slightly impatient.
+    When the agent offers specific options, answers with just the matching option in
+    1-3 words ("Dealer.", "New claim.", "Yes."). Confirmations are single words ("Yes.",
+    "Correct."). For open-ended questions, gives a direct fragment of 5-8 words. Never
+    volunteers context. When repeatedly asked to provide information before being connected,
+    shows mild frustration — says things like "I already said that" or "Just connect
+    me." Will provide the VIN if the agent frames it as the last step before the transfer.
+description: "Regression test for three related issues found in production conversation\
+  \ 0153633380-1508970993-2698887669-1773867395. A dealer calls to follow up on a\
+  \ new claim already submitted online. The ANI lookup fails, so CallerIdentification\
+  \ cannot pre-identify them. After routing to DealershipIssues, the agent should:\
+  \ (1) ask for VIN or contract number — NOT claim number — since this is a new claim\
+  \ flow; (2) when the dealer asks for an adjuster mid-flow, give an easy path to\
+  \ transfer by acknowledging, asking only for VIN/contract, and transferring even\
+  \ if the dealer is uncooperative; (3) use a non-committal situational filler rather\
+  \ than 'One moment while I connect you with an adjuster' before the Reasoner has\
+  \ confirmed the transfer is happening."
+evaluations:
+- rules:
+  - Agent routes to the Dealership service flow after the caller identifies as a Dealer
+- rules:
+  - Agent asks whether the caller has already submitted the claim online before collecting
+    any identifier
+- rules:
+  - After the caller confirms the claim was submitted online, agent asks for the VIN
+    or contract number — the agent does NOT ask for a claim number as the primary
+    or only identifier option
+- rules:
+  - When the caller asks to speak to an adjuster or agent during the new claim flow,
+    the agent does not restart the entire new claim flow from scratch (re-asking 'have
+    you submitted online?'). Instead, it works toward connecting the caller to a Claims
+    Agent.
+- applicability:
+  - The caller asked to speak to an adjuster or agent during the new claim flow
+  rules:
+  - Agent asks for the VIN or contract number as the one piece of information needed
+    before transfer — the agent does NOT ask for a claim number in this context
+- applicability:
+  - The caller asked to speak to an adjuster or agent during the new claim flow
+  rules:
+  - If the caller provides a VIN, agent uses it in the transfer; if the caller refuses
+    or cannot provide an identifier, agent transfers anyway rather than looping
+- rules:
+  - Agent transfers the caller to a Claims Agent via escalate_to_agent_from_ivr
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GAIntent parameter passed to escalate_to_agent_from_ivr reflects a new claim
+    or general claims intent (NEWCLAIM, CLAIMS, or CLAIMSTATUS)
+id: e2e_dealer_new_claim_submitted_multi_claim_adjuster_request
+mock_user:
+  current_timestamp: '2026-05-28'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '9513842826'
+    - params: {}
+      response:
+        PhoneNumber: '9513842826'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input ANI
+    - params: {}
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input ANI
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim was paid via credit card and the payment
+            is posted.
+          breakdownMileage: 68596
+          repairShopName: HEMET CDJR
+          claimStatus: Payment Approved
+          repairOrderNumber: '205305'
+          createdOn: '2026-04-14'
+          claimNumber: '49138085'
+          salesforceID: 500Pm00001UxN5FIAV
+          longVerbiageStatus: This claim was paid via credit card and the payment is
+            posted.
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          breakdownMileage: 70215
+          repairShopName: HEMET CDJR
+          claimStatus: Draft
+          repairOrderNumber: '206485'
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+          salesforceID: 500Pm00001bdxKAIAY
+          longVerbiageStatus: This claim is pending submission from your facility.
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: For information on your claim, please select 'all
+            other inquiries' in the next prompt.
+          breakdownMileage: 0
+          claimStatus: Closed
+          createdOn: '2026-05-27'
+          claimNumber: '49685221'
+          salesforceID: 500Pm00001bdxwvIAA
+          longVerbiageStatus: For information on your claim, please select all other
+            inquiries.
+        success: true
+        roadsideAdministratorPhoneNumber: 1-800-270-8447
+        numberOfClaims: 3
+    - params: {}
+      response:
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim was paid via credit card and the payment
+            is posted.
+          breakdownMileage: 68596
+          repairShopName: HEMET CDJR
+          claimStatus: Payment Approved
+          repairOrderNumber: '205305'
+          createdOn: '2026-04-14'
+          claimNumber: '49138085'
+          salesforceID: 500Pm00001UxN5FIAV
+          longVerbiageStatus: This claim was paid via credit card and the payment is
+            posted.
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          breakdownMileage: 70215
+          repairShopName: HEMET CDJR
+          claimStatus: Draft
+          repairOrderNumber: '206485'
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+          salesforceID: 500Pm00001bdxKAIAY
+          longVerbiageStatus: This claim is pending submission from your facility.
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: For information on your claim, please select 'all
+            other inquiries' in the next prompt.
+          breakdownMileage: 0
+          claimStatus: Closed
+          createdOn: '2026-05-27'
+          claimNumber: '49685221'
+          salesforceID: 500Pm00001bdxwvIAA
+          longVerbiageStatus: For information on your claim, please select all other
+            inquiries.
+        success: true
+        roadsideAdministratorPhoneNumber: 1-800-270-8447
+        numberOfClaims: 3
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          breakdownMileage: 70215
+          repairShopName: HEMET CDJR
+          claimStatus: Draft
+          repairOrderNumber: '206485'
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+          salesforceID: 500Pm00001bdxKAIAY
+          longVerbiageStatus: This claim is pending submission from your facility.
+        success: true
+        numberOfClaims: 1
+    - params: {}
+      response:
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          breakdownMileage: 70215
+          repairShopName: HEMET CDJR
+          claimStatus: Draft
+          repairOrderNumber: '206485'
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+          salesforceID: 500Pm00001bdxKAIAY
+          longVerbiageStatus: This claim is pending submission from your facility.
+        success: true
+        numberOfClaims: 1
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '9513842826'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- new_claim
+- edge_case
+- regression
+- multi_claim_vin
+- adjuster_request
+- ani_lookup_failure

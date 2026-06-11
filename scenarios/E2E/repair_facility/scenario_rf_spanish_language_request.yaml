@@ -1,0 +1,151 @@
+id: e2e_rf_spanish_language_request
+company_marker: assurantauto
+description: Repair facility calls and immediately requests Spanish-language support.
+  Bot should escalate directly to a live agent without attempting to identify the
+  caller's issue or resolve anything in English.
+tags:
+- e2e
+- repair_facility
+- edge_case
+- escalation
+- spanish
+- language
+customer:
+  customer_id: RF-spanish-001
+  goals:
+  - When the agent asks your caller type, say you are a repair facility
+  - Immediately say you need assistance in Spanish ("Can you help me in Spanish?" or
+    "¿Habla español?")
+  - If the agent responds in English and asks you to describe your issue, repeat that
+    you need Spanish-language support
+  - You are satisfied once you are transferred to a live agent
+  knowledge: You are calling from an independent repair facility. You are not comfortable
+    speaking in English and need Spanish-language support. You do not have a specific
+    issue to describe — you simply need to speak with someone in Spanish. If pressed,
+    just repeat that you need Spanish.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. Speaks
+    in short phrases only. Occasional Spanish words or phrases mixed in. Does not
+    volunteer extra information. Politely but firmly repeats the Spanish request if
+    the agent tries to continue in English.
+  evaluation_goals:
+  - evaluation_goal: The bot escalates the caller to a live agent upon receiving the
+      Spanish-language request, without attempting to understand or resolve a specific
+      issue first.
+    is_possible: true
+  - evaluation_goal: The bot does not repeatedly ask the caller to state their problem
+      in English before escalating.
+    is_possible: true
+evaluations:
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr when the caller requests Spanish-language
+    support
+- rules:
+  - Agent does not ask the caller to describe their problem or attempt to resolve
+    any issue before escalating
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'The GAIntent output variable is set to one of the valid values for Repair Facility:
+    CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT,
+    UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT, RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The Language parameter passed to escalate_to_agent_from_ivr is 'ES'
+customer_evaluations: null
+settings:
+  agent_speaks_first: true
+  max_turns: 10
+  task_name: CallerIdentification
+  input_variables: {}
+seed: null
+simulated_conversations: {}
+mock_user:
+  id: null
+  current_timestamp: '2026-06-09'
+  description: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5559876543'
+    - params: {}
+      response:
+        PhoneNumber: '5559876543'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input
+            ANI 5559876543
+    - params: {}
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input
+            ANI 5559876543
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent

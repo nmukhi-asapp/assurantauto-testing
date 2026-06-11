@@ -26,7 +26,22 @@ Do not proceed until you have at least the conversation ID and company marker.
 
 Voice conversations have two parts: a base conversation and an `_int` (internal/reasoner) conversation. Both must be fetched and merged.
 
-**Try this first** — update and run `scripts/fetch_conversation.py` in this repo:
+**Try this first** — use the `mcp__data-sampling__fetch_conversations_by_id` MCP tool:
+
+```
+mcp__data-sampling__fetch_conversations_by_id(
+  company_marker="<company-marker>",
+  conversation_ids=["<conversation-id>"],
+  save_conversations=True,
+  is_voice=True,
+  output_dir="<absolute-path-to-this-repo>/fetched_conversations"
+)
+```
+
+The merged file is saved to:
+`fetched_conversations/platform::<company-marker>::<conversation-id>::<customer-id>.json`
+
+**If the MCP tool is unavailable or fails**, fall back to `scripts/fetch_conversation.py`:
 
 ```bash
 # Edit scripts/fetch_conversation.py to set:
@@ -36,10 +51,7 @@ Voice conversations have two parts: a base conversation and an `_int` (internal/
 uv run python scripts/fetch_conversation.py
 ```
 
-The merged file is saved to:
-`fetched_conversations/platform::<company-marker>::<conversation-id>::<customer-id>.json`
-
-If the command fails, present it to the user and ask them to run it, then wait for them to confirm it completed and tell you the output file path.
+If the script also fails, present the command to the user and ask them to run it, then wait for them to confirm it completed and tell you the output file path.
 
 ### Chat conversations
 

@@ -41,7 +41,7 @@ REPO/
 
 Use Python `date.today()` for today. Compute:
 - `week_end` = most recent Saturday
-- `week_start` = week_end − 5 days (Monday)
+- `week_start` = week_end − 6 days (Monday)
 
 ### 2. List CallerIdentification conversations from Athena
 

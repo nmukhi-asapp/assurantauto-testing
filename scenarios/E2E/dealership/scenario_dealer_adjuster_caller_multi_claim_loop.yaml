@@ -1,0 +1,284 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-ADJUSTER-001
+  evaluation_goals: null
+  goals:
+  - Your very first response to anything the bot says is exactly "Adjuster." — one
+    word, nothing else. Do NOT say "dealer" or identify your caller type on your first
+    turn under any circumstances.
+  - On your second response, if the bot asks you to clarify your caller type, say
+    "Adjuster. Hello. Hello. Hello." — still do not say dealer.
+  - On your third response, if asked whether you are an Assurant employee, say "No.
+    Adjuster, please." — still do not say dealer.
+  - Only on your fourth response or later, when directly pressed, say "Uh, dealer."
+  - When asked what you need help with, say "Start new claim."
+  - When asked if you have already submitted the claim online, say "Yes."
+  - When asked to provide a claim number, contract number, or VIN, provide the last
+    8 characters of the VIN which is "KN571342".
+  - When asked whether that is a contract number or last 8 of VIN, say "Yes." the
+    first two times, then "Eight characters of the VIN."
+  - When told multiple claims are associated with the vehicle and asked for the claim
+    number, say "Adjuster, please." — do not provide a claim number.
+  - When asked what specifically you need, say "Start new claim." again.
+  - When asked if you submitted online again, say "Yes."
+  - When asked for VIN again, provide "KN571342" again.
+  - When told again about multiple claims and asked for claim number, say "Start new
+    claim." again without providing one.
+  - When asked if you submitted the repair order online, say "Yes."
+  - When asked again for claim number or identifier, say "I thought I already did
+    that."
+  - When told the agent can only proceed with an identifier and asked for claim number,
+    say "No."
+  - When the agent says it needs a claim number, contract number, or VIN to continue,
+    provide "KN571342" again.
+  - When told multiple claims are found and asked for the claim number, say "Do not
+    have."
+  - When offered claim dates (April 14, 2026 or May 27, 2026), say "What?" first,
+    then "Twenty seventh twenty twenty six."
+  - After hearing the claim statuses for May 27, say "Claim from yesterday. Adjust
+    or speak to adjuster."
+  knowledge: You are calling from HEMET CDJR dealership. A vehicle (last 8 of VIN
+    KN571342) has a claim you submitted online yesterday and need to follow up on.
+    You do not have the specific claim number handy. You use the word "adjuster" to
+    mean you want to be connected to a claims adjuster. If asked your caller type,
+    you are a dealer.
+  personality: Responds like a real caller on a phone IVR. Extremely terse and frequently
+    barge-in on the bot mid-sentence. Uses the word "Adjuster" as shorthand for "I
+    want to speak to a claims adjuster." When the agent offers specific options, answers
+    with just the matching option in 1-3 words ("Start new claim.", "Yes.", "Dealer.").
+    Confirmations are single words ("Yes.", "Yeah.", "No."). For open-ended questions,
+    gives a direct fragment of 5-8 words. Never volunteers context or reasons. Occasionally
+    repeats the same request when the bot loops ("Start new claim." again). Expresses
+    mild frustration through terse repetition rather than hostility. Familiar with
+    the dealership claims process and impatient with long qualification loops.
+description: 'Dealer calls and initially identifies as "Adjuster" (meaning they want
+  to speak to a claims adjuster), causing a multi-round identification loop. Eventually
+  identifies as a dealer. Wants to follow up on a claim submitted online yesterday
+  for VIN KN571342. Does not have the specific claim number. The bot must look up
+  claims by VIN, offer date disambiguation, present statuses for the two May 27 claims,
+  and escalate to a Claims Agent.'
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after caller ultimately identifies as a dealer
+- rules:
+  - Agent calls getClaimsLast8OfVin with last8OfVin equal to KN571342
+- rules:
+  - Agent presents multiple claim statuses or dates to help caller identify their
+    claim without requiring a claim number
+- rules:
+  - Agent escalates to a Claims Agent (calls escalate_to_agent_from_ivr)
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - "The GAIntent parameter passed to escalate_to_agent_from_ivr is one of the valid\
+    \ values for Dealership: CLAIMS, CLAIMSTATUS, UPDATECLAIM, NEWCLAIM, ALLOTHER_QUESTIONS"
+id: e2e_dealer_adjuster_caller_multi_claim_loop
+mock_user:
+  current_timestamp: '2026-05-28'
+  description: Dealer calling about a vehicle (VIN KN571342) with multiple claims.
+    No contract found by ANI. is_repair_facility returns false. getClaimsLast8OfVin
+    returns 3 claims — one paid from April 14 and two from May 27 (one pending, one
+    closed).
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '9513842826'
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: '9513842826'
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        success: false
+        errorMessage: Contract and cases are not found in GLOW for the given input
+          ANI 9513842826
+    - params:
+        VIN: KN571342
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: 1C6SRFCT3KN571342
+              contractNumber: AU6RX0135748
+              customerFirstName: John
+              customerLastName: Smith
+              productType: WAR
+              status: Active
+              make: RAM
+              model: 1500
+              vehicleYear: 2019
+              sellingDealerName: HEMET CDJR
+              sellingDealerPhone: '9513842826'
+              claim:
+              - claimNumber: '49138085'
+                claimStatus: Payment Approved
+                claimStatusDescription: This claim was paid via credit card and the
+                  payment is posted.
+                createdOn: '2026-04-14'
+              - claimNumber: '49684633'
+                claimStatus: Draft
+                claimStatusDescription: This claim is pending submission from your
+                  facility.
+                createdOn: '2026-05-27'
+              - claimNumber: '49685221'
+                claimStatus: Closed
+                claimStatusDescription: For information on your claim, please select
+                  'all other inquiries' in the next prompt.
+                createdOn: '2026-05-27'
+    - params: {}
+      response:
+        success: false
+        errorMessage: Contract and cases are not found in GLOW for the given input
+          ANI 9513842826
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        success: true
+        numberOfClaims: 3
+        roadsideAdministratorPhoneNumber: 1-800-270-8447
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim was paid via credit card and the payment
+            is posted.
+          breakdownMileage: 68596
+          repairShopName: HEMET CDJR
+          claimStatus: Payment Approved
+          repairOrderNumber: '205305'
+          createdOn: '2026-04-14'
+          claimNumber: '49138085'
+          formNumber: AU6RLX0121
+          salesforceID: 500Pm00001UxN5FIAV
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          breakdownMileage: 70215
+          repairShopName: HEMET CDJR
+          claimStatus: Draft
+          repairOrderNumber: '206485'
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+          formNumber: AU6RLX0121
+          salesforceID: 500Pm00001bdxKAIAY
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: For information on your claim, please select 'all
+            other inquiries' in the next prompt.
+          breakdownMileage: 0
+          claimStatus: Closed
+          createdOn: '2026-05-27'
+          claimNumber: '49685221'
+          formNumber: AU6RLX0121
+          salesforceID: 500Pm00001bdxwvIAA
+    - params: {}
+      response:
+        success: true
+        numberOfClaims: 3
+        claims:
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim was paid via credit card and the payment
+            is posted.
+          claimStatus: Payment Approved
+          createdOn: '2026-04-14'
+          claimNumber: '49138085'
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: This claim is pending submission from your facility.
+          claimStatus: Draft
+          createdOn: '2026-05-27'
+          claimNumber: '49684633'
+        - productType: WAR
+          contractNumber: AU6RX0135748
+          VIN: 1C6SRFCT3KN571342
+          claimStatusDescription: For information on your claim, please select 'all
+            other inquiries' in the next prompt.
+          claimStatus: Closed
+          createdOn: '2026-05-27'
+          claimNumber: '49685221'
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '9513842826'
+  max_turns: 35
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- regression
+- new_claim
+- multi_claim
+- adjuster_loop

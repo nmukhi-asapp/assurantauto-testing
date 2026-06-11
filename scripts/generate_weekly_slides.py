@@ -57,7 +57,7 @@ def main():
     pcts = [100 * sum(1 for r in daily[d] if r['pass_fail'] == 'PASS') / len(daily[d]) for d in labels]
     totals = [len(daily[d]) for d in labels]
     mean_scores = [mean(r['score5'] for r in daily[d]) for d in labels]
-    bad_counts = [sum(1 for r in daily[d] if r['score5'] <= 3.5) for d in labels]
+    bad_pcts = [100 * sum(1 for r in daily[d] if r['score5'] <= 3.5) / len(daily[d]) for d in labels]
 
     out_dir = REPO / 'reports' / 'weekly_slides' / week_end
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -114,19 +114,19 @@ def main():
     plt.savefig(out_dir / 'slide_5_quality_score.png', dpi=150, bbox_inches='tight')
     plt.close()
 
-    # ── Slide 6: daily count of calls scoring ≤ 3.5 + trend ──────────────
+    # ── Slide 6: daily % of calls scoring ≤ 3.5 ─────────────────────────
     fig, ax = plt.subplots(figsize=(14, 6))
-    ax.bar(x, bad_counts, color='#D44A3F', alpha=0.85, label='Count ≤ 3.5')
-    z2 = np.polyfit(x_arr, bad_counts, 1)
-    ax.plot(x_arr, np.poly1d(z2)(x_arr), color='#991B1B', linewidth=2,
+    ax.bar(x, bad_pcts, color='#D44A3F', alpha=0.85, label='% ≤ 3.5')
+    z6 = np.polyfit(x_arr, bad_pcts, 1)
+    ax.plot(x_arr, np.poly1d(z6)(x_arr), color='#991B1B', linewidth=2,
             linestyle='--', label='Trend')
-    ax.set_ylabel('# calls scoring ≤ 3.5')
+    ax.set_ylabel('% calls scoring ≤ 3.5')
     ax.set_xlabel('Date')
-    ax.set_title('Daily count of low-quality calls (score ≤ 3.5, re-anchored rubric)',
+    ax.set_ylim(0, 100)
+    ax.set_title('Daily % of low-quality calls (score ≤ 3.5, re-anchored rubric)',
                  loc='left', fontsize=11, color='#555')
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=45, ha='right', fontsize=9)
-    ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.grid(True, alpha=0.3, axis='y')
     ax.legend(loc='upper right', fontsize=9)
     plt.tight_layout()

@@ -1,0 +1,197 @@
+id: e2e_ch_spanish_language_request
+company_marker: assurantauto
+description: Contract holder calls and immediately requests Spanish-language support.
+  Bot should escalate directly to a live agent without attempting to identify the
+  caller's issue or resolve anything in English.
+tags:
+- e2e
+- contract_holder
+- edge_case
+- escalation
+- spanish
+- language
+customer:
+  customer_id: CHI-spanish-ch
+  goals:
+  - When the agent asks your caller type or how it can help you, say you need assistance
+    in Spanish ("Can you help me in Spanish?" or "¿Habla español?")
+  - If the agent responds in English and asks you to describe your issue, repeat that
+    you need Spanish-language support
+  - You are satisfied once you are transferred to a live agent
+  knowledge: You are a contract holder calling Assurant. You are not comfortable speaking
+    in English and need Spanish-language support. You do not have a specific issue
+    to describe — you simply need to speak with someone in Spanish. If pressed, just
+    repeat that you need Spanish.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. Speaks
+    in short phrases only. Occasional Spanish words or phrases mixed in. Does not
+    volunteer extra information. Politely but firmly repeats the Spanish request if
+    the agent tries to continue in English.
+  evaluation_goals:
+  - evaluation_goal: The bot escalates the caller to a live agent upon receiving the
+      Spanish-language request, without attempting to understand or resolve a specific
+      issue first.
+    is_possible: true
+  - evaluation_goal: The bot does not repeatedly ask the caller to state their problem
+      in English before escalating.
+    is_possible: true
+evaluations:
+- rules:
+  - Agent escalates using escalate_to_agent_from_ivr when the caller requests Spanish-language
+    support
+- rules:
+  - Agent does not ask the caller to describe their problem or attempt to resolve
+    any issue before escalating
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'The GAIntent output variable is set to one of the valid values for Contract Holder:
+    CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO,
+    GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE, RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS,
+    DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The Language parameter passed to escalate_to_agent_from_ivr is 'ES'
+customer_evaluations: null
+settings:
+  agent_speaks_first: true
+  max_turns: 10
+  task_name: CallerIdentification
+  input_variables:
+    PhoneNumber: '5551000099'
+seed: null
+simulated_conversations: {}
+mock_user:
+  id: null
+  current_timestamp: '2026-06-09'
+  description: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5551000099'
+    - params: {}
+      response:
+        PhoneNumber: '5551000099'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: 1HGCM82633A100099
+              contractNumber: VSC100099
+              customerFirstName: Maria
+              customerLastName: Garcia
+              customerEmail: maria.garcia@test.assurant.com
+              customerAddress1: 123 Main St
+              customerCity: San Antonio
+              customerCountry: USA
+              customerStateCode: TX
+              customerPostalCode: '78201'
+              customerHomePhone: '5551000099'
+              expirationDate: '2028-09-01'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              expirationMiles: 90000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2022-09-01'
+              sellingDealerName: San Antonio Auto Center
+              sellingDealerAddress: 456 Commerce Dr, San Antonio, TX, 78201
+              sellingDealerPhone: '2105550199'
+              model: CIVIC
+              make: HONDA
+              vehicleYear: 2022
+              isFE: false
+              rentalIndicator: Y
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-866-603-5420
+              specCoveragePlanCode: Platinum
+              termsStructuredText: Vehicle Service Contract terms and conditions apply.
+              claims: []
+              formNumber: RAMAONTBTFS0517
+              accountTypeNumber: Mech1
+              dealerType: Primary
+              expirationType: AOTAOM
+              effectiveDate: '2022-09-01'
+    - params: {}
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: 1HGCM82633A100099
+              contractNumber: VSC100099
+              customerFirstName: Maria
+              customerLastName: Garcia
+              status: Active
+              productType: WAR
+              claims: []
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_contract_holder:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent

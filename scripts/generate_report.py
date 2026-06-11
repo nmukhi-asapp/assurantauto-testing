@@ -28,7 +28,7 @@ sys.path.insert(0, str(TIME_INSPECTOR_DIR))
 try:
     from analyze import (
         analyze_span, TurnSpan, Activity,
-        AT_CUSTOMER, AT_DEAD_AIR, AT_BOT_SPEAKING, AT_TALKER_LLM,
+        AT_CUSTOMER_SPEECH as AT_CUSTOMER, AT_DEAD_AIR, AT_BOT_SPEAKING, AT_TALKER_LLM,
         parse_ts, ts_diff_ms,
         ACTIVITY_HEX, ROW_ORDER, ROW_SHORT_LABEL, ACTIVITY_CONFIG, fmt_ms,
     )

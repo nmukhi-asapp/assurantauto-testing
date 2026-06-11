@@ -1,0 +1,160 @@
+id: e2e_dealer_last8_vin_sufficient_for_transfer
+company_marker: assurantauto
+description: Dealer calls to start a new claim and provides the last 8 characters
+  of the VIN when asked for an identifier. When the dealer chooses to handle the claim
+  over the phone, the bot should escalate immediately using the last 8 VIN already
+  collected — it must NOT ask for the full VIN or any additional identifier.
+tags:
+- e2e
+- dealership
+- new_claim
+- escalation
+- vin
+- identifier_reuse
+customer:
+  customer_id: DLR-last8-vin-001
+  evaluation_goals:
+  - evaluation_goal: The bot does not ask for the full VIN or any additional identifier
+      after the last 8 of the VIN has already been provided and confirmed.
+    is_possible: true
+  - evaluation_goal: The bot escalates to a live Claims Agent using the last 8 VIN
+      already collected, without any additional identifier collection step.
+    is_possible: true
+  goals:
+  - When the agent asks your caller type, say you are a dealer
+  - When the agent asks what you need help with, say you want to start a new claim
+  - When the agent asks for an identifier (claim number, contract number, or last 8
+    of VIN), say "last eight" and provide JZ199341
+  - When asked whether you have submitted online, say no
+  - When offered the online portal or phone option, say you prefer to handle it over
+    the phone
+  - If the agent asks for the full VIN or any further identifier, tell them you already
+    provided the last 8
+  - You are satisfied once you are transferred to a Claims Agent
+  knowledge: You are calling from an auto dealership. A customer's vehicle (last 8
+    of VIN is JZ199341) needs a new repair claim. You have not submitted online. You
+    want to handle the claim over the phone with a claims adjuster. You already gave
+    the last 8 of the VIN and should not need to provide it again.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Dealer.", "Last eight.", "Over the phone.", "No."). Confirmations are single
+    words or short phrases only. Professional and efficient. Mildly frustrated if
+    asked to re-provide information already given.
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a dealer
+- rules:
+  - Agent collects an identifier (last 8 of VIN JZ199341) before proceeding with
+    the new claim flow
+- rules:
+  - Agent does NOT ask for the full VIN or re-ask for any identifier after the last
+    8 VIN has already been confirmed in this conversation
+- rules:
+  - Agent escalates to a live Claims Agent using escalate_to_agent_from_ivr after
+    the dealer requests phone handling
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+    or 'Dealer'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'The GAIntent output variable is set to one of the valid values: NEWCLAIM, CLAIMS,
+    ALLOTHER_QUESTIONS, DEFAULT'
+customer_evaluations: null
+settings:
+  agent_speaks_first: true
+  max_turns: 20
+  task_name: CallerIdentification
+  input_variables: {}
+seed: null
+simulated_conversations: {}
+mock_user:
+  id: null
+  current_timestamp: '2026-06-09'
+  description: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '7344256500'
+    - params: {}
+      response:
+        PhoneNumber: '7344256500'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input
+            ANI 7344256500
+    - params: {}
+      response:
+        response:
+          success: false
+          errorMessage: Contract and cases are not found in GLOW for the given input
+            ANI 7344256500
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    getClaimsLast8OfVin:
+    - params:
+        VIN: JZ199341
+      response:
+        success: true
+        claims: []
+        numberOfClaims: 0
+        roadsideAdministratorPhoneNumber: 1-800-270-8447
+    - params: {}
+      response:
+        success: false
+        claims: []
+        numberOfClaims: 0
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: NewClaimPhoneRequest

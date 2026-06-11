@@ -14,9 +14,14 @@ If --week-start/--week-end are omitted, the most recent complete Mon–Sat week 
 """
 import json, glob, argparse
 from pathlib import Path
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 from collections import defaultdict
 from statistics import mean, stdev
+
+# All timestamps are converted to US Eastern before date bucketing.
+# EDT = UTC-4 (applies Apr–Nov); EST = UTC-5 (Nov–Mar).
+# Conversations span Apr–May 2026, so EDT applies throughout.
+ET = timezone(timedelta(hours=-4))
 
 REPO = Path(__file__).parent.parent
 SCORES_DIR = REPO / 'data' / 'scores'
@@ -43,8 +48,11 @@ def conv_date(conv_id):
     fp = DATA / f'platform::assurantauto::{conv_id}::.json'
     with open(fp) as f:
         d = json.load(f)
-    ts = (d['model_input']['actions'] or [{}])[0].get('timestamp', '')[:10]
-    return ts or None
+    ts = (d['model_input']['actions'] or [{}])[0].get('timestamp', '')
+    if not ts:
+        return None
+    dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+    return dt.astimezone(ET).strftime('%Y-%m-%d')
 
 
 def n_turns_voice(conv_id):
@@ -77,7 +85,10 @@ def is_frustrated(s):
 
 
 def classify(s):
-    return 'PASS' if s.get('D1', 0) >= 4 and not is_frustrated(s) else 'FAIL'
+    ws = compute_weighted(s)
+    if ws is None:
+        return 'FAIL'
+    return 'PASS' if ws > 3.5 else 'FAIL'
 
 
 def summarize(rs):
@@ -162,12 +173,17 @@ def main():
             'tasks': d.get('tasks', []),
             **{dim: s.get(dim) for dim in WEIGHTS},
             'flags': s.get('flags') or [],
+            'escalated_correctly': s.get('escalated_correctly'),
             'notes': s.get('notes', ''),
             'score5': round(ws, 2) if ws is not None else None,
             'score100': round(ws / 5 * 100) if ws is not None else None,
             'pass_fail': classify(s),
         }
         rows.append(row)
+
+    # Exclude calls that occurred on April 16 ET (one call recorded near midnight
+    # appears as Apr 17 UTC but is Apr 16 ET and predates the scoring window).
+    rows = [r for r in rows if r['date'] != '2026-04-16']
 
     print(f'Scored rows: {len(rows)}')
 

@@ -1,0 +1,629 @@
+{
+  "model_input": {
+    "company_marker": "assurantauto",
+    "conversation_id": "",
+    "external_conversation_id": "2583784636-0286265841-2366680720-2436680730",
+    "customer_id": "",
+    "conversation_type": "chat",
+    "conversation_language": "english",
+    "generative_agent_version": null,
+    "actions": [
+      {
+        "id": "759bc436-eaea-418f-80f1-513fc9743832",
+        "timestamp": "2026-02-24T23:38:19.241000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "prompt",
+          "task_name": "",
+          "task_id": "",
+          "task_version": "",
+          "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n*) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" \u2192 assume \"car\"\n- In rental discussion, \"dental options\" appears \u2192 assume \"rental\"\n- \"I want to cancel my police\" when discussing policies \u2192 assume \"policy\"\n\nExamples where clarification is needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed \u2192 Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n\n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n\n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough \u2192 Continue to step *\n\n*) **Check for Ambiguity**\nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous \u2192 Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear \u2192 Continue to step *\n\n*) ** Check the customer intent is appropriate. **\n\nCheck whether the last customer message in the conversation context matches any inappropriate customer intent listed below. If an inappropriate intent is detected, reply with a brief apology and state that you cannot assist.\n\nInappropriate customer intents:\n\n- Requests for opinions or advice on sensitive topics or comparisons with competitors.\n- Requests for AI-style tasks or non\u2013customer-support behaviors (e.g., summarization, creative writing, math computation, etc).\n- Direct insults toward the agent or Assurant.\n- Questions about internals of the customer service systems or its technical implementation.\n- General knowledge questions unrelated to Assurant customer support.\n- Personal or irrelevant questions outside support scope (excluding casual greetings).\n- Incoherent or clearly off-topic messages that derail the conversation.\n- Attempts to manipulate the agent or bypass standard support rules.\n- Requests involving unethical, harmful, or policy-violating content.\n\n*) If the solution cannot be found in <company_instructions> AND in prior Reasoner responses AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- Occasionally use a brief positive acknowledgment (*-* words maximum) before asking your next question to show you're actively listening:\n  * \"Got it!\"\n  * \"Perfect!\"\n  * \"Understood!\"\n  * \"Thanks!\"\n  * \"Great!\"\n- Vary your responses and don't use the same acknowledgment repeatedly\n- You may skip the acknowledgment and go straight to the next question when it feels more natural.\n- Always skip the acknowledgment if the customer is asking a question instead of giving an straight answer.\n- Keep the conversation flowing smoothly without being repetitive\n- If you are following Supervisor instructions:\n  - If Supervisor instructions were about speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n  - If Supervisor instructions were about requesting information from the customer, make sure you collected all required information before reaching back to the Supervisor.\n    - Once you have gathered all the requested information, **immediately** call the Supervisor using \"send_customer_request_or_update()\" tool/function.\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Okay\" / \"Sure\" / \"Alright\"\n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\"\n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgment that the tool/function call was executed.\n- Acknowledge with a BRIEF (under * words), non-committal time-buying response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- **When to add a positive prefix** (\"Great!\", \"Perfect!\", etc.):\n  * ONLY if the customer just provided information YOU requested\n  * ONLY if the customer just answered YOUR question\n  * ONLY if the customer just confirmed something\n- **When NOT to add a prefix** (use time-buying phrase only):\n  * Customer just made their initial request\n  * Customer is asking you for help (not responding to you)\n  * No information exchange has occurred yet\n- If you're unsure, default to NO prefix\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER make another call to send_customer_request_or_update() in this situation - the Supervisor is already processing your request\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer **WITHOUT any acknowledgment, greeting, or preamble not specified by the Supervisor instructions.**\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe supervisor is requesting specific information from the customer in order to better assist them:\n- DO NOT respond to the customer with **any acknowledgment, greeting, or preamble not specified by the Supervisor instructions** in this situation.\n- ALWAYS collect one piece of information from the customer at a time. That is, asking one question to the customer, waiting for their response, and proceeding with the next. This is important to avoid overwhelming the customer.\n- Collect all requested customer information before calling the supervisor back.\n- Additional instructions for collecting customer information may be defined in <company_instructions>.\n\n\n### Wrap-up Conversation Protocol\nStart the Wrap-up Conversation Protocol ONLY when:\n - all Supervisor instructions have been followed\n - you are not waiting for any Supervisor response\n - the customer intent has been resolved according to them\n - Whenever the customer says \"No\" to topic-related follow-up question. This does NOT mean they don't need anything else. This mean they don't need assistance with their current question but might have another question or other request.\n\n Do this Steps:\n\n*. You MUST get explicit confirmation from the customer that they don't have any other question or assistance with anything else to procede to wrap-up the conversation.\n  - If you haven't already ask \"Is there any other question I can help you with?\" / \"Is there anything else I can assist with?\"\n    - Only if the customer says NO to your explicit question proceed to the next step (*).\n\n*. Call the Supervisor using \"send_customer_request_or_update()\" tool/function call requesting to end the conversation as the customer doesn't need assistance with anything else.\n   - Continue to Step *\n\n*. Give the customer a farewell by saying exactly this: \"\"Thank you for calling Assurant. Have a great day!\"\"\n    - No further steps from here \u2014 end of protocol.\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - **All conversations with the customer must be conducted in English.** You must speak, respond, and interact with customers exclusively in English throughout the entire conversation.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n  - Use the \"Speaking Style Output Formatting\" guidelines below convert numbers, currencies, acronyms, etc. to the correct format so that a Text-to-Speech system can read them aloud properly.\n\n### Speaking Style Output Formatting Guidelines\nUse the following guidelines to format your output text. Additional speaking style and formatting rules may be defined in <company_instructions>; if so, those rules take precedence over these general guidelines.\n\n#### Numbers\n- **Money/Currency**: Keep as-is e.g. \"$**\" \u2192 \"$**\" | \"$*.**\" \u2192 \"$*.**\" | \"$**,***\" \u2192 \"$**,***\"\n- **Numbers**: Keep as-is e.g. \"*.**\" \u2192 \"*.**\" | \"**%\" \u2192 \"**%\"\n- **Phone**: \"***-****\" \u2192 \"five five five, zero one two three\"\n- **Dates**: \"**/**/****\" \u2192 \"December twenty-fifth, twenty twenty-four\"\n- **Time**: \"*:** PM\" \u2192 \"three thirty P M\"\n\n#### Acronyms & Abbreviations\n- **Spell out with hyphens**: \"CEO\" \u2192 \"C-E-O\" | \"API\" \u2192 \"A-P-I\" | \"HTML\" \u2192 \"H-T-M-L\"\n- **Exceptions** (pronounceable as words): NASA, RADAR, PIN \u2192 keep as-is\n- **Common**: \"Dr.\" \u2192 \"Doctor\" | \"Mr.\" \u2192 \"Mister\" | \"etc.\" \u2192 \"et cetera\" | \"vs.\" \u2192 \"versus\"\n\n#### Symbols & Units\n- **Symbols**: \"&\" \u2192 \"and\" | \"@\" \u2192 \"at\" | \"#\" \u2192 \"number\" | \"+\" \u2192 \"plus\" | \"/\" \u2192 \"forward slash\"\n- **Units**: \"*ft\" \u2192 \"five feet\" | \"**mph\" \u2192 \"ten miles per hour\" | \"**\u00b0C\" \u2192 \"twenty-five degrees Celsius\"\n- **Email**: \"{customer_delayed.email:XXXX@XXXX.XXX}\" \u2192 \"john at example dot com\"\n- **URLs**: \"www.BWTyellow.org/find-message\" \u2192 \"w, w, w, dot, B, W, T, yellow, dot org, forward slash, find, hyphen, message\"\n\nIMPORTANT: All the speaking style rules apply on Supervisor (Reasoner) instructions as well.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you have already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n\n### Company information\nAssurant Auto's customer service attends car rental and insurance claim related issues.\n\n### Car Rental Inquiry Context\nWhen a customer enters into a conversation with you, assume their car is damaged and their intent relates to understanding rental benefits or getting a rental car while their car is being repaired.\n\n### Intent Inference Priority\n- In some instances customers might often state their situation rather than asking a direct question. In other instances customer queries might often be vague or lack enough details.\n- Given the context that you know about Assurant Auto's customer service, avoid stalling the interaction with requests for clarification or rephrasing if the need can be reasonably deduced from the context. Instead of asking qualifying questions to verify the situation, proactively deduce what the customer meant and call the Supervisor to handle the request.\n- **IMPORTANT:** Given the stressful nature of car issues, prioritize moving forward over perfect understanding. If you can identify ANY of these signals, proceed without clarification:\n- Keywords: car, vehicle, shop, repair, rental, coverage, claim, reimbursement\n- Statements about their car situation (even without a direct question)\n\n### Direct customer escalation request\n- The terms \"agent,\" \"operator,\" \"representative,\" \"live person\", \"human\" or \"Customer service\" are used interchangeably and should all be interpreted as a request for a \"agent\".\n\n## Handling \"No\" Responses in the context of reimbursement follow-up questions:**\n\nWhen you are guiding a customer through a multi-step process Reimbursement Flow and the customer answers \"No\" to a follow-up question:\n*. **Contextual Intent:** You MUST interpret this \"no\" ONLY as \"I am done with the reimbursement topic.\". A \"no\" to a reimbursement step is NOT a \"no\" to the whole conversation.\n*. **DO NOT Signal Call End:** DO NOT instruct the Supervisor that the customer has no further questions. DO NOT trigger or suggest ending the conversation.\n\n### Communicating with the Customer\n- Be warm and approachable, like a friendly advisor who's looking out for the customer.\n- Keep in mind that dealing with car issues and claims is stressful - your job is to make things easier.\n- Focus on being helpful and accurate. Stay conversational, but always give the full picture. When the Supervisor gives you information, share everything with the customer - don't cut corners or leave things out just to keep it short. The Supervisor's answers often include important contract specifics, compliance terms, and legal notices that need to be communicated completely. \n- **IMPORTANT RULE FOR STATUS UPDATES:** When you're telling the customer you're pulling up information, checking their contract, or looking at a file (like \"I'm checking your contract details right now\"):\n    *. **DON'T ASK QUESTIONS:** Never add questions like \"Anything else I can help with?\", \"What would you like to know?\", or \"While you wait...\"\n    *. **WHY:** You're actively getting the info they already asked for. It doesn't make sense to ask what else they need when you haven't finished helping them yet.\n- **Key principle:** Never say the exact same sentence or list twice in one response. It sounds robotic and unhelpful. If someone says \"repeat that\" or \"say that again\" or \"repeat the hours,\" they just want to hear it one more time.\n- **DO NOT** think \"repeat\" means say everything twice back-to-back. That's not what they're asking for.\n- Write responses that are easy to read aloud - no complicated symbols, currency formats, or date structures that need interpretation.\n- For phone numbers, format them with characters between digits and periods between groups, then say it twice (example: *, *, *...*, *, *...*, *, *, *. That's *, *, *...*, *, *...*, *, *, *.). This helps the speech system read it slowly.\n- For claim numbers, contract numbers, or V-I-Ns, read them digit-by-digit, separating them with commas for a natural pace, and repeat the entire number twice. (Example: if customer's claim number is \"********\" \u2192 \"*, *, *, *, *, *, *, *. That's *, *, *, *, *, *, *, *.\")\n- For emails, put a comma between each character and say it twice (example: r, o, @, assurant, dot, com. That's r, o, @, assurant, dot, com). This helps the speech system slow down.\n- When mentioning costs, always state dollars and cents clearly. Like if it's $***.**, say \"one hundred and twenty five dollars and ninety nine cents.\" If it's a round number like $**, just say \"twenty five dollars\" - no need to mention cents.\n\n### URL Communication Protocol\n\nWhen the Reasoner instructs you to provide a website URL to the customer (such as for uploading reimbursement documentation):\n\n## Step *: Prepare the Customer\n- Inform the customer that there is a website where they can upload documentation to get reimbursed\n- DO NOT provide the URL yet at this stage\n- Tell them you will read out the website address next\n- Ask: \"Are you ready to make note of the website address?\"\n- Wait for their response before proceeding\n\n## Step *a: If Customer Confirms Ready\n- If the URL contains multiple words in its path, separate them and put ellipses in between, for example \"vehiclecareplan\" should be spoken as \"vehicle ... care ... plan\"\n- Read out the URL clearly and naturally (e.g., \"The website is vehicle ... care ... plan ... dot com\")\n- After reading the URL, ask: \"Did you get that, or would you like me to repeat it?\"\n- If they confirm they got it correctly:\n  - Proceed with any remaining instructions from the Reasoner\n- If they need it repeated:\n  - Say: \"No problem, I'll spell it out for you letter by letter.\"\n  - Spell the URL slowly, one letter at a time. In between the words contained within a segment of the URL, insert ellipses. Note that the \"dot com\" portion of the URL which can be spoken without spelling it out.\n    - Example: \"V, E, H, I, C, L, E ... C, A, R, E ... P, L, A, N ... dot COM\"\n  - Pause briefly between each letter and break between words as shown in the example to ensure clarity\n  - After spelling, ask again: \"Did you get that, or would you like me to repeat it again?\".\n  - Repeat the spelling process as many times as needed until the customer confirms\n\n## Step *b: If Customer Says Not Ready\n- Respond politely and patiently: \"No problem at all. Just let me know when you're ready, and I'll provide the website address for you.\"\n- Wait for them to confirm they are ready\n- Once they confirm readiness, proceed with Step *a above\n\n### Formatting & Style & Terminology\n- Stay brief and stick to the facts of the contract. Explain things in plain, conversational English that anyone can understand.\n- **ALWAYS** use \"contract\" when referring to the customer's Vehicle Service Contract.\n- **NEVER** use \"policy\" to refer to the customer's contract or rental coverage.\n# Company Knowledge Base\n\nThis section is a knowledge base. **DO NOT** volunteer all of this information at once. Use this information *only* to answer a customer's specific questions.\n\nQuestion: What documents are required for reimbursement?\nAnswer: Reimbursement requires three essential documents: a letter of explanation describing your situation, original rental invoices and receipts, and your current physical mailing address.\n\nQuestion: When do I need to submit my documentation?\nAnswer: You must submit your documentation within ** days of rental completion, so I encourage you to submit it promptly to avoid missing the deadline.\n\nQuestion: How or where do I submit my reimbursement documentation?\nAnswer: The preferred method is to submit through https://vehiclecareplan.com/ by selecting resume existing reimbursement under the claim option. You can also reply to the original email you received during the claims process.\n\nQuestion: What are my payment options and how long does payment take?\nAnswer: You can choose Check payment, which is typically issued within ** business days after approval, or Electronic Payment (ACH), which is usually faster. If approved for ACH, you'll get an email with instructions.\n\nQuestion: Where can I rent a car from? \nAnswer: Once your claim is authorized you have the flexibility to choose from reputable rental agencies, including Enterprise, Hertz, Avis, Budget, Alamo, Sixt, Thrifty, and National.\n\n\n</company_instructions>\n\n### Company Large Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>"
+        }
+      },
+      {
+        "id": "ac3c2a6a-3c28-49b3-8c37-533239de8122",
+        "timestamp": "2026-02-24T23:38:19.722000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "Language": "\"EN\"",
+            "taskName": "\"CarRentalInquiry\"",
+            "VIN": "\"1FA6P8CF0K5202322\"",
+            "Timestamp": "\"2026-02-24\"",
+            "CiscoCallId": "\"9A016CBC111011F18D10AE90913CCC1A\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"0006GF2Q\"",
+            "TFN_DNIS": "\"4035297\"",
+            "PhoneNumber": "\"6614288182\"",
+            "asapp_callTransferId": "\"9A016CBC111011F18D10AE90913CCC1A\"",
+            "customerId": "\"unknown\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"2583784636-0286265841-2366680720-2436680730\""
+          }
+        }
+      },
+      {
+        "id": "c1c079c0-ce9c-4af6-b65b-d5608402bc09",
+        "timestamp": "2026-02-24T23:38:19.722000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "062fbe31-3e77-4f02-b07c-312cb79e6647",
+        "timestamp": "2026-02-24T23:38:19.772000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "23fd035e-644f-4e32-905c-794aef2a4e80",
+        "timestamp": "2026-02-24T23:38:19.774000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "asapp_externalConversationId": "\"2583784636-0286265841-2366680720-2436680730\"",
+            "TFN_DNIS": "\"4035297\"",
+            "callerIntent": "\"CAR_RENTAL\"",
+            "PhoneNumber": "\"6614288182\"",
+            "Language": "\"EN\"",
+            "asapp_callTransferId": "\"9A016CBC111011F18D10AE90913CCC1A\"",
+            "VIN": "\"1FA6P8CF0K5202322\"",
+            "Timestamp": "\"2026-02-24\"",
+            "CiscoCallId": "\"9A016CBC111011F18D10AE90913CCC1A\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"0006GF2Q\"",
+            "Identified": "\"true\""
+          }
+        }
+      },
+      {
+        "id": "1e19c353-dd07-4746-b0bf-1f79accdc844",
+        "timestamp": "2026-02-24T23:38:20.001000Z",
+        "source_system": "unknown",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "get_contract_and_claims_data_V2",
+          "parameters": {
+            "TFN_DNIS": "4035297",
+            "PhoneNumber": "6614288182",
+            "Language": "EN",
+            "VIN": "1FA6P8CF0K5202322",
+            "Timestamp": "2026-02-24",
+            "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "ContractNumber": "0006GF2Q"
+          },
+          "request_id": "f024a300-21f6-4586-a7a7-bb60794b0869",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+          "function_version": "5",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "ca3515ca-bd87-4928-9b80-64ac20e45341",
+        "timestamp": "2026-02-24T23:38:23.222000Z",
+        "source_system": "unknown",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "get_contract_and_claims_data_V2",
+            "parameters": {
+              "TFN_DNIS": "4035297",
+              "PhoneNumber": "6614288182",
+              "Language": "EN",
+              "VIN": "1FA6P8CF0K5202322",
+              "Timestamp": "2026-02-24",
+              "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "ContractNumber": "0006GF2Q"
+            },
+            "request_id": "f024a300-21f6-4586-a7a7-bb60794b0869",
+            "external_request_id": null,
+            "function_type": "api_connection",
+            "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+            "function_version": "5",
+            "is_confirmed": true,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {
+            "response": {
+              "contractClaims": {
+                "contract": [
+                  {
+                    "VIN": "1FA6P8CF0K5202322",
+                    "contractNumber": "0006GF2Q",
+                    "customerFirstName": "JESSI",
+                    "customerLastName": "DOMINGUEZ",
+                    "customerEmail": "unknown@fe-unknown.com",
+                    "customerAddress1": "621 42ND ST E #811",
+                    "customerCity": "WILLISTON",
+                    "customerCountry": "USA",
+                    "customerStateCode": "ND",
+                    "customerPostalCode": "58801",
+                    "expirationDate": "2026-07-08",
+                    "status": "Active",
+                    "dealerId": "CO000015",
+                    "accountType": "Dealer",
+                    "productName": "Limited Warranty",
+                    "productType": "LW",
+                    "administrator": "Automotive Warranty Services, Inc.",
+                    "customerHomePhone": "6614288182",
+                    "expirationMiles": 150000,
+                    "deductible": 200,
+                    "deductibleOutOfNetwork": 200,
+                    "inServiceDate": "2024-07-08",
+                    "sellingDealerName": "HEUBERGER MOTORS",
+                    "sellingDealerAddress": "1080 Motor City Dr, Colorado Springs, CO, 80905-7311",
+                    "sellingDealerPhone": "7194751920",
+                    "model": "MUSTANG",
+                    "make": "FORD",
+                    "vehicleYear": 2019,
+                    "towAmount": 0,
+                    "isFE": false,
+                    "formNumber": "QLW2003PT0913",
+                    "accountTypeNumber": "Mech1",
+                    "termsAndConditions": "https://api.assurant.com/forms/QLW2003PT0913",
+                    "tieBackDistance": 40,
+                    "specCoveragePlanCode": "Powertrain w/o SG",
+                    "effectiveDate": "2024-07-08",
+                    "productCode": "QLJARXRQ",
+                    "dealerType": "Primary",
+                    "expirationType": "AOTCM",
+                    "rentalIndicator": "Y",
+                    "claims": [],
+                    "termsStructuredText": "D\nE\nA\nL\nE\nR\nC\nO\nP\nY\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)\nP\nO\nW\nE\nR\nT\nR\nA\nI\nN\nL\nI\nM\nI\nT\nE\nD\nW\nA\nR\nR\nA\nN\nT\nY\nS\ni\ng\nn\ne\nd\nB\ny\nC\nu\ns\nt\no\nm\ne\nr\nS\ni\ng\nn\ne\nd\nB\ny\nD\ne\na\nl\ne\nr\n\u2019\ns\nR\ne\np\nr\ne\ns\ne\nn\nt\na\nt\ni\nv\ne\nD\ne\na\nl\ne\nr\nN\nu\nm\nb\ne\nr\nN\na\nm\ne\nA\nd\nd\nr\ne\ns\ns\nT\ne\nl\ne\np\nh\no\nn\ne\nC\ni\nt\ny\nS\nt\na\nt\ne\nZ\ni\np\nC\no\nd\ne\n2\n.\nC\nu\ns\nt\no\nm\ne\nr\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\n3\n.\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\n4\n.\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nI\nN\nF\nO\nR\nM\nA\nT\nI\nO\nN\nS\nC\nH\nE\nD\nU\nL\nE\nV\nI\nN\nY\ne\na\nr\nM\na\nk\ne\nM\no\nd\ne\nl\nC\nu\nr\nr\ne\nn\nt\nO\nd\no\nm\ne\nt\ne\nr\nR\ne\na\nd\ni\nn\ng\nV\ne\nh\ni\nc\nl\ne\nP\nu\nr\nc\nh\na\ns\ne\nD\na\nt\ne\n1\n.\nV\ne\nh\ni\nc\nl\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nM\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\n:\nY\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nm\nu\ns\nt\nb\ne\ns\ne\nr\nv\ni\nc\ne\nd\na\nn\nd\nr\ne\nc\ne\ni\nv\ne\na\nl\nl\no\nf\nt\nh\ne\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\ns\ni\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\nO\nw\nn\ne\nr\ns\nM\na\nn\nu\na\nl\n.\nY\no\nu\nm\nu\ns\nt\nr\ne\nt\na\ni\nn\nc\no\np\ni\ne\ns\no\nf\na\nl\nl\nc\no\nm\np\nl\ne\nt\ne\nd\nr\ne\np\na\ni\nr\no\nr\nd\ne\nr\ns\ns\nh\no\nw\ni\nn\ng\nt\nh\ne\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\ns\ne\nr\nv\ni\nc\ne\ns\np\ne\nr\nf\no\nr\nm\ne\nd\nd\nu\nr\ni\nn\ng\nt\nh\ne\nc\no\nv\ne\nr\na\ng\ne\np\ne\nr\ni\no\nd\n.\nF\na\ni\nl\nu\nr\ne\nt\no\ns\nh\no\nw\np\nr\no\no\nf\nt\nh\na\nt\na\nl\nl\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\nn\nd\nr\ne\np\na\ni\nr\ns\nh\na\nv\ne\nb\ne\ne\nn\np\ne\nr\nf\no\nr\nm\ne\nd\nm\na\ny\nv\no\ni\nd\nc\no\nv\ne\nr\na\ng\ne\n.\nR\ne\np\na\ni\nr\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\n:\nY\no\nu\na\nr\ne\nr\ne\nq\nu\ni\nr\ne\nd\nt\no\nr\ne\nt\nu\nr\nn\nt\no\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\no\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\nf\no\nr\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nu\nn\nd\ne\nr\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nI\nf\nt\nr\na\nv\ne\nl\ni\nn\ng\na\nw\na\ny\nf\nr\no\nm\nh\no\nm\ne\n,\np\nl\ne\na\ns\ne\nc\no\nn\nt\na\nc\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\na\nt\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\nf\no\nr\nd\ni\nr\ne\nc\nt\ni\no\nn\ns\nt\no\nn\ne\na\nr\ne\ns\nt\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\n.\nD\ne\nd\nu\nc\nt\ni\nb\nl\ne\n:\n$\n2\n0\n0\nd\ne\nd\nu\nc\nt\ni\nb\nl\ne\ni\ns\nt\nh\ne\na\nm\no\nu\nn\nt\ny\no\nu\nm\nu\ns\nt\np\na\ny\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\np\ne\nr\nv\ni\ns\ni\nt\n.\nA\nl\nl\nr\ne\np\na\ni\nr\ns\nm\nu\ns\nt\nb\ne\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nb\ny\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\np\nr\ni\no\nr\nt\no\nb\ne\ng\ni\nn\nn\ni\nn\ng\na\nn\ny\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nd\no\ne\ns\nn\no\nt\nc\no\nv\ne\nr\ns\ne\na\nl\ns\na\nn\nd\ng\na\ns\nk\ne\nt\ns\nu\nn\nl\ne\ns\ns\ni\nn\nc\no\nn\nj\nu\nn\nc\nt\ni\no\nn\nw\ni\nt\nh\na\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\n.\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nP\ne\nr\ni\no\nd\n:\n2\nY\ne\na\nr\ns\no\nr\nu\np\nt\no\n1\n5\n0\n,\n0\n0\n0\nM\ni\nl\ne\ns\nT\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nb\ne\ng\ni\nn\ns\no\nn\nt\nh\ne\nA\ng\nr\ne\ne\nm\ne\nn\nt\nD\na\nt\ne\n(\nS\ne\ne\nK\ne\ny\nT\ne\nr\nm\ns\n)\na\nn\nd\na\nt\no\nd\no\nm\ne\nt\ne\nr\nm\ni\nl\ne\ns\n\u201c\n0\n\u201d\n.\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\ns\nh\na\nl\nl\ne\nn\nd\n2\ny\ne\na\nr\ns\nf\nr\no\nm\nt\nh\ne\nA\ng\nr\ne\ne\nm\ne\nn\nt\nD\na\nt\ne\no\nr\nw\nh\ne\nn\n1\n5\n0\n,\n0\n0\n0\nm\ni\nl\ne\ns\na\nr\ne\nr\ne\ng\ni\ns\nt\ne\nr\ne\nd\no\nn\nt\nh\ne\no\nd\no\nm\ne\nt\ne\nr\n,\nw\nh\ni\nc\nh\ne\nv\ne\nr\no\nc\nc\nu\nr\ns\nf\ni\nr\ns\nt\n.\nB\nu\ny\ne\nr\nN\na\nm\ne\nC\no\n-\nB\nu\ny\ne\nr\nN\na\nm\ne\nS\nt\nr\ne\ne\nt\nS\nt\nr\ne\ne\nt\nC\ni\nt\ny\n,\nS\nt\na\nt\ne\n,\nZ\ni\np\nC\no\nd\ne\nC\ni\nt\ny\n,\nS\nt\na\nt\ne\n,\nZ\ni\np\nC\no\nd\ne\nT\ne\nl\ne\np\nh\no\nn\ne\nH\nm\nC\ne\nl\nl\nT\ne\nl\ne\np\nh\no\nn\ne\nH\nm\nC\ne\nl\nl\nE\n-\nm\na\ni\nl\nA\nd\nd\nr\ne\ns\ns\nE\n-\nm\na\ni\nl\nA\nd\nd\nr\ne\ns\ns\nC\nU\nS\nT\nO\nM\nE\nR\nC\nO\nP\nY\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)\nS\ni\ng\nn\ne\nd\nB\ny\nC\nu\ns\nt\no\nm\ne\nr\nS\ni\ng\nn\ne\nd\nB\ny\nD\ne\na\nl\ne\nr\n\u2019\ns\nR\ne\np\nr\ne\ns\ne\nn\nt\na\nt\ni\nv\ne\nP\nO\nW\nE\nR\nT\nR\nA\nI\nN\nL\nI\nM\nI\nT\nE\nD\nW\nA\nR\nR\nA\nN\nT\nY\nD\ne\na\nl\ne\nr\nN\nu\nm\nb\ne\nr\nN\na\nm\ne\nA\nd\nd\nr\ne\ns\ns\nT\ne\nl\ne\np\nh\no\nn\ne\nC\ni\nt\ny\nS\nt\na\nt\ne\nZ\ni\np\nC\no\nd\ne\n2\n.\nC\nu\ns\nt\no\nm\ne\nr\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\n3\n.\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\n4\n.\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nI\nN\nF\nO\nR\nM\nA\nT\nI\nO\nN\nS\nC\nH\nE\nD\nU\nL\nE\nV\nI\nN\nY\ne\na\nr\nM\na\nk\ne\nM\no\nd\ne\nl\nC\nu\nr\nr\ne\nn\nt\nO\nd\no\nm\ne\nt\ne\nr\nR\ne\na\nd\ni\nn\ng\nV\ne\nh\ni\nc\nl\ne\nP\nu\nr\nc\nh\na\ns\ne\nD\na\nt\ne\n1\n.\nV\ne\nh\ni\nc\nl\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nM\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\n:\nY\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nm\nu\ns\nt\nb\ne\ns\ne\nr\nv\ni\nc\ne\nd\na\nn\nd\nr\ne\nc\ne\ni\nv\ne\na\nl\nl\no\nf\nt\nh\ne\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\ns\ni\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\nO\nw\nn\ne\nr\ns\nM\na\nn\nu\na\nl\n.\nY\no\nu\nm\nu\ns\nt\nr\ne\nt\na\ni\nn\nc\no\np\ni\ne\ns\no\nf\na\nl\nl\nc\no\nm\np\nl\ne\nt\ne\nd\nr\ne\np\na\ni\nr\no\nr\nd\ne\nr\ns\ns\nh\no\nw\ni\nn\ng\nt\nh\ne\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\ns\ne\nr\nv\ni\nc\ne\ns\np\ne\nr\nf\no\nr\nm\ne\nd\nd\nu\nr\ni\nn\ng\nt\nh\ne\nc\no\nv\ne\nr\na\ng\ne\np\ne\nr\ni\no\nd\n.\nF\na\ni\nl\nu\nr\ne\nt\no\ns\nh\no\nw\np\nr\no\no\nf\nt\nh\na\nt\na\nl\nl\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\nn\nd\nr\ne\np\na\ni\nr\ns\nh\na\nv\ne\nb\ne\ne\nn\np\ne\nr\nf\no\nr\nm\ne\nd\nm\na\ny\nv\no\ni\nd\nc\no\nv\ne\nr\na\ng\ne\n.\nR\ne\np\na\ni\nr\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\n:\nY\no\nu\na\nr\ne\nr\ne\nq\nu\ni\nr\ne\nd\nt\no\nr\ne\nt\nu\nr\nn\nt\no\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\no\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\nf\no\nr\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nu\nn\nd\ne\nr\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nI\nf\nt\nr\na\nv\ne\nl\ni\nn\ng\na\nw\na\ny\nf\nr\no\nm\nh\no\nm\ne\n,\np\nl\ne\na\ns\ne\nc\no\nn\nt\na\nc\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\na\nt\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\nf\no\nr\nd\ni\nr\ne\nc\nt\ni\no\nn\ns\nt\no\nn\ne\na\nr\ne\ns\nt\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\n.\nD\ne\nd\nu\nc\nt\ni\nb\nl\ne\n:\n$\n2\n0\n0\nd\ne\nd\nu\nc\nt\ni\nb\nl\ne\ni\ns\nt\nh\ne\na\nm\no\nu\nn\nt\ny\no\nu\nm\nu\ns\nt\np\na\ny\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\np\ne\nr\nv\ni\ns\ni\nt\n.\nA\nl\nl\nr\ne\np\na\ni\nr\ns\nm\nu\ns\nt\nb\ne\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nb\ny\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\np\nr\ni\no\nr\nt\no\nb\ne\ng\ni\nn\nn\ni\nn\ng\na\nn\ny\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nd\no\ne\ns\nn\no\nt\nc\no\nv\ne\nr\ns\ne\na\nl\ns\na\nn\nd\ng\na\ns\nk\ne\nt\ns\nu\nn\nl\ne\ns\ns\ni\nn\nc\no\nn\nj\nu\nn\nc\nt\ni\no\nn\nw\ni\nt\nh\na\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\n.\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nP\ne\nr\ni\no\nd\n:\n2\nY\ne\na\nr\ns\no\nr\nu\np\nt\no\n1\n5\n0\n,\n0\n0\n0\nM\ni\nl\ne\ns\nT\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nb\ne\ng\ni\nn\ns\no\nn\nt\nh\ne\nA\ng\nr\ne\ne\nm\ne\nn\nt\nD\na\nt\ne\n(\nS\ne\ne\nK\ne\ny\nT\ne\nr\nm\ns\n)\na\nn\nd\na\nt\no\nd\no\nm\ne\nt\ne\nr\nm\ni\nl\ne\ns\n\u201c\n0\n\u201d\n.\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\ns\nh\na\nl\nl\ne\nn\nd\n2\ny\ne\na\nr\ns\nf\nr\no\nm\nt\nh\ne\nA\ng\nr\ne\ne\nm\ne\nn\nt\nD\na\nt\ne\no\nr\nw\nh\ne\nn\n1\n5\n0\n,\n0\n0\n0\nm\ni\nl\ne\ns\na\nr\ne\nr\ne\ng\ni\ns\nt\ne\nr\ne\nd\no\nn\nt\nh\ne\no\nd\no\nm\ne\nt\ne\nr\n,\nw\nh\ni\nc\nh\ne\nv\ne\nr\no\nc\nc\nu\nr\ns\nf\ni\nr\ns\nt\n.\nB\nu\ny\ne\nr\nN\na\nm\ne\nC\no\n-\nB\nu\ny\ne\nr\nN\na\nm\ne\nS\nt\nr\ne\ne\nt\nS\nt\nr\ne\ne\nt\nC\ni\nt\ny\n,\nS\nt\na\nt\ne\n,\nZ\ni\np\nC\no\nd\ne\nC\ni\nt\ny\n,\nS\nt\na\nt\ne\n,\nZ\ni\np\nC\no\nd\ne\nT\ne\nl\ne\np\nh\no\nn\ne\nH\nm\nC\ne\nl\nl\nT\ne\nl\ne\np\nh\no\nn\ne\nH\nm\nC\ne\nl\nl\nE\n-\nm\na\ni\nl\nA\nd\nd\nr\ne\ns\ns\nE\n-\nm\na\ni\nl\nA\nd\nd\nr\ne\ns\ns\nK\nE\nY\nT\nE\nR\nM\nS\n\u2022\n\u201c\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\n\u201d\nm\ne\na\nn\ns\nA\nu\nt\no\nm\no\nt\ni\nv\ne\nW\na\nr\nr\na\nn\nt\ny\nS\ne\nr\nv\ni\nc\ne\ns\n,\nI\nn\nc\n.\n,\n1\n7\n5\nW\ne\ns\nt\nJ\na\nc\nk\ns\no\nn\nB\nl\nv\nd\n.\n,\nC\nh\ni\nc\na\ng\no\n,\nI\nl\nl\ni\nn\no\ni\ns\n,\n6\n0\n6\n0\n4\n,\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\n.\n\u2022\n\u201c\nA\nf\nf\ni\nl\ni\na\nt\ne\n\u201d\nm\ne\na\nn\ns\na\nn\ny\nd\ne\na\nl\ne\nr\ns\nh\ni\np\no\nw\nn\ne\nd\nb\ny\n,\no\nw\nn\ni\nn\ng\no\nr\nu\nn\nd\ne\nr\nc\no\nm\nm\no\nn\no\nw\nn\ne\nr\ns\nh\ni\np\nw\ni\nt\nh\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\n.\n\u2022\n\u201c\nA\ng\nr\ne\ne\nm\ne\nn\nt\nD\na\nt\ne\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\nd\na\nt\ne\ny\no\nu\np\nu\nr\nc\nh\na\ns\ne\nd\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\na\ns\ns\nh\no\nw\nn\ni\nn\nS\ne\nc\nt\ni\no\nn\n1\no\nn\nt\nh\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nS\nc\nh\ne\nd\nu\nl\ne\na\nn\nd\nt\nh\ne\nd\na\nt\ne\no\nn\nw\nh\ni\nc\nh\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nb\ne\ng\ni\nn\ns\n.\n\u2022\n\u201c\nB\nr\ne\na\nk\nd\no\nw\nn\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\nf\na\ni\nl\nu\nr\ne\no\nf\na\nn\ny\no\nr\ni\ng\ni\nn\na\nl\no\nr\nl\ni\nk\ne\nr\ne\np\nl\na\nc\ne\nm\ne\nn\nt\np\na\nr\nt\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nt\no\np\ne\nr\nf\no\nr\nm\ni\nt\ns\ni\nn\nt\ne\nn\nd\ne\nd\nf\nu\nn\nc\nt\ni\no\nn\n(\ns\n)\ni\nn\nn\no\nr\nm\na\nl\ns\ne\nr\nv\ni\nc\ne\n,\np\nr\no\nv\ni\nd\ni\nn\ng\ni\nt\nh\na\ns\nr\ne\nc\ne\ni\nv\ne\nd\na\nl\nl\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\ni\nn\nt\nh\ne\nO\nw\nn\ne\nr\ns\nM\na\nn\nu\na\nl\n.\nB\nr\ne\na\nk\nd\no\nw\nn\nd\no\ne\ns\nn\no\nt\ni\nn\nc\nl\nu\nd\ne\nt\nh\ne\ng\nr\na\nd\nu\na\nl\nr\ne\nd\nu\nc\nt\ni\no\nn\ni\nn\no\np\ne\nr\na\nt\ni\nn\ng\np\ne\nr\nf\no\nr\nm\na\nn\nc\ne\nc\na\nu\ns\ne\nd\nb\ny\nw\ne\na\nr\na\nn\nd\nt\ne\na\nr\nw\nh\ne\nr\ne\na\nf\na\ni\nl\nu\nr\ne\nh\na\ns\nn\no\nt\no\nc\nc\nu\nr\nr\ne\nd\n.\n\u2022\n\u201c\nC\no\ns\nt\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\nr\ne\na\ns\no\nn\na\nb\nl\ne\na\nn\nd\nc\nu\ns\nt\no\nm\na\nr\ny\nc\nh\na\nr\ng\ne\ns\nf\no\nr\np\na\nr\nt\ns\na\nn\nd\nl\na\nb\no\nr\nn\ne\nc\ne\ns\ns\na\nr\ny\nt\no\nr\ne\np\na\ni\nr\no\nr\nr\ne\np\nl\na\nc\ne\nt\nh\ne\np\na\nr\nt\ns\nc\no\nv\ne\nr\ne\nd\n.\nT\nh\ne\ns\ne\nc\nh\na\nr\ng\ne\ns\ns\nh\na\nl\nl\nn\no\nt\ne\nx\nc\ne\ne\nd\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\ns\nu\ng\ng\ne\ns\nt\ne\nd\nr\ne\nt\na\ni\nl\np\nr\ni\nc\ne\nf\no\nr\np\na\nr\nt\ns\na\nn\nd\nl\na\nb\no\nr\na\nl\nl\no\nw\na\nn\nc\ne\ns\nd\ne\nr\ni\nv\ne\nd\nf\nr\no\nm\nn\na\nt\ni\no\nn\na\nl\nl\ny\nr\ne\nc\no\ng\nn\ni\nz\ne\nd\nl\na\nb\no\nr\nt\ni\nm\ne\np\nu\nb\nl\ni\nc\na\nt\ni\no\nn\ns\n.\n\u2022\n\u201c\nD\ne\nd\nu\nc\nt\ni\nb\nl\ne\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\na\nm\no\nu\nn\nt\ny\no\nu\nm\nu\ns\nt\np\na\ny\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\np\ne\nr\nv\ni\ns\ni\nt\n.\nT\nh\ne\nd\ne\nd\nu\nc\nt\ni\nb\nl\ne\ni\ns\n$\n2\n0\n0\np\ne\nr\nv\ni\ns\ni\nt\n.\n\u2022\n\u201c\nR\ne\np\na\ni\nr\nF\na\nc\ni\nl\ni\nt\ny\n\u201d\nm\ne\na\nn\ns\na\nf\nr\na\nn\nc\nh\ni\ns\ne\nd\na\nu\nt\no\nm\no\nb\ni\nl\ne\nd\ne\na\nl\ne\nr\no\nr\nl\ni\nc\ne\nn\ns\ne\nd\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\nt\nh\na\nt\np\nr\no\nv\ni\nd\ne\ns\na\nw\nr\ni\nt\nt\ne\nn\np\na\nr\nt\ns\na\nn\nd\nl\na\nb\no\nr\ng\nu\na\nr\na\nn\nt\ne\ne\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\no\nf\nn\no\nt\nl\ne\ns\ns\nt\nh\na\nn\n6\nm\no\nn\nt\nh\ns\na\nn\nd\n6\n,\n0\n0\n0\nm\ni\nl\ne\ns\n.\nR\ne\np\na\ni\nr\ns\np\ne\nr\nf\no\nr\nm\ne\nd\nb\ny\na\nn\ny\nf\na\nc\ni\nl\ni\nt\ny\nm\nu\ns\nt\nr\ne\nc\ne\ni\nv\ne\na\nu\nt\nh\no\nr\ni\nz\na\nt\ni\no\nn\nf\nr\no\nm\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\np\nr\ni\no\nr\nt\no\nb\ne\ng\ni\nn\nn\ni\nn\ng\nr\ne\np\na\ni\nr\ns\n.\n\u2022\n\u201c\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\nd\ne\na\nl\ne\nr\nf\nr\no\nm\nw\nh\no\nm\ny\no\nu\np\nu\nr\nc\nh\na\ns\ne\nd\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\na\ns\ns\nh\no\nw\nn\ni\nn\nS\ne\nc\nt\ni\no\nn\n3\no\nn\nt\nh\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nS\nc\nh\ne\nd\nu\nl\ne\n.\n\u2022\n\u201c\nV\ne\nh\ni\nc\nl\ne\n\u201d\nm\ne\na\nn\ns\nt\nh\ne\nc\no\nv\ne\nr\ne\nd\nc\na\nr\no\nr\nt\nr\nu\nc\nk\na\ns\ns\nh\no\nw\nn\ni\nn\nS\ne\nc\nt\ni\no\nn\n1\no\nn\nt\nh\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nS\nc\nh\ne\nd\nu\nl\ne\n.\n\u2022\n\u201c\nW\na\nr\nr\na\nn\nt\ny\n\u201d\nm\ne\na\nn\ns\na\nn\ny\nw\na\nr\nr\na\nn\nt\ny\no\nf\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n,\ns\nt\na\nt\ne\nr\ne\nq\nu\ni\nr\ne\nd\nw\na\nr\nr\na\nn\nt\ny\n,\nd\ne\na\nl\ne\nr\nw\na\nr\nr\na\nn\nt\ny\no\nr\na\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\ng\nu\na\nr\na\nn\nt\ne\ne\n.\n\u2022\n\u201c\nW\ne\n,\n\u201d\n\u201c\nu\ns\n\u201d\n,\n\u201c\no\nu\nr\n\u201d\nm\ne\na\nn\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\ni\ns\ns\nu\ni\nn\ng\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\na\ns\ns\nh\no\nw\nn\ni\nn\nS\ne\nc\nt\ni\no\nn\n3\no\nn\nt\nh\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nS\nc\nh\ne\nd\nu\nl\ne\n.\n\u2022\n\u201c\nY\no\nu\n\u201d\na\nn\nd\n\u201c\ny\no\nu\nr\n\u201d\nm\ne\na\nn\nt\nh\ne\nc\nu\ns\nt\no\nm\ne\nr\n(\np\nr\ni\nv\na\nt\ne\ni\nn\nd\ni\nv\ni\nd\nu\na\nl\n)\na\ns\ns\nh\no\nw\nn\ni\nn\nS\ne\nc\nt\ni\no\nn\n2\no\nn\nt\nh\ne\nI\nn\nf\no\nr\nm\na\nt\ni\no\nn\nS\nc\nh\ne\nd\nu\nl\ne\n,\nw\nh\no\ni\ns\na\nl\ns\no\nt\nh\ne\no\nr\ni\ng\ni\nn\na\nl\nh\no\nl\nd\ne\nr\no\nf\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nW\nH\nA\nT\nT\nH\nI\nS\nP\nO\nW\nE\nR\nT\nR\nA\nI\nN\nL\nI\nM\nI\nT\nE\nD\nW\nA\nR\nR\nA\nN\nT\nY\nC\nO\nV\nE\nR\nS\nD\nu\nr\ni\nn\ng\nt\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nP\ne\nr\ni\no\nd\n,\nw\ne\nw\ni\nl\nl\np\na\ny\na\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\n,\no\nr\na\nt\no\nu\nr\no\np\nt\ni\no\nn\n,\nr\ne\ni\nm\nb\nu\nr\ns\ne\ny\no\nu\nt\nh\ne\nc\no\ns\nt\nt\no\nr\ne\nm\ne\nd\ny\na\nn\ny\nb\nr\ne\na\nk\nd\no\nw\nn\no\nf\nt\nh\ne\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\ns\nl\ne\ns\ns\ny\no\nu\nr\nd\ne\nd\nu\nc\nt\ni\nb\nl\ne\n.\nA\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\n\u2019\ns\no\np\nt\ni\no\nn\n,\nr\ne\np\nl\na\nc\ne\nm\ne\nn\nt\np\na\nr\nt\ns\nu\ns\ne\nd\ni\nn\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\nm\na\ny\ni\nn\nc\nl\nu\nd\ne\nn\ne\nw\n,\nr\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nd\n,\nu\ns\ne\nd\no\nr\nn\no\nn\n-\no\nr\ni\ng\ni\nn\na\nl\ne\nq\nu\ni\np\nm\ne\nn\nt\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\np\na\nr\nt\ns\n.\nT\nh\ne\nf\no\nl\nl\no\nw\ni\nn\ng\np\na\nr\nt\ns\na\nr\ne\nc\no\nv\ne\nr\ne\nd\nu\nn\nd\ne\nr\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nP\na\nr\nt\ns\nn\no\nt\nl\ni\ns\nt\ne\nd\na\nr\ne\nn\no\nt\nc\no\nv\ne\nr\ne\nd\n.\n1\n.\nE\nN\nG\nI\nN\nE\n-\nG\na\ns\no\nl\ni\nn\ne\nE\nn\ng\ni\nn\ne\n-\nC\ny\nl\ni\nn\nd\ne\nr\nb\nl\no\nc\nk\n,\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\nl\nu\nb\nr\ni\nc\na\nt\ne\nd\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\nc\nr\na\nn\nk\ns\nh\na\nf\nt\n,\nr\no\nd\na\nn\nd\nm\na\ni\nn\nb\ne\na\nr\ni\nn\ng\ns\n,\nc\na\nm\nb\ne\na\nr\ni\nn\ng\ns\n,\ne\nx\np\na\nn\ns\ni\no\nn\n(\nf\nr\ne\ne\nz\ne\n)\np\nl\nu\ng\ns\n,\nc\no\nn\nn\ne\nc\nt\ni\nn\ng\nr\no\nd\ns\n,\nw\nr\ni\ns\nt\np\ni\nn\ns\n,\np\ni\ns\nt\no\nn\ns\n,\np\ni\ns\nt\no\nn\nr\ni\nn\ng\ns\n,\nc\na\nm\ns\nh\na\nf\nt\n,\nc\na\nm\nt\no\nw\ne\nr\n,\nl\ni\nf\nt\ne\nr\ns\n,\nc\ny\nl\ni\nn\nd\ne\nr\nh\ne\na\nd\n,\nv\na\nl\nv\ne\ns\na\nn\nd\ng\nu\ni\nd\ne\ns\n,\nv\na\nl\nv\ne\ns\np\nr\ni\nn\ng\ns\n,\nr\no\nc\nk\ne\nr\na\nr\nm\ns\n(\nc\na\nm\nf\no\nl\nl\no\nw\ne\nr\ns\n)\n,\np\nu\ns\nh\nr\no\nd\ns\n,\nt\ni\nm\ni\nn\ng\nc\nh\na\ni\nn\nh\no\nu\ns\ni\nn\ng\n(\nc\no\nv\ne\nr\n)\n,\nt\ni\nm\ni\nn\ng\nc\nh\na\ni\nn\na\nn\nd\ns\np\nr\no\nc\nk\ne\nt\ns\n,\nt\ni\nm\ni\nn\ng\nb\ne\nl\nt\na\nn\nd\np\nu\nl\nl\ne\ny\ns\n,\nt\ni\nm\ni\nn\ng\nb\ne\nl\nt\nt\ne\nn\ns\ni\no\nn\ne\nr\n,\ni\nn\nt\na\nk\ne\na\nn\nd\ne\nx\nh\na\nu\ns\nt\nm\na\nn\ni\nf\no\nl\nd\ns\n,\nf\nl\ny\nw\nh\ne\ne\nl\n,\nb\na\nl\na\nn\nc\ne\ns\nh\na\nf\nt\ns\n,\nh\na\nr\nm\no\nn\ni\nc\nb\na\nl\na\nn\nc\ne\nr\na\nn\nd\nr\ne\nt\na\ni\nn\ne\nr\nb\no\nl\nt\n,\nc\nr\na\nn\nk\ns\nh\na\nf\nt\np\nu\nl\nl\ne\ny\n,\nv\na\nl\nv\ne\nc\no\nv\ne\nr\ns\n,\no\ni\nl\np\na\nn\n,\no\ni\nl\np\nu\nm\np\na\nn\nd\np\nr\ne\ns\ns\nu\nr\ne\nr\ne\nl\ni\ne\nf\nv\na\nl\nv\ne\n,\ne\nn\ng\ni\nn\ne\no\ni\nl\nc\no\no\nl\ne\nr\nh\no\ns\ne\ns\n,\no\ni\nl\nf\ni\nl\nt\ne\nr\na\nd\na\np\nt\ne\nr\n/\nh\no\nu\ns\ni\nn\ng\n,\ne\nn\ng\ni\nn\ne\no\ni\nl\ns\ne\nn\nd\ni\nn\ng\nu\nn\ni\nt\n,\ne\nn\ng\ni\nn\ne\nm\no\nu\nn\nt\ns\n,\nw\na\nt\ne\nr\np\nu\nm\np\n,\nt\ne\nm\np\ne\nr\na\nt\nu\nr\ne\ns\ne\nn\nd\ni\nn\ng\nu\nn\ni\nt\n,\nt\nh\ne\nr\nm\no\ns\nt\na\nt\na\nn\nd\nh\no\nu\ns\ni\nn\ng\n,\nf\nu\ne\nl\ns\nu\np\np\nl\ny\np\nu\nm\np\n,\nv\na\nc\nu\nu\nm\np\nu\nm\np\n,\nd\ni\np\ns\nt\ni\nc\nk\na\nn\nd\nt\nu\nb\ne\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n.\nT\nu\nr\nb\no\nc\nh\na\nr\ng\ne\nd\n/\nS\nu\np\ne\nr\nc\nh\na\nr\ng\ne\nd\n/\nR\no\nt\na\nr\ny\n/\nD\ni\ne\ns\ne\nl\n/\nE\nn\nh\na\nn\nc\ne\nd\nE\nn\ng\ni\nn\ne\ns\n-\nA\nl\nl\no\nf\nt\nh\ne\na\nb\no\nv\ne\nl\ni\ns\nt\ne\nd\np\na\nr\nt\ns\no\nr\ne\nq\nu\ni\nv\na\nl\ne\nn\nt\np\nl\nu\ns\n:\nt\nu\nr\nb\no\nc\nh\na\nr\ng\ne\nr\n,\nw\na\ns\nt\ne\ng\na\nt\ne\nc\no\nn\nt\nr\no\nl\nl\ne\nr\n,\ni\nn\nt\ne\nr\nc\no\no\nl\ne\nr\n,\nh\na\nr\nd\nl\ni\nn\ne\ns\n,\nc\no\nm\np\nr\ne\ns\ns\no\nr\n,\nc\nl\nu\nt\nc\nh\na\nn\nd\np\nu\nl\nl\ne\ny\n,\nb\ny\np\na\ns\ns\nv\na\nl\nv\ne\n,\ni\nn\nj\ne\nc\nt\ni\no\nn\np\nu\nm\np\n,\nl\ni\nn\ne\ns\na\nn\nd\nn\no\nz\nz\nl\ne\ns\n.\n2\n.\nT\nR\nA\nN\nS\nM\nI\nS\nS\nI\nO\nN\n-\nA\nu\nt\no\nm\na\nt\ni\nc\n-\nC\na\ns\ne\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\nl\nu\nb\nr\ni\nc\na\nt\ne\nd\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\no\ni\nl\np\nu\nm\np\n,\nv\na\nl\nv\ne\nb\no\nd\ny\n,\nt\no\nr\nq\nu\ne\nc\no\nn\nv\ne\nr\nt\ne\nr\n,\nv\na\nc\nu\nu\nm\nm\no\nd\nu\nl\na\nt\no\nr\n,\ng\no\nv\ne\nr\nn\no\nr\n,\nm\na\ni\nn\ns\nh\na\nf\nt\n,\nc\nl\nu\nt\nc\nh\ne\ns\n,\nb\na\nn\nd\ns\n,\nd\nr\nu\nm\ns\n,\ng\ne\na\nr\ns\ne\nt\ns\n,\nb\ne\na\nr\ni\nn\ng\ns\n,\nb\nu\ns\nh\ni\nn\ng\ns\n,\ns\ne\na\nl\ni\nn\ng\nr\ni\nn\ng\ns\n,\nT\nV\nc\na\nb\nl\ne\n,\ns\no\nl\ne\nn\no\ni\nd\ns\n,\ne\nl\ne\nc\nt\nr\no\nn\ni\nc\ns\nh\ni\nf\nt\nc\no\nn\nt\nr\no\nl\nu\nn\ni\nt\n,\nt\nr\na\nn\ns\nm\ni\ns\ns\ni\no\nn\nm\no\nu\nn\nt\ns\n,\nc\no\no\nl\ne\nr\n,\nc\no\no\nl\ne\nr\nh\no\ns\ne\ns\na\nn\nd\nh\na\nr\nd\nl\ni\nn\ne\ns\n,\nd\ni\np\ns\nt\ni\nc\nk\na\nn\nd\nt\nu\nb\ne\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n.\nS\nt\na\nn\nd\na\nr\nd\n-\nC\na\ns\ne\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\nl\nu\nb\nr\ni\nc\na\nt\ne\nd\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\nm\na\ni\nn\ns\nh\na\nf\nt\n,\ng\ne\na\nr\ns\ne\nt\ns\n,\ns\nh\ni\nf\nt\nf\no\nr\nk\ns\n,\ns\ny\nn\nc\nh\nr\no\nn\ni\nz\ne\nr\ns\n,\nb\ne\na\nr\ni\nn\ng\ns\n,\nb\nu\ns\nh\ni\nn\ng\ns\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n.\nT\nr\na\nn\ns\nf\ne\nr\nC\na\ns\ne\n-\n(\n4\nX\n4\nv\ne\nh\ni\nc\nl\ne\ns\n)\n-\nC\na\ns\ne\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\nl\nu\nb\nr\ni\nc\na\nt\ne\nd\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\nm\na\ni\nn\ns\nh\na\nf\nt\n,\ng\ne\na\nr\ns\ne\nt\ns\n,\nc\nh\na\ni\nn\na\nn\nd\ns\np\nr\no\nc\nk\ne\nt\ns\n,\nb\ne\na\nr\ni\nn\ng\ns\n,\nb\nu\ns\nh\ni\nn\ng\ns\n,\nm\no\nu\nn\nt\ns\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n,\ne\nl\ne\nc\nt\nr\no\nn\ni\nc\na\nn\nd\nv\na\nc\nu\nu\nm\ne\nn\ng\na\ng\ne\nm\ne\nn\nt\nc\no\nm\np\no\nn\ne\nn\nt\ns\n.\n3\n.\nF\nR\nO\nN\nT\nW\nH\nE\nE\nL\nD\nR\nI\nV\nE\n-\nF\ni\nn\na\nl\nd\nr\ni\nv\ne\nh\no\nu\ns\ni\nn\ng\n,\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\nc\na\nr\nr\ni\ne\nr\nc\na\ns\ne\n,\ng\ne\na\nr\ns\ne\nt\ns\n,\nc\nh\na\ni\nn\na\nn\nd\ns\np\nr\no\nc\nk\ne\nt\ns\n,\nb\ne\na\nr\ni\nn\ng\ns\n,\nb\nu\ns\nh\ni\nn\ng\ns\n,\na\nx\nl\ne\ns\nh\na\nf\nt\ns\n,\nu\nn\ni\nv\ne\nr\ns\na\nl\nj\no\ni\nn\nt\ns\n,\nf\nr\no\nn\nt\nh\nu\nb\nb\ne\na\nr\ni\nn\ng\ns\n,\nr\ne\na\nr\nh\nu\nb\nb\ne\na\nr\ni\nn\ng\ns\n,\nl\no\nc\nk\ni\nn\ng\nh\nu\nb\na\ns\ns\ne\nm\nb\nl\ni\ne\ns\n(\n4\nX\n4\n)\n,\nd\nr\ni\nv\ne\ns\nh\na\nf\nt\ns\nu\np\np\no\nr\nt\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n.\n4\n.\nR\nE\nA\nR\nW\nH\nE\nE\nL\nD\nR\nI\nV\nE\n-\nD\nr\ni\nv\ne\na\nx\nl\ne\nh\no\nu\ns\ni\nn\ng\n,\na\nn\nd\na\nl\nl\ni\nn\nt\ne\nr\nn\na\nl\nl\nu\nb\nr\ni\nc\na\nt\ne\nd\np\na\nr\nt\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\n;\nc\na\nr\nr\ni\ne\nr\nc\na\ns\ne\n,\ng\ne\na\nr\ns\ne\nt\ns\n,\nb\ne\na\nr\ni\nn\ng\ns\n,\nb\nu\ns\nh\ni\nn\ng\ns\n,\nl\ni\nm\ni\nt\ne\nd\ns\nl\ni\np\nc\nl\nu\nt\nc\nh\np\na\nc\nk\n,\na\nx\nl\ne\ns\nh\na\nf\nt\ns\n,\nf\nr\no\nn\nt\nh\nu\nb\nb\ne\na\nr\ni\nn\ng\ns\n,\nr\ne\na\nr\nh\nu\nb\nb\ne\na\nr\ni\nn\ng\ns\n,\np\nr\no\np\ne\nl\nl\ne\nr\ns\nh\na\nf\nt\ns\n,\nu\nn\ni\nv\ne\nr\ns\na\nl\nj\no\ni\nn\nt\ns\n,\nd\nr\ni\nv\ne\ns\nh\na\nf\nt\ns\nu\np\np\no\nr\nt\n,\nf\na\ns\nt\ne\nn\ne\nr\ns\nf\no\nr\nt\nh\ne\nc\no\nm\np\no\nn\ne\nn\nt\ns\nl\ni\ns\nt\ne\nd\na\nb\no\nv\ne\n.\nR\ne\nn\nt\na\nl\nR\ne\ni\nm\nb\nu\nr\ns\ne\nm\ne\nn\nt\nW\nh\ne\nn\na\nb\nr\ne\na\nk\nd\no\nw\nn\nr\ne\nn\nd\ne\nr\ns\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\nn\no\np\ne\nr\na\nb\nl\ne\no\nr\nu\nn\ns\na\nf\ne\nt\no\nd\nr\ni\nv\ne\nw\nh\ni\nc\nh\nr\ne\nq\nu\ni\nr\ne\ns\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nt\no\nb\ne\nh\ne\nl\nd\nb\ny\na\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\no\nv\ne\nr\nn\ni\ng\nh\nt\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\n,\nw\ne\nw\ni\nl\nl\np\na\ny\ny\no\nu\nr\na\nc\nt\nu\na\nl\ne\nx\np\ne\nn\ns\ne\ns\nt\no\nr\ne\nn\nt\na\nr\ne\np\nl\na\nc\ne\nm\ne\nn\nt\nv\ne\nh\ni\nc\nl\ne\nf\nr\no\nm\na\nl\ni\nc\ne\nn\ns\ne\nd\nr\ne\nn\nt\na\nl\na\ng\ne\nn\nc\ny\nn\no\nt\nt\no\ne\nx\nc\ne\ne\nd\n$\n3\n0\np\ne\nr\nd\na\ny\nf\no\nr\na\nm\na\nx\ni\nm\nu\nm\no\nf\nt\nw\no\n(\n2\n)\nd\na\ny\ns\nf\no\nr\na\nn\ny\no\nn\ne\nb\nr\ne\na\nk\nd\no\nw\nn\n.\nP\na\ng\ne\n2\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)\nW\nH\nA\nT\nT\nH\nI\nS\nP\nO\nW\nE\nR\nT\nR\nA\nI\nN\nL\nI\nM\nI\nT\nE\nD\nW\nA\nR\nR\nA\nN\nT\nY\nD\nO\nE\nS\nN\nO\nT\nC\nO\nV\nE\nR\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nd\no\ne\ns\nn\no\nt\nc\no\nv\ne\nr\na\nn\nd\nw\ne\nw\ni\nl\nl\nn\no\nt\np\na\ny\nb\ne\nn\ne\nf\ni\nt\ns\n:\n1\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\nt\nh\ne\nf\na\ni\nl\nu\nr\ne\no\nf\na\nn\ny\ns\ne\na\nl\no\nr\ng\na\ns\nk\ne\nt\n.\n2\n.\nF\no\nr\nc\no\ns\nt\ns\nc\no\nv\ne\nr\ne\nd\nb\ny\na\nn\ny\nw\na\nr\nr\na\nn\nt\ny\nr\ne\ng\na\nr\nd\nl\ne\ns\ns\no\nf\nw\nh\ne\nt\nh\ne\nr\nt\nh\ne\ny\nh\no\nn\no\nr\ns\nu\nc\nh\nw\na\nr\nr\na\nn\nt\ny\n.\n3\n.\nF\no\nr\na\nn\ny\nc\no\ns\nt\ns\nt\nh\na\nt\na\nr\ne\no\nr\nw\no\nu\nl\nd\nh\na\nv\ne\nb\ne\ne\nn\nc\no\nv\ne\nr\ne\nd\nu\nn\nd\ne\nr\na\nn\ny\nv\ne\nh\ni\nc\nl\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\nw\na\nr\nr\na\nn\nt\ny\nw\nh\ne\nt\nh\ne\nr\no\nr\nn\no\nt\ns\nu\nc\nh\nw\na\nr\nr\na\nn\nt\ny\ni\ns\ni\nn\ne\nf\nf\ne\nc\nt\ni\nn\na\nn\no\nt\nh\ne\nr\nc\no\nu\nn\nt\nr\ny\no\nr\nh\na\ns\nb\ne\ne\nn\nv\no\ni\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n.\n4\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nh\na\ns\nb\ne\ne\nn\nd\ne\nc\nl\na\nr\ne\nd\na\nt\no\nt\na\nl\nl\no\ns\ns\n,\ns\na\nl\nv\na\ng\ne\nd\no\nr\nj\nu\nn\nk\nv\ne\nh\ni\nc\nl\ne\n.\n5\n.\nW\nh\ne\nn\nr\ne\np\na\ni\nr\ns\na\nr\ne\np\ne\nr\nf\no\nr\nm\ne\nd\nw\ni\nt\nh\no\nu\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\n\u2019\ns\np\nr\ni\no\nr\na\nu\nt\nh\no\nr\ni\nz\na\nt\ni\no\nn\n.\n6\n.\nF\no\nr\ne\nx\np\ne\nn\ns\ne\ns\nc\nh\na\nr\ng\ne\nd\nf\no\nr\nt\nh\ne\nd\ni\ns\np\no\ns\na\nl\no\nf\ne\nn\nv\ni\nr\no\nn\nm\ne\nn\nt\na\nl\nl\ny\nu\nn\ns\na\nf\ne\nm\na\nt\ne\nr\ni\na\nl\ns\n.\n7\n.\nF\no\nr\ne\nx\np\ne\nn\ns\ne\ns\nc\nh\na\nr\ng\ne\nd\nf\no\nr\nn\no\nn\n-\ns\np\ne\nc\ni\nf\ni\nc\nm\na\nt\ne\nr\ni\na\nl\ns\no\nr\ns\nh\no\np\ns\nu\np\np\nl\ni\ne\ns\n.\n8\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\no\nr\ni\nn\nv\no\nl\nv\ni\nn\ng\nc\no\nl\nl\ni\ns\ni\no\nn\n,\nf\ni\nr\ne\n,\nt\nh\ne\nf\nt\n,\nv\na\nn\nd\na\nl\ni\ns\nm\n,\nr\ni\no\nt\n,\nt\ne\nr\nr\no\nr\ni\ns\nt\na\nc\nt\ns\n,\nw\na\nr\n,\ne\nx\np\nl\no\ns\ni\no\nn\n,\nl\ni\ng\nh\nt\nn\ni\nn\ng\n,\ne\na\nr\nt\nh\nq\nu\na\nk\ne\n,\nh\nu\nr\nr\ni\nc\na\nn\ne\n,\nt\nr\no\np\ni\nc\na\nl\ns\nt\no\nr\nm\n,\nv\no\nl\nc\na\nn\ni\nc\ne\nr\nu\np\nt\ni\no\nn\n,\nw\ni\nn\nd\ns\nt\no\nr\nm\n,\nh\na\ni\nl\n,\nw\na\nt\ne\nr\n,\nf\nr\ne\ne\nz\ni\nn\ng\no\nr\nf\nl\no\no\nd\n.\n9\n.\nF\no\nr\nl\no\ns\ns\no\nf\nt\ni\nm\ne\n,\ne\nc\no\nn\no\nm\ni\nc\nl\no\ns\ns\n,\ni\nn\nc\no\nn\nv\ne\nn\ni\ne\nn\nc\ne\n,\nl\no\nd\ng\ni\nn\ng\n,\nf\no\no\nd\n,\nf\nr\ne\ni\ng\nh\nt\nc\nh\na\nr\ng\ne\ns\n,\nc\no\nr\ne\nc\nh\na\nr\ng\ne\ns\n,\ns\nt\no\nr\na\ng\ne\nc\nh\na\nr\ng\ne\ns\n,\no\nr\no\nt\nh\ne\nr\nc\no\nn\ns\ne\nq\nu\ne\nn\nt\ni\na\nl\nl\no\ns\ns\no\nr\nd\na\nm\na\ng\ne\nt\nh\na\nt\nr\ne\ns\nu\nl\nt\ne\nd\nf\nr\no\nm\na\nb\nr\ne\na\nk\nd\no\nw\nn\n.\n1\n0\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nw\nh\ne\nn\nc\no\nn\nt\na\nm\ni\nn\na\nt\ne\nd\nf\nl\nu\ni\nd\ns\nc\na\nu\ns\ne\nd\no\nr\nc\no\nn\nt\nr\ni\nb\nu\nt\ne\nd\nt\no\nt\nh\ne\nb\nr\ne\na\nk\nd\no\nw\nn\n.\n1\n1\n.\nF\no\nr\na\nn\ny\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\nc\no\nn\nt\na\nm\ni\nn\na\nt\ni\no\nn\n,\no\nv\ne\nr\nh\ne\na\nt\ni\nn\ng\n,\nl\na\nc\nk\no\nf\nc\no\no\nl\na\nn\nt\no\nr\nl\nu\nb\nr\ni\nc\na\nn\nt\ns\n,\ni\nm\np\nr\no\np\ne\nr\ns\np\ne\nc\ni\nf\ni\nc\na\nt\ni\no\nn\n(\nt\ny\np\ne\n)\no\nf\nf\nl\nu\ni\nd\ns\n,\nl\na\nc\nk\no\nf\no\ni\nl\nv\ni\ns\nc\no\ns\ni\nt\ny\n,\ns\nl\nu\nd\ng\ne\no\nr\nr\ne\ns\nt\nr\ni\nc\nt\ne\nd\no\ni\nl\nf\nl\no\nw\n.\nE\nx\na\nm\np\nl\ne\ns\ni\nn\nc\nl\nu\nd\ne\nb\nu\nt\nn\no\nt\nl\ni\nm\ni\nt\ne\nd\nt\no\n:\ne\nn\ng\ni\nn\ne\na\nn\nd\nt\nr\na\nn\ns\nm\ni\ns\ns\ni\no\nn\n.\n1\n2\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nw\na\ns\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nd\na\ns\na\nn\no\nn\n-\nU\n.\nS\n.\ns\np\ne\nc\ni\nf\ni\nc\na\nt\ni\no\nn\nm\no\nd\ne\nl\n.\n1\n3\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\nt\no\nw\ni\nn\ng\na\nt\nr\na\ni\nl\ne\nr\no\nr\na\nn\no\nt\nh\ne\nr\nv\ne\nh\ni\nc\nl\ne\nu\nn\nl\ne\ns\ns\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\ns\ne\nq\nu\ni\np\np\ne\nd\nf\no\nr\nt\nh\ni\ns\na\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n.\n1\n4\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\nu\ns\ni\nn\ng\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nf\no\nr\nr\na\nc\ni\nn\ng\no\nr\no\nt\nh\ne\nr\nc\no\nm\np\ne\nt\ni\nt\ni\no\nn\n.\n1\n5\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\no\nr\ni\nn\nv\no\nl\nv\ni\nn\ng\nm\no\nd\ni\nf\ni\nc\na\nt\ni\no\nn\ns\nu\nn\nl\ne\ns\ns\nt\nh\no\ns\ne\nm\no\nd\ni\nf\ni\nc\na\nt\ni\no\nn\ns\nw\ne\nr\ne\np\ne\nr\nf\no\nr\nm\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\na\nn\nd\nt\nh\ne\nm\no\nd\ni\nf\ni\nc\na\nt\ni\no\nn\ns\nm\ne\ne\nt\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\ns\np\ne\nc\ni\nf\ni\nc\na\nt\ni\no\nn\ns\n(\ne\n.\ng\n.\nt\ni\nr\ne\ns\nt\nw\no\no\nr\nm\no\nr\ne\ns\ni\nz\ne\ns\nl\na\nr\ng\ne\nr\no\nr\ns\nm\na\nl\nl\ne\nr\nt\nh\na\nn\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\ns\np\ne\nc\ni\nf\ni\nc\na\nt\ni\no\nn\ns\n,\nl\ni\nf\nt\nk\ni\nt\ns\n,\na\nf\nt\ne\nr\nm\na\nr\nk\ne\nt\np\ne\nr\nf\no\nr\nm\na\nn\nc\ne\np\na\nr\nt\ns\no\nr\ns\ny\ns\nt\ne\nm\ns\n)\n.\n1\n6\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nh\na\ns\nb\ne\ne\nn\nm\no\nd\ni\nf\ni\ne\nd\nt\no\np\nl\no\nw\ns\nn\no\nw\n,\nw\nh\ne\nt\nh\ne\nr\nt\nh\ne\ns\nn\no\nw\np\nl\no\nw\nb\nl\na\nd\ne\ni\ns\na\nt\nt\na\nc\nh\ne\nd\nt\no\nt\nh\ne\nv\ne\nh\ni\nc\nl\ne\no\nr\nn\no\nt\n.\n1\n7\n.\nF\no\nr\na\nn\ny\nc\no\nn\ns\ne\nq\nu\ne\nn\nt\ni\na\nl\no\nr\ni\nn\nc\ni\nd\ne\nn\nt\na\nl\nd\na\nm\na\ng\ne\no\nr\nl\no\ns\ns\ns\nh\no\nu\nl\nd\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nb\ne\ni\nn\nv\no\nl\nv\ne\nd\ni\nn\na\nc\no\nl\nl\ni\ns\ni\no\nn\nc\na\nu\ns\ne\nd\nb\ny\no\nr\ni\nn\nv\no\nl\nv\ni\nn\ng\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nf\na\nc\no\nm\np\no\nn\ne\nn\nt\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\n1\n8\n.\nF\no\nr\nt\nh\ne\nr\ne\np\na\ni\nr\no\nf\nv\na\nl\nv\ne\ns\na\nn\nd\n/\no\nr\nr\ni\nn\ng\ns\nf\no\nr\nt\nh\ne\np\nu\nr\np\no\ns\ne\no\nf\nr\na\ni\ns\ni\nn\ng\nt\nh\ne\ne\nn\ng\ni\nn\ne\n\u2019\ns\nc\no\nm\np\nr\ne\ns\ns\ni\no\nn\nw\nh\ne\nn\na\nb\nr\ne\na\nk\nd\no\nw\nn\nh\na\ns\nn\no\nt\no\nc\nc\nu\nr\nr\ne\nd\n.\n1\n9\n.\nT\no\nc\no\nr\nr\ne\nc\nt\na\nc\no\ns\nm\ne\nt\ni\nc\ni\nm\np\ne\nr\nf\ne\nc\nt\ni\no\nn\n.\n2\n0\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\na\nb\nu\ns\ne\n,\nm\ni\ns\nu\ns\ne\n,\na\nl\nt\ne\nr\na\nt\ni\no\nn\ns\no\nr\nl\na\nc\nk\no\nf\nc\nu\ns\nt\no\nm\na\nr\ny\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\ni\nn\nt\nh\ne\nM\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\no\nf\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\na\nn\nd\n/\no\nr\ni\nn\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\nM\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nS\nc\nh\ne\nd\nu\nl\ne\nf\no\nr\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\n.\n2\n1\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\nr\nu\ns\nt\no\nr\nw\ne\na\nt\nh\ne\nr\nr\ne\nl\na\nt\ne\nd\nc\no\nr\nr\no\ns\ni\no\nn\n.\n2\n2\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nf\na\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\nr\ne\ns\nu\nl\nt\ni\nn\ng\nf\nr\no\nm\nt\nh\ne\nf\na\ni\nl\nu\nr\ne\no\nf\na\nn\no\nn\n-\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\n.\nH\no\nw\ne\nv\ne\nr\n,\nc\no\nv\ne\nr\na\ng\ne\nw\ni\nl\nl\nb\ne\np\nr\no\nv\ni\nd\ne\nd\nf\no\nr\na\nn\no\nn\n-\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\nr\ne\ns\nu\nl\nt\ni\nn\ng\nf\nr\no\nm\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nf\na\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\n.\n2\n3\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\ns\nu\ns\ne\nd\nf\no\nr\nc\no\nm\nm\ne\nr\nc\ni\na\nl\np\nu\nr\np\no\ns\ne\ns\ni\nn\nc\nl\nu\nd\ni\nn\ng\nb\nu\nt\nn\no\nt\nl\ni\nm\ni\nt\ne\nd\nt\no\n:\nh\na\nu\nl\ni\nn\ng\n,\nc\no\nn\ns\nt\nr\nu\nc\nt\ni\no\nn\nw\no\nr\nk\n,\np\nr\ni\nn\nc\ni\np\na\nl\no\nf\nf\n-\nr\no\na\nd\nu\ns\ne\n,\np\ni\nc\nk\nu\np\na\nn\nd\n/\no\nr\nd\ne\nl\ni\nv\ne\nr\ny\ns\ne\nr\nv\ni\nc\ne\n,\nd\na\ni\nl\ny\nr\ne\nn\nt\na\nl\ns\n,\nc\na\nr\nr\ny\np\na\ns\ns\ne\nn\ng\ne\nr\ns\nf\no\nr\nh\ni\nr\ne\n(\nt\na\nx\ni\n,\nl\ni\nm\no\nu\ns\ni\nn\ne\no\nr\ns\nh\nu\nt\nt\nl\ne\ns\ne\nr\nv\ni\nc\ne\ns\n)\n,\nt\no\nw\ni\nn\ng\no\nr\nr\no\na\nd\ns\ne\nr\nv\ni\nc\ne\no\np\ne\nr\na\nt\ni\no\nn\ns\n,\ng\no\nv\ne\nr\nn\nm\ne\nn\nt\n/\nm\ni\nl\ni\nt\na\nr\ny\nu\ns\ne\n,\nl\na\nw\ne\nn\nf\no\nr\nc\ne\nm\ne\nn\nt\n,\nf\ni\nr\ne\n,\na\nm\nb\nu\nl\na\nn\nc\ne\no\nr\no\nt\nh\ne\nr\ne\nm\ne\nr\ng\ne\nn\nc\ny\ns\ne\nr\nv\ni\nc\ne\ns\n,\ns\nn\no\nw\np\nl\no\nw\ni\nn\ng\n,\nc\no\nm\np\na\nn\ny\np\no\no\nl\nu\ns\ne\no\nr\nb\nu\ns\ni\nn\ne\ns\ns\nt\nr\na\nv\ne\nl\nw\nh\ne\nn\nt\nh\ne\nv\ne\nh\ni\nc\nl\ne\ni\ns\nu\ns\ne\nd\nb\ny\nm\no\nr\ne\nt\nh\na\nn\no\nn\ne\nd\nr\ni\nv\ne\nr\n.\n2\n4\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\ns\na\nn\ne\nx\no\nt\ni\nc\nv\ne\nh\ni\nc\nl\ne\no\nr\ni\ns\na\nt\nr\nu\nc\nk\nr\na\nt\ne\nd\nm\no\nr\ne\nt\nh\na\nn\n1\nt\no\nn\n.\n2\n5\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nc\na\nu\ns\ne\nd\nb\ny\no\nr\ni\nn\nv\no\nl\nv\ni\nn\ng\ne\nq\nu\ni\np\nm\ne\nn\nt\n,\nc\no\nm\np\no\nn\ne\nn\nt\ns\no\nr\ns\ny\ns\nt\ne\nm\ns\nn\no\nt\ni\nn\ns\nt\na\nl\nl\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n.\n2\n6\n.\nI\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\n\u2019\ns\no\nd\no\nm\ne\nt\ne\nr\nh\na\ns\nb\ne\ne\nn\ns\nt\no\np\np\ne\nd\n,\na\nl\nt\ne\nr\ne\nd\no\nr\nm\ni\ns\nr\ne\np\nr\ne\ns\ne\nn\nt\ns\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\n'\ns\na\nc\nt\nu\na\nl\nm\ni\nl\ne\na\ng\ne\ni\nn\nc\nl\nu\nd\ni\nn\ng\nb\nu\nt\nn\no\nt\nl\ni\nm\ni\nt\ne\nd\nt\no\no\nd\no\nm\ne\nt\ne\nr\nm\ni\ns\nr\ne\np\nr\ne\ns\ne\nn\nt\na\nt\ni\no\nn\nc\na\nu\ns\ne\nd\nb\ny\nt\nh\ne\nu\ns\ne\no\nr\nm\no\nd\ni\nf\ni\nc\na\nt\ni\no\nn\no\nf\nt\nh\ne\nv\ne\nh\ni\nc\nl\ne\nw\ni\nt\nh\nu\nn\nd\ne\nr\ns\ni\nz\ne\nt\ni\nr\ne\na\nn\nd\nw\nh\ne\ne\nl\na\ns\ns\ne\nm\nb\nl\ni\ne\ns\n.\n2\n7\n.\nT\no\nr\ne\np\na\ni\nr\n,\nr\ne\np\nl\na\nc\ne\n,\na\nd\nj\nu\ns\nt\no\nr\na\nl\ni\ng\nn\na\nn\ny\np\na\nr\nt\nn\no\nt\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nu\nn\nl\ne\ns\ns\nr\ne\nq\nu\ni\nr\ne\nd\ni\nn\nc\no\nn\nj\nu\nn\nc\nt\ni\no\nn\nw\ni\nt\nh\nt\nh\ne\nr\ne\np\na\ni\nr\no\nf\na\nc\no\nv\ne\nr\ne\nd\np\na\nr\nt\n.\n2\n8\n.\nF\no\nr\nd\ni\na\ng\nn\no\ns\ni\ns\nc\nh\na\nr\ng\ne\ns\n,\nc\no\ns\nt\no\nf\nd\ni\ns\na\ns\ns\ne\nm\nb\nl\ny\no\nr\na\ns\ns\ne\nm\nb\nl\ny\ni\nf\ny\no\nu\nr\nr\ne\np\na\ni\nr\ni\ns\nn\no\nt\nc\no\nv\ne\nr\ne\nd\no\nr\nh\na\ns\nb\ne\ne\nn\nd\ne\nn\ni\ne\nd\n.\n2\n9\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\nt\nh\na\nt\ni\ns\na\nd\ni\nr\ne\nc\nt\nr\ne\ns\nu\nl\nt\no\nf\na\nm\ne\nc\nh\na\nn\ni\nc\na\nl\no\nr\ns\nt\nr\nu\nc\nt\nu\nr\na\nl\nd\ne\nf\ne\nc\nt\nw\nh\ne\nn\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\nh\na\ns\na\nn\nn\no\nu\nn\nc\ne\nd\na\np\nu\nb\nl\ni\nc\nr\ne\nc\na\nl\nl\nf\no\nr\nt\nh\ne\np\nu\nr\np\no\ns\ne\no\nf\nc\no\nr\nr\ne\nc\nt\ni\nn\ng\ns\nu\nc\nh\na\nd\ne\nf\ne\nc\nt\n.\n3\n0\n.\nF\no\nr\na\nd\nd\ni\nt\ni\no\nn\na\nl\nl\no\ns\ns\no\nr\nd\na\nm\na\ng\ne\nw\nh\ni\nc\nh\ni\ns\no\nc\nc\na\ns\ni\no\nn\ne\nd\nb\ny\ny\no\nu\no\nr\no\np\ne\nr\na\nt\no\nr\n\u2019\ns\nf\na\ni\nl\nu\nr\ne\nt\no\nu\ns\ne\na\nl\nl\nr\ne\na\ns\no\nn\na\nb\nl\ne\np\nr\ne\nc\na\nu\nt\ni\no\nn\ns\nt\no\np\nr\no\nt\ne\nc\nt\nt\nh\ne\nv\ne\nh\ni\nc\nl\ne\nf\nr\no\nm\na\nn\ny\nf\nu\nr\nt\nh\ne\nr\nl\no\ns\ns\no\nr\nd\na\nm\na\ng\ne\na\nf\nt\ne\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nr\nf\na\ni\nl\nu\nr\ne\nh\na\ns\no\nc\nc\nu\nr\nr\ne\nd\no\nr\nb\ne\ne\nn\ni\nn\nd\ni\nc\na\nt\ne\nd\n.\n3\n1\n.\nF\no\nr\nr\ne\np\na\ni\nr\ns\nm\na\nd\ne\ns\no\nl\ne\nl\ny\nt\no\nm\ne\ne\nt\no\nr\nm\na\ni\nn\nt\na\ni\nn\na\nn\ny\ng\no\nv\ne\nr\nn\nm\ne\nn\nt\na\nl\ne\nm\ni\ns\ns\ni\no\nn\ns\nt\na\nn\nd\na\nr\nd\ns\n.\n3\n2\n.\nF\no\nr\nd\na\nm\na\ng\ne\nc\na\nu\ns\ne\nd\nt\no\ny\no\nu\nr\ne\nn\ng\ni\nn\ne\nr\ne\ns\nu\nl\nt\ni\nn\ng\nf\nr\no\nm\nt\nh\ne\ni\nn\ng\ne\ns\nt\ni\no\nn\no\nf\nw\na\nt\ne\nr\nt\nh\nr\no\nu\ng\nh\nt\nh\ne\ne\nn\ng\ni\nn\ne\na\ni\nr\ni\nn\nt\na\nk\ne\ns\ny\ns\nt\ne\nm\n(\nc\no\nm\nm\no\nn\nl\ny\nr\ne\nf\ne\nr\nr\ne\nd\nt\no\na\ns\nw\na\nt\ne\nr\ni\nn\ng\ne\ns\nt\ni\no\nn\n)\n.\n3\n3\n.\nF\no\nr\nr\ne\np\na\ni\nr\ns\no\nf\nw\na\nt\ne\nr\na\nn\nd\na\ni\nr\nl\ne\na\nk\ns\n,\nr\na\nt\nt\nl\ne\ns\n,\ns\nq\nu\ne\na\nk\ns\n,\na\nn\nd\nw\ni\nn\nd\nn\no\ni\ns\ne\n.\n3\n4\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nr\nd\na\nm\na\ng\ne\nc\na\nu\ns\ne\nd\nb\ny\nn\ne\ng\nl\ne\nc\nt\ni\nn\ng\nt\no\nf\no\nl\nl\no\nw\np\nr\no\np\ne\nr\nc\nh\na\nr\ng\ni\nn\ng\np\nr\no\nc\ne\nd\nu\nr\ne\ns\no\nr\nu\ns\ne\no\nf\ni\nn\nc\no\nm\np\na\nt\ni\nb\nl\ne\nc\nh\na\nr\ng\ni\nn\ng\nd\ne\nv\ni\nc\ne\ns\nf\no\nr\ny\no\nu\nr\np\nl\nu\ng\n-\ni\nn\nh\ny\nb\nr\ni\nd\n/\ne\nl\ne\nc\nt\nr\ni\nc\nv\ne\nh\ni\nc\nl\ne\n.\n3\n5\n.\nF\no\nr\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nr\nd\na\nm\na\ng\ne\nc\na\nu\ns\ne\nd\nb\ny\na\np\no\nw\ne\nr\ns\nu\nr\ng\ne\n.\nP\na\ng\ne\n3\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)\nM\nA\nI\nN\nT\nE\nN\nA\nN\nC\nE\nR\nE\nQ\nU\nI\nR\nE\nM\nE\nN\nT\nS\nI\nn\no\nr\nd\ne\nr\nt\no\nk\ne\ne\np\ny\no\nu\nr\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nv\na\nl\ni\nd\n,\ny\no\nu\nm\nu\ns\nt\nf\no\nl\nl\no\nw\nt\nh\ne\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\np\nr\no\nc\ne\nd\nu\nr\ne\ns\nl\ni\ns\nt\ne\nd\nb\ne\nl\no\nw\n.\nI\nf\ny\no\nu\nr\nf\na\ni\nl\nu\nr\ne\nt\no\nf\no\nl\nl\no\nw\nt\nh\ne\ns\ne\np\nr\no\nc\ne\nd\nu\nr\ne\ns\nc\na\nu\ns\ne\ns\na\nb\nr\ne\na\nk\nd\no\nw\nn\n,\ny\no\nu\nm\na\ny\nb\ne\nd\ne\nn\ni\ne\nd\nc\no\nv\ne\nr\na\ng\ne\n.\nY\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nm\nu\ns\nt\nb\ne\ns\ne\nr\nv\ni\nc\ne\nd\nr\ne\nc\ne\ni\nv\ni\nn\ng\na\nl\nl\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\na\ns\nr\ne\nc\no\nm\nm\ne\nn\nd\ne\nd\nb\ny\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\ni\nn\nt\nh\ne\nO\nw\nn\ne\nr\ns\nM\na\nn\nu\na\nl\n,\no\nr\nY\no\nu\nm\nu\ns\nt\nh\na\nv\ne\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ns\ne\nr\nv\ni\nc\ne\nd\ni\nn\nt\nh\ne\nf\no\nl\nl\no\nw\ni\nn\ng\nm\na\nn\nn\ne\nr\ne\nv\ne\nr\ny\ns\ni\nx\n(\n6\n)\nm\no\nn\nt\nh\ns\no\nr\ns\ni\nx\nt\nh\no\nu\ns\na\nn\nd\n(\n6\n,\n0\n0\n0\n)\nm\ni\nl\ne\ns\n,\nw\nh\ni\nc\nh\ne\nv\ne\nr\nc\no\nm\ne\ns\nf\ni\nr\ns\nt\n:\n1\n.\nC\nh\na\nn\ng\ne\ne\nn\ng\ni\nn\ne\no\ni\nl\na\nn\nd\nf\ni\nl\nt\ne\nr\n.\n5\n.\nC\nh\ne\nc\nk\na\nn\nd\nm\na\ni\nn\nt\na\ni\nn\nd\nr\ni\nv\ne\na\nx\nl\ne\nf\nl\nu\ni\nd\nl\ne\nv\ne\nl\n.\n2\n.\nC\nh\ne\nc\nk\nP\nC\nV\nv\na\nl\nv\ne\no\np\ne\nr\na\nt\ni\no\nn\n.\n6\n.\nL\nu\nb\nr\ni\nc\na\nt\ne\nf\nr\no\nn\nt\ns\nu\ns\np\ne\nn\ns\ni\no\nn\n.\n3\n.\nC\nh\ne\nc\nk\na\nn\nd\nm\na\ni\nn\nt\na\ni\nn\np\no\nw\ne\nr\ns\nt\ne\ne\nr\ni\nn\ng\nf\nl\nu\ni\nd\nl\ne\nv\ne\nl\n.\n7\n.\nC\nh\ne\nc\nk\na\nn\nd\nm\na\ni\nn\nt\na\ni\nn\nt\nh\ne\np\nr\no\np\ne\nr\nl\ne\nv\ne\nl\no\nf\nc\no\no\nl\na\nn\nt\n.\n4\n.\nC\nh\ne\nc\nk\na\nn\nd\nm\na\ni\nn\nt\na\ni\nn\nt\nr\na\nn\ns\nm\ni\ns\ns\ni\no\nn\nf\nl\nu\ni\nd\nl\ne\nv\ne\nl\n.\nI\nn\na\nc\nc\no\nr\nd\na\nn\nc\ne\nw\ni\nt\nh\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\n\u2019\ns\np\nr\ne\ns\nc\nr\ni\nb\ne\nd\ns\ne\nr\nv\ni\nc\ne\ni\nn\nt\ne\nr\nv\na\nl\ns\ny\no\nu\nm\nu\ns\nt\n;\nc\nh\na\nn\ng\ne\nt\nr\na\nn\ns\nm\ni\ns\ns\ni\no\nn\nf\nl\nu\ni\nd\n,\nd\nr\ni\nv\ne\na\nx\nl\ne\nf\nl\nu\ni\nd\na\nn\nd\nb\nr\na\nk\ne\nf\nl\nu\ni\nd\n.\nF\no\nl\nl\no\nw\na\nl\nl\no\nt\nh\ne\nr\nr\ne\nc\no\nm\nm\ne\nn\nd\na\nt\ni\no\nn\ns\no\nf\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\nr\ne\ng\na\nr\nd\ni\nn\ng\no\nt\nh\ne\nr\ns\np\ne\nc\ni\na\nl\ns\ne\nr\nv\ni\nc\ne\ns\n(\ni\nf\na\np\np\nl\ni\nc\na\nb\nl\ne\nt\no\ny\no\nu\nr\nm\no\nd\ne\nl\n)\na\ns\no\nu\nt\nl\ni\nn\ne\nd\ni\nn\nt\nh\ne\nO\nw\nn\ne\nr\ns\nM\na\nn\nu\na\nl\n.\nY\no\nu\nm\nu\ns\nt\nk\ne\ne\np\nr\ne\nc\ne\ni\np\nt\ns\nw\nh\ni\nc\nh\nv\ne\nr\ni\nf\ny\nt\nh\ne\nV\ne\nh\ni\nc\nl\ne\nI\nd\ne\nn\nt\ni\nf\ni\nc\na\nt\ni\no\nn\nN\nu\nm\nb\ne\nr\n,\nw\no\nr\nk\no\nr\nd\ne\nr\ns\na\nn\nd\no\nt\nh\ne\nr\nd\no\nc\nu\nm\ne\nn\nt\na\nt\ni\no\nn\nt\nh\na\nt\ns\nh\no\nw\ns\nd\na\nt\ne\n,\na\nd\ne\ns\nc\nr\ni\np\nt\ni\no\nn\no\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\n,\nm\ni\nl\ne\na\ng\ne\na\nn\nd\ns\ne\nr\nv\ni\nc\ne\ns\np\ne\nr\nf\no\nr\nm\ne\nd\n.\nW\ne\nm\na\ny\nr\ne\nq\nu\ni\nr\ne\ny\no\nu\nt\no\nf\nu\nr\nn\ni\ns\nh\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\nw\ni\nt\nh\np\nr\no\no\nf\nt\nh\na\nt\nt\nh\ne\ns\np\ne\nc\ni\nf\ni\ne\nd\ns\ne\nr\nv\ni\nc\ne\ns\nh\na\nv\ne\nb\ne\ne\nn\np\ne\nr\nf\no\nr\nm\ne\nd\n.\nF\na\ni\nl\nu\nr\ne\nt\no\ns\nh\no\nw\np\nr\no\no\nf\no\nf\ns\ne\nr\nv\ni\nc\ni\nn\ng\nm\na\ny\nr\ne\ns\nu\nl\nt\ni\nn\nt\nh\ne\nd\ne\nn\ni\na\nl\no\nf\nc\no\nv\ne\nr\na\ng\ne\n.\nW\ne\nr\ne\nc\no\nm\nm\ne\nn\nd\ny\no\nu\nr\ne\nt\nu\nr\nn\nt\no\nu\ns\n,\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\no\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\nf\no\nr\na\nl\nl\ns\nc\nh\ne\nd\nu\nl\ne\nd\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\n.\nW\ne\no\nr\no\nu\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\na\nr\ne\nc\no\nm\nm\ni\nt\nt\ne\nd\nt\no\ne\nn\ns\nu\nr\ni\nn\ng\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\ns\np\nr\no\np\ne\nr\nl\ny\nm\na\ni\nn\nt\na\ni\nn\ne\nd\na\nn\nd\nw\ni\nl\nl\na\nl\ns\no\nr\ne\nt\na\ni\nn\nc\no\np\ni\ne\ns\no\nf\ny\no\nu\nr\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nr\ne\nc\no\nr\nd\ns\ni\nn\no\nr\nd\ne\nr\nt\no\na\ns\ns\nu\nr\ne\ny\no\nu\nr\nc\no\nm\np\nl\ni\na\nn\nc\ne\nw\ni\nt\nh\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nr\ne\nc\no\nr\nd\nr\ne\nt\ne\nn\nt\ni\no\nn\n.\nM\no\ns\nt\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ni\ne\ns\nw\ni\nl\nl\nn\no\nt\nr\ne\nt\na\ni\nn\nc\no\np\ni\ne\ns\no\nf\ny\no\nu\nr\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nr\ne\nc\no\nr\nd\ns\nf\no\nr\nm\no\nr\ne\nt\nh\na\nn\na\nc\no\nu\np\nl\ne\no\nf\ny\ne\na\nr\ns\n.\nI\nN\nC\nA\nS\nE\nO\nF\nA\nB\nR\nE\nA\nK\nD\nO\nW\nN\n\u2022\nY\no\nu\na\nr\ne\nr\ne\nq\nu\ni\nr\ne\nd\nt\no\nr\ne\nt\nu\nr\nn\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nt\no\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\no\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\nf\no\nr\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nu\nn\nd\ne\nr\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\n\u2022\nI\nf\nt\nr\na\nv\ne\nl\ni\nn\ng\na\nw\na\ny\nf\nr\no\nm\nh\no\nm\ne\n,\np\nl\ne\na\ns\ne\nc\no\nn\nt\na\nc\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\na\nt\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\nf\no\nr\nd\ni\nr\ne\nc\nt\ni\no\nn\ns\nt\no\nt\nh\ne\nn\ne\na\nr\ne\ns\nt\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\n.\nY\nO\nU\nR\nR\nE\nS\nP\nO\nN\nS\nI\nB\nI\nL\nI\nT\nI\nE\nS\nY\no\nu\na\nr\ne\nr\ne\ns\np\no\nn\ns\ni\nb\nl\ne\nf\no\nr\nm\na\nk\ni\nn\ng\ns\nu\nr\ne\nt\nh\ne\no\ni\nl\nw\na\nr\nn\ni\nn\ng\nl\ni\ng\nh\nt\n/\ng\na\nu\ng\ne\na\nn\nd\nt\nh\ne\nt\ne\nm\np\ne\nr\na\nt\nu\nr\ne\nw\na\nr\nn\ni\nn\ng\nl\ni\ng\nh\nt\n/\ng\na\nu\ng\ne\na\nr\ne\nf\nu\nn\nc\nt\ni\no\nn\ni\nn\ng\nb\ne\nf\no\nr\ne\nd\nr\ni\nv\ni\nn\ng\nt\nh\ne\nv\ne\nh\ni\nc\nl\ne\n.\nY\no\nu\na\nr\ne\nr\ne\nq\nu\ni\nr\ne\nd\nt\no\ns\na\nf\ne\nl\ny\np\nu\nl\nl\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\no\nf\nf\nt\nh\ne\nr\no\na\nd\na\nn\nd\ns\nh\nu\nt\nd\no\nw\nn\nt\nh\ne\ne\nn\ng\ni\nn\ne\ni\nm\nm\ne\nd\ni\na\nt\ne\nl\ny\nw\nh\ne\nn\nt\nh\ne\no\ni\nl\nw\na\nr\nn\ni\nn\ng\nl\ni\ng\nh\nt\n/\ng\na\nu\ng\ne\no\nr\nt\nh\ne\nt\ne\nm\np\ne\nr\na\nt\nu\nr\ne\nw\na\nr\nn\ni\nn\ng\nl\ni\ng\nh\nt\n/\ng\na\nu\ng\ne\ni\nn\nd\ni\nc\na\nt\ne\ns\na\np\nr\no\nb\nl\ne\nm\n.\nI\nf\ny\no\nu\ne\nx\np\ne\nr\ni\ne\nn\nc\ne\na\nb\nr\ne\na\nk\nd\no\nw\nn\n,\ny\no\nu\na\ng\nr\ne\ne\nt\no\n:\n1\n.\nU\ns\ne\na\nl\nl\nr\ne\na\ns\no\nn\na\nb\nl\ne\nm\ne\na\nn\ns\nt\no\np\nr\no\nt\ne\nc\nt\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nf\nr\no\nm\nf\nu\nr\nt\nh\ne\nr\nd\na\nm\na\ng\ne\n.\n2\n.\nR\ne\nt\nu\nr\nn\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\nt\no\nt\nh\ne\nS\ne\nl\nl\ni\nn\ng\nD\ne\na\nl\ne\nr\no\nr\nA\nf\nf\ni\nl\ni\na\nt\ne\nf\no\nr\nc\no\nv\ne\nr\ne\nd\nr\ne\np\na\ni\nr\ns\n.\nI\nf\nt\nr\na\nv\ne\nl\ni\nn\ng\na\nw\na\ny\nf\nr\no\nm\nh\no\nm\ne\n,\np\nl\ne\na\ns\ne\nc\no\nn\nt\na\nc\nt\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\na\nt\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\nf\no\nr\nd\ni\nr\ne\nc\nt\ni\no\nn\ns\nt\no\nt\nh\ne\nn\ne\na\nr\ne\ns\nt\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\n.\n3\n.\nA\nu\nt\nh\no\nr\ni\nz\ne\nt\nh\ne\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\nt\no\np\ne\nr\nf\no\nr\nm\nn\ne\nc\ne\ns\ns\na\nr\ny\nd\ni\na\ng\nn\no\ns\nt\ni\nc\nw\no\nr\nk\na\nn\nd\np\nr\no\nv\ni\nd\ne\n\u201c\nt\ne\na\nr\nd\no\nw\nn\na\nu\nt\nh\no\nr\ni\nz\na\nt\ni\no\nn\n\u201d\ns\no\nt\nh\na\nt\nt\nh\ne\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\nc\na\nn\np\nr\no\nv\ni\nd\ne\na\nn\na\nc\nc\nu\nr\na\nt\ne\nd\ni\na\ng\nn\no\ns\ni\ns\na\nn\nd\ne\ns\nt\ni\nm\na\nt\ne\no\nf\nr\ne\np\na\ni\nr\ns\n.\nI\nM\nP\nO\nR\nT\nA\nN\nT\n:\nW\nE\nW\nI\nL\nL\nN\nO\nT\nP\nA\nY\nF\nO\nR\nD\nI\nA\nG\nN\nO\nS\nI\nS\nC\nH\nA\nR\nG\nE\nS\nF\nO\nR\nR\nE\nP\nA\nI\nR\nS\nN\nO\nT\nC\nO\nV\nE\nR\nE\nD\nU\nN\nD\nE\nR\nT\nH\nI\nS\nP\nO\nW\nE\nR\nT\nR\nA\nI\nN\nL\nI\nM\nI\nT\nE\nD\nW\nA\nR\nR\nA\nN\nT\nY\n.\n4\n.\nF\nu\nr\nn\ni\ns\nh\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\nw\ni\nt\nh\ns\nu\nc\nh\ni\nn\nf\no\nr\nm\na\nt\ni\no\nn\na\ns\nt\nh\ne\ny\nm\na\ny\nr\ne\na\ns\no\nn\na\nb\nl\ny\nr\ne\nq\nu\ni\nr\ne\n,\na\nn\nd\ni\nf\nr\ne\nq\nu\ne\ns\nt\ne\nd\np\nr\no\nv\ni\nd\ne\np\nr\no\no\nf\no\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\n\u2019\ns\nr\ne\ng\nu\nl\na\nr\nm\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nd\nu\nr\ni\nn\ng\nt\nh\ne\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nP\ne\nr\ni\no\nd\na\ns\nd\ne\nf\ni\nn\ne\nd\ni\nn\nt\nh\ne\nM\na\ni\nn\nt\ne\nn\na\nn\nc\ne\nR\ne\nq\nu\ni\nr\ne\nm\ne\nn\nt\ns\ns\ne\nc\nt\ni\no\nn\n.\n5\n.\nA\nl\nl\no\nw\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\nt\no\ne\nx\na\nm\ni\nn\ne\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\ni\nf\na\ns\nk\ne\nd\nt\no\nd\no\ns\no\n.\n6\n.\nA\nl\nl\nr\ne\np\na\ni\nr\ns\nb\ne\ni\nn\ng\na\nu\nt\nh\no\nr\ni\nz\ne\nd\nb\ny\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\np\nr\ni\no\nr\nt\no\nb\ne\ng\ni\nn\nn\ni\nn\ng\na\nn\ny\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\n7\n.\nC\na\nl\nl\nt\nh\ne\nf\no\nl\nl\no\nw\ni\nn\ng\nb\nu\ns\ni\nn\ne\ns\ns\nd\na\ny\nt\no\nr\ne\nc\ne\ni\nv\ne\nc\nl\na\ni\nm\nf\ni\nl\ni\nn\ng\ni\nn\ns\nt\nr\nu\nc\nt\ni\no\nn\ns\ns\nh\no\nu\nl\nd\na\nb\nr\ne\na\nk\nd\no\nw\nn\no\nc\nc\nu\nr\no\nn\na\nw\ne\ne\nk\ne\nn\nd\no\nr\nh\no\nl\ni\nd\na\ny\n.\nC\nu\ns\nt\no\nm\ne\nr\ns\ne\nr\nv\ni\nc\ne\nh\no\nu\nr\ns\na\nr\ne\n7\n:\n0\n0\nA\nM\n-\n7\n:\n0\n0\nP\nM\n(\nC\ne\nn\nt\nr\na\nl\nT\ni\nm\ne\n)\nM\no\nn\nd\na\ny\nt\nh\nr\no\nu\ng\nh\nF\nr\ni\nd\na\ny\n.\nP\na\ng\ne\n4\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)\nG\nE\nN\nE\nR\nA\nL\nP\nR\nO\nV\nI\nS\nI\nO\nN\nS\n1\n.\nW\nh\ne\nr\ne\nY\no\nu\nA\nr\ne\nC\no\nv\ne\nr\ne\nd\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\na\np\np\nl\ni\ne\ns\no\nn\nl\ny\nt\no\nb\nr\ne\na\nk\nd\no\nw\nn\ns\no\nc\nc\nu\nr\nr\ni\nn\ng\nw\ni\nt\nh\ni\nn\nt\nh\ne\nc\no\nn\nt\ni\nn\ne\nn\nt\na\nl\nU\nn\ni\nt\ne\nd\nS\nt\na\nt\ne\ns\no\nf\nA\nm\ne\nr\ni\nc\na\n,\nA\nl\na\ns\nk\na\n,\nH\na\nw\na\ni\ni\na\nn\nd\nC\na\nn\na\nd\na\n.\n2\n.\nL\ni\nm\ni\nt\no\nf\nL\ni\na\nb\ni\nl\ni\nt\ny\nO\nu\nr\nl\ni\nm\ni\nt\no\nf\nl\ni\na\nb\ni\nl\ni\nt\ny\ni\ns\nt\nh\ne\nc\no\ns\nt\nt\no\nr\ne\np\na\ni\nr\no\nr\nr\ne\np\nl\na\nc\ne\na\nn\ny\nc\no\nv\ne\nr\ne\nd\nb\nr\ne\na\nk\nd\no\nw\nn\n;\nb\nu\nt\ni\nn\nn\no\ne\nv\ne\nn\nt\ns\nh\na\nl\nl\nt\nh\ni\ns\nc\no\ns\nt\ne\nx\nc\ne\ne\nd\nt\nh\ne\na\nv\ne\nr\na\ng\ne\nr\ne\nt\na\ni\nl\nv\na\nl\nu\ne\no\nf\ny\no\nu\nr\nv\ne\nh\ni\nc\nl\ne\na\ns\nd\ne\nt\ne\nr\nm\ni\nn\ne\nd\nb\ny\nt\nh\ne\nN\nA\nD\nA\n(\nO\nf\nf\ni\nc\ni\na\nl\nU\ns\ne\nd\nC\na\nr\nG\nu\ni\nd\ne\n)\na\nt\nt\nh\ne\nt\ni\nm\ne\no\nf\nl\no\ns\ns\n.\n3\n.\nL\ni\nm\ni\nt\na\nt\ni\no\nn\ns\no\nf\nI\nm\np\nl\ni\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nA\nl\nl\nI\nm\np\nl\ni\ne\nd\nW\na\nr\nr\na\nn\nt\ni\ne\ns\nw\nh\ni\nc\nh\nm\na\ny\na\nr\ni\ns\ne\nu\nn\nd\ne\nr\ns\nt\na\nt\ne\nl\na\nw\n,\ni\nn\nc\nl\nu\nd\ni\nn\ng\na\nl\nl\nI\nm\np\nl\ni\ne\nd\nW\na\nr\nr\na\nn\nt\ni\ne\ns\no\nf\nM\ne\nr\nc\nh\na\nn\nt\na\nb\ni\nl\ni\nt\ny\no\nr\nF\ni\nt\nn\ne\ns\ns\nf\no\nr\na\np\na\nr\nt\ni\nc\nu\nl\na\nr\np\nu\nr\np\no\ns\ne\n,\na\nr\ne\nl\ni\nm\ni\nt\ne\nd\nt\no\nt\nh\ne\nd\nu\nr\na\nt\ni\no\nn\no\nf\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\na\nn\nd\nd\no\nn\no\nt\nc\no\nv\ne\nr\ni\nn\nc\ni\nd\ne\nn\nt\na\nl\no\nr\nc\no\nn\ns\ne\nq\nu\ne\nn\nt\ni\na\nl\nd\na\nm\na\ng\ne\ns\n.\nS\no\nm\ne\ns\nt\na\nt\ne\ns\nd\no\nn\no\nt\na\nl\nl\no\nw\nl\ni\nm\ni\nt\na\nt\ni\no\nn\ns\no\nn\nh\no\nw\nl\no\nn\ng\na\nn\nI\nm\np\nl\ni\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nl\na\ns\nt\ns\no\nr\nt\nh\ne\ne\nx\nc\nl\nu\ns\ni\no\nn\no\nf\ni\nn\nc\ni\nd\ne\nn\nt\na\nl\no\nr\nc\no\nn\ns\ne\nq\nu\ne\nn\nt\ni\na\nl\nd\na\nm\na\ng\ne\ns\n,\ns\no\nt\nh\ne\na\nb\no\nv\ne\nl\ni\nm\ni\nt\na\nt\ni\no\nn\ns\no\nr\ne\nx\nc\nl\nu\ns\ni\no\nn\ns\nm\na\ny\nn\no\nt\na\np\np\nl\ny\nt\no\ny\no\nu\n.\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\ng\ni\nv\ne\ns\ny\no\nu\ns\np\ne\nc\ni\nf\ni\nc\nl\ne\ng\na\nl\nr\ni\ng\nh\nt\ns\n,\na\nn\nd\ny\no\nu\nm\na\ny\na\nl\ns\no\nh\na\nv\ne\no\nt\nh\ne\nr\nr\ni\ng\nh\nt\ns\nw\nh\ni\nc\nh\nv\na\nr\ny\nf\nr\no\nm\ns\nt\na\nt\ne\nt\no\ns\nt\na\nt\ne\n.\n4\n.\nI\nf\nY\no\nu\nH\na\nv\ne\nO\nt\nh\ne\nr\nC\no\nv\ne\nr\na\ng\ne\nI\nf\nt\nh\ne\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\no\nr\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\na\ng\nr\ne\ne\ns\nt\no\nc\no\nv\ne\nr\na\nl\nl\no\nr\ns\no\nm\ne\no\nf\nt\nh\ne\nc\no\ns\nt\no\nf\na\nb\nr\ne\na\nk\nd\no\nw\nn\na\nf\nt\ne\nr\na\nw\na\nr\nr\na\nn\nt\ny\no\nr\ng\nu\na\nr\na\nn\nt\ne\ne\nh\na\ns\ne\nx\np\ni\nr\ne\nd\n,\nw\ne\nw\ni\nl\nl\np\na\ny\no\nn\nl\ny\nf\no\nr\na\nn\ny\ne\nx\nt\nr\na\nc\no\ns\nt\n.\n5\n.\nY\no\nu\nr\nH\ne\nl\np\nA\nn\nd\nC\no\no\np\ne\nr\na\nt\ni\no\nn\nY\no\nu\nr\nh\ne\nl\np\na\nn\nd\nc\no\no\np\ne\nr\na\nt\ni\no\nn\ni\ns\nr\ne\nq\nu\ni\nr\ne\nd\ni\nf\nw\ne\na\ns\nk\ny\no\nu\nt\no\nh\ne\nl\np\nu\ns\ne\nn\nf\no\nr\nc\ne\ny\no\nu\nr\nr\ni\ng\nh\nt\ns\na\ng\na\ni\nn\ns\nt\na\nn\ny\nm\na\nn\nu\nf\na\nc\nt\nu\nr\ne\nr\no\nr\nr\ne\np\na\ni\nr\nf\na\nc\ni\nl\ni\nt\ny\nw\nh\no\nm\na\ny\nb\ne\nr\ne\ns\np\no\nn\ns\ni\nb\nl\ne\nt\no\ny\no\nu\nf\no\nr\nt\nh\ne\nc\no\ns\nt\no\nf\nr\ne\np\na\ni\nr\ns\nc\no\nv\ne\nr\ne\nd\nb\ny\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\n6\n.\nS\nu\nb\nr\no\ng\na\nt\ni\no\nn\nI\nf\nw\ne\np\na\ny\nf\no\nr\na\nl\no\ns\ns\n,\nw\ne\nm\na\ny\nr\ne\nq\nu\ni\nr\ne\ny\no\nu\nt\no\na\ns\ns\ni\ng\nn\nt\no\nu\ns\ny\no\nu\nr\nr\ni\ng\nh\nt\ns\no\nf\nr\ne\nc\no\nv\ne\nr\ny\na\ng\na\ni\nn\ns\nt\no\nt\nh\ne\nr\ns\n.\nW\ne\nw\ni\nl\nl\nn\no\nt\np\na\ny\nf\no\nr\na\nl\no\ns\ns\ni\nf\ny\no\nu\ni\nm\np\na\ni\nr\nt\nh\ne\ns\ne\nr\ni\ng\nh\nt\ns\nt\no\nr\ne\nc\no\nv\ne\nr\n.\nY\no\nu\nr\nr\ni\ng\nh\nt\ns\nt\no\nr\ne\nc\no\nv\ne\nr\nf\nr\no\nm\no\nt\nh\ne\nr\ns\nm\na\ny\nn\no\nt\nb\ne\nw\na\ni\nv\ne\nd\n.\n7\n.\nT\nr\na\nn\ns\nf\ne\nr\na\nb\ni\nl\ni\nt\ny\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\ni\ns\nn\no\nn\n-\nt\nr\na\nn\ns\nf\ne\nr\na\nb\nl\ne\n.\n8\n.\nC\na\nn\nc\ne\nl\nl\na\nt\ni\no\nn\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\ni\ns\nn\no\nn\n-\nc\na\nn\nc\ne\nl\na\nb\nl\ne\n.\n9\n.\nD\ni\ns\np\nu\nt\ne\nR\ne\ns\no\nl\nu\nt\ni\no\nn\n\u2013\nA\nr\nb\ni\nt\nr\na\nt\ni\no\nn\nT\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nr\ne\nq\nu\ni\nr\ne\ns\nb\ni\nn\nd\ni\nn\ng\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\ni\nf\nt\nh\ne\nr\ne\ni\ns\na\nn\nu\nn\nr\ne\ns\no\nl\nv\ne\nd\nd\ni\ns\np\nu\nt\ne\nb\ne\nt\nw\ne\ne\nn\ny\no\nu\na\nn\nd\nu\ns\nc\no\nn\nc\ne\nr\nn\ni\nn\ng\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n(\ni\nn\nc\nl\nu\nd\ni\nn\ng\nt\nh\ne\nc\no\ns\nt\no\nf\n,\nl\na\nc\nk\no\nf\no\nr\na\nc\nt\nu\na\nl\nr\ne\np\na\ni\nr\no\nr\nr\ne\np\nl\na\nc\ne\nm\ne\nn\nt\na\nr\ni\ns\ni\nn\ng\nf\nr\no\nm\na\nb\nr\ne\na\nk\nd\no\nw\nn\n)\n.\nU\nn\nd\ne\nr\nt\nh\ni\ns\nA\nr\nb\ni\nt\nr\na\nt\ni\no\nn\np\nr\no\nv\ni\ns\ni\no\nn\n,\ny\no\nu\ng\ni\nv\ne\nu\np\ny\no\nu\nr\nr\ni\ng\nh\nt\nt\no\nr\ne\ns\no\nl\nv\ne\na\nn\ny\nd\ni\ns\np\nu\nt\ne\na\nr\ni\ns\ni\nn\ng\nf\nr\no\nm\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\nb\ny\na\nj\nu\nd\ng\ne\na\nn\nd\n/\no\nr\na\nj\nu\nr\ny\n.\nY\no\nu\na\nl\ns\no\na\ng\nr\ne\ne\nn\no\nt\nt\no\np\na\nr\nt\ni\nc\ni\np\na\nt\ne\na\ns\na\nc\nl\na\ns\ns\nr\ne\np\nr\ne\ns\ne\nn\nt\na\nt\ni\nv\ne\no\nr\nc\nl\na\ns\ns\nm\ne\nm\nb\ne\nr\ni\nn\na\nn\ny\nc\nl\na\ns\ns\na\nc\nt\ni\no\nn\nl\ni\nt\ni\ng\na\nt\ni\no\nn\n,\na\nn\ny\nc\nl\na\ns\ns\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\no\nr\na\nn\ny\nc\no\nn\ns\no\nl\ni\nd\na\nt\ni\no\nn\no\nf\ni\nn\nd\ni\nv\ni\nd\nu\na\nl\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\ns\n.\nI\nn\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\n,\na\ng\nr\no\nu\np\no\nf\nt\nh\nr\ne\ne\na\nr\nb\ni\nt\nr\na\nt\no\nr\ns\n(\ne\na\nc\nh\no\nf\nw\nh\no\nm\ni\ns\na\nn\ni\nn\nd\ne\np\ne\nn\nd\ne\nn\nt\n,\nn\ne\nu\nt\nr\na\nl\nt\nh\ni\nr\nd\np\na\nr\nt\ny\n)\nw\ni\nl\nl\ng\ni\nv\ne\na\nd\ne\nc\ni\ns\ni\no\nn\na\nf\nt\ne\nr\nh\ne\na\nr\ni\nn\ng\ny\no\nu\nr\na\nn\nd\no\nu\nr\np\no\ns\ni\nt\ni\no\nn\ns\n.\nT\nh\ne\nd\ne\nc\ni\ns\ni\no\nn\no\nf\na\nm\na\nj\no\nr\ni\nt\ny\no\nf\nt\nh\ne\na\nr\nb\ni\nt\nr\na\nt\no\nr\ns\nw\ni\nl\nl\nd\ne\nt\ne\nr\nm\ni\nn\ne\nt\nh\ne\no\nu\nt\nc\no\nm\ne\no\nf\nt\nh\ne\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\na\nn\nd\nt\nh\ne\nd\ne\nc\ni\ns\ni\no\nn\no\nf\nt\nh\ne\na\nr\nb\ni\nt\nr\na\nt\no\nr\ns\ns\nh\na\nl\nl\nb\ne\nf\ni\nn\na\nl\na\nn\nd\nb\ni\nn\nd\ni\nn\ng\na\nn\nd\nc\na\nn\nn\no\nt\nb\ne\nr\ne\nv\ni\ne\nw\ne\nd\no\nr\nc\nh\na\nn\ng\ne\nd\nb\ny\n,\no\nr\na\np\np\ne\na\nl\ne\nd\nt\no\n,\na\nc\no\nu\nr\nt\no\nf\nl\na\nw\n.\nT\no\ns\nt\na\nr\nt\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\n,\ne\ni\nt\nh\ne\nr\ny\no\nu\no\nr\nw\ne\nm\nu\ns\nt\nm\na\nk\ne\na\nw\nr\ni\nt\nt\ne\nn\nd\ne\nm\na\nn\nd\nt\no\nt\nh\ne\no\nt\nh\ne\nr\np\na\nr\nt\ny\nf\no\nr\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\n.\nT\nh\ni\ns\nd\ne\nm\na\nn\nd\nm\nu\ns\nt\nb\ne\nm\na\nd\ne\nw\ni\nt\nh\ni\nn\no\nn\ne\n(\n1\n)\ny\ne\na\nr\no\nf\nt\nh\ne\ne\na\nr\nl\ni\ne\nr\no\nf\nt\nh\ne\nd\na\nt\ne\nt\nh\ne\nb\nr\ne\na\nk\nd\no\nw\nn\no\nc\nc\nu\nr\nr\ne\nd\no\nr\nt\nh\ne\nd\ni\ns\np\nu\nt\ne\na\nr\no\ns\ne\n.\nY\no\nu\na\nn\nd\nw\ne\nw\ni\nl\nl\ne\na\nc\nh\ns\ne\np\na\nr\na\nt\ne\nl\ny\ns\ne\nl\ne\nc\nt\na\nn\na\nr\nb\ni\nt\nr\na\nt\no\nr\n.\nT\nh\ne\nt\nw\no\na\nr\nb\ni\nt\nr\na\nt\no\nr\ns\nw\ni\nl\nl\ns\ne\nl\ne\nc\nt\na\nt\nh\ni\nr\nd\na\nr\nb\ni\nt\nr\na\nt\no\nr\nc\na\nl\nl\ne\nd\na\nn\n\"\nu\nm\np\ni\nr\ne\n.\n\"\nE\na\nc\nh\np\na\nr\nt\ny\nw\ni\nl\nl\ne\na\nc\nh\np\na\ny\nt\nh\ne\ne\nx\np\ne\nn\ns\ne\no\nf\nt\nh\ne\na\nr\nb\ni\nt\nr\na\nt\no\nr\ns\ne\nl\ne\nc\nt\ne\nd\nb\ny\nt\nh\na\nt\np\na\nr\nt\ny\n.\nT\nh\ne\ne\nx\np\ne\nn\ns\ne\no\nf\nt\nh\ne\nu\nm\np\ni\nr\ne\nw\ni\nl\nl\nb\ne\ns\nh\na\nr\ne\nd\ne\nq\nu\na\nl\nl\ny\nb\ny\ny\no\nu\na\nn\nd\nu\ns\n.\nU\nn\nl\ne\ns\ns\no\nt\nh\ne\nr\nw\ni\ns\ne\na\ng\nr\ne\ne\nd\nt\no\nb\ny\ny\no\nu\na\nn\nd\nu\ns\n,\nt\nh\ne\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\nw\ni\nl\nl\nt\na\nk\ne\np\nl\na\nc\ne\ni\nn\nt\nh\ne\nc\no\nu\nn\nt\ny\na\nn\nd\ns\nt\na\nt\ne\ni\nn\nw\nh\ni\nc\nh\ny\no\nu\nl\ni\nv\ne\n.\nT\nh\ne\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\ns\nh\na\nl\nl\nb\ne\ng\no\nv\ne\nr\nn\ne\nd\nb\ny\nt\nh\ne\nF\ne\nd\ne\nr\na\nl\nA\nr\nb\ni\nt\nr\na\nt\ni\no\nn\nA\nc\nt\n(\n9\nU\n.\nS\n.\nC\n.\nA\n.\n\u00a7\n1\ne\nt\n.\ns\ne\nq\n.\n)\na\nn\nd\nn\no\nt\nb\ny\na\nn\ny\ns\nt\na\nt\ne\nl\na\nw\nc\no\nn\nc\ne\nr\nn\ni\nn\ng\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\n.\nT\nh\ne\nr\nu\nl\ne\ns\no\nf\nt\nh\ne\nA\nm\ne\nr\ni\nc\na\nn\nA\nr\nb\ni\nt\nr\na\nt\ni\no\nn\nA\ns\ns\no\nc\ni\na\nt\ni\no\nn\n(\nw\nw\nw\n.\na\nd\nr\n.\no\nr\ng\n)\nw\ni\nl\nl\na\np\np\nl\ny\nt\no\na\nn\ny\na\nr\nb\ni\nt\nr\na\nt\ni\no\nn\nu\nn\nd\ne\nr\nt\nh\ni\ns\nP\no\nw\ne\nr\nt\nr\na\ni\nn\nL\ni\nm\ni\nt\ne\nd\nW\na\nr\nr\na\nn\nt\ny\n.\nI\nF\nY\nO\nU\nH\nA\nV\nE\nA\nB\nR\nE\nA\nK\nD\nO\nW\nN\n,\nC\nA\nL\nL\nY\nO\nU\nR\nS\nE\nL\nL\nI\nN\nG\nD\nE\nA\nL\nE\nR\nO\nR\n:\n-\nC\na\nl\nl\nt\nh\ne\nA\nd\nm\ni\nn\ni\ns\nt\nr\na\nt\no\nr\nt\no\nl\nl\n-\nf\nr\ne\ne\n:\n1\n-\n8\n0\n0\n-\n6\n2\n1\n-\n2\n1\n3\n0\nP\na\ng\ne\n5\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\nQ\nL\nW\n2\n-\n0\n0\n3\n-\nP\nT\n(\n0\n9\n/\n1\n3\n)\n(\nS\nt\no\nc\nk\nR\ne\no\nr\nd\ne\nr\nN\nu\nm\nb\ne\nr\n)"
+                  }
+                ]
+              }
+            }
+          },
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "2bd13a51-d48b-4852-8818-58f856e74cb0",
+        "timestamp": "2026-02-24T23:38:23.243000Z",
+        "source_system": "welcome_message",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello! I see you're calling about your FORD MUSTANG. I don't see any claims for your vehicle right now. Would you like to know more about how to start a new claim, or do you have other questions about car rentals?",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "c75a6ec3-22b9-4e67-8480-fccff1b6a007",
+        "timestamp": "2026-02-24T23:38:23.280000Z",
+        "source_system": "welcome_message",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"Hello! I see you're calling about your FORD MUSTANG. I don't see any claims for your vehicle right now. Would you like to know more about how to start a new claim, or do you have other questions about car rentals?\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0bfcc3e9-aa70-4636-be11-517fd68b7d39",
+        "timestamp": "2026-02-24T23:38:23.281000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello! I see you're calling about your FORD MUSTANG. I don't see any claims for your vehicle right now. Would you like to know more about how to start a new claim, or do you have other questions about car rentals?",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "c25e818b-6b8f-4856-8670-b1b772966f26",
+        "timestamp": "2026-02-24T23:38:42.591000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e6669c3e-11e4-417f-b36e-13f89520ff2c",
+        "timestamp": "2026-02-24T23:38:42.657000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Speak with representative.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KJ909XF8A20MHS378859GRF8",
+        "timestamp": "2026-02-24T23:38:44.520000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "DISCARD ANY PREVIOUS REQUESTS and escalate the customer to a live human agent immediately \u2014 the customer has already been notified!",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e8db9254-3e34-40b3-b9bd-9a2a70bcd7de",
+        "timestamp": "2026-02-24T23:38:44.625000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "escalate_to_live_agent",
+          "parameters": {},
+          "request_id": "call_cj2sPVALuPGUU0wCtVG4AdNg",
+          "external_request_id": "6a626e29-0969-4a95-91d8-9dc3d0e190d3",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "c7b344a3-390b-4c66-afbd-6dad59a27901",
+        "timestamp": "2026-02-24T23:38:44.644000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "137",
+          "content": null
+        }
+      },
+      {
+        "id": "ee04a930-7ffa-4da2-abe0-a383f7ba7da2",
+        "timestamp": "2026-02-24T23:38:45.022000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Understood, please hold.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "a0f71dd3-4f74-4f46-8ff0-c30b0af37d78",
+        "timestamp": "2026-02-24T23:38:46.634000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-northcentralus-gpt-4.1",
+          "num_input_tokens": 7722,
+          "num_output_tokens": 271,
+          "prompt_type": "task_reasoner",
+          "request_id": "3b349e86-264a-44a5-93f6-56737a701dba",
+          "llm_id": "litellm",
+          "cost": 0.017612000927329063,
+          "call_duration": 1955
+        }
+      },
+      {
+        "id": "7d67b2da-38bf-41a9-82a9-a9d55def0735",
+        "timestamp": "2026-02-24T23:38:46.636000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(6.3) The Talker has instructed to escalate to a live human agent, which matches the escalation scenario \"customer has persisted in asking for a human agent despite previous deflection attempts.\" (3.1) I have all the information needed to escalate. (3.2) My next action is to call escalate_to_agent with the correct parameters per task instructions."
+      },
+      {
+        "id": "8cda3fb6-386d-4022-afee-67735868a903",
+        "timestamp": "2026-02-24T23:38:46.640000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "329ec26d-199c-4662-8e0e-a510fe8742fa",
+        "timestamp": "2026-02-24T23:38:46.679000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "escalate_to_live_agent",
+            "parameters": {},
+            "request_id": "call_cj2sPVALuPGUU0wCtVG4AdNg",
+            "external_request_id": "6a626e29-0969-4a95-91d8-9dc3d0e190d3",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "last_action_id": "8cda3fb6-386d-4022-afee-67735868a903",
+          "error": null
+        }
+      },
+      {
+        "id": "ab5e3cc1-e838-4b95-9025-695723fd0772",
+        "timestamp": "2026-02-24T23:38:46.698000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "escalate_to_agent",
+          "parameters": {
+            "GAIntent": "RCEQUESTION",
+            "TFN_DNIS": "4035297",
+            "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+            "PhoneNumber": "6614288182",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "callerIntent": "CAR_RENTAL",
+            "Timestamp": "2026-02-24",
+            "Language": "EN",
+            "VIN": "1FA6P8CF0K5202322",
+            "ContractNumber": "0006GF2Q",
+            "ClaimNumber": "",
+            "salesforceId": "",
+            "productType": "LW",
+            "IdentifierUsed": "ContractNumber",
+            "Identified": true,
+            "ClaimStatus": "NoClaim",
+            "TransferReason": "CallerRequestedAgent",
+            "Question": "Customer has requested escalation to a live human agent after being notified.",
+            "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+          },
+          "request_id": "865eaaa2-cb90-4893-bbda-077a65dde826",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+          "function_version": "18",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "3f32e3a1-8d79-41a5-b4df-5276317a298e",
+        "timestamp": "2026-02-24T23:38:46.715000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "escalate_to_agent",
+            "parameters": {
+              "GAIntent": "RCEQUESTION",
+              "TFN_DNIS": "4035297",
+              "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+              "PhoneNumber": "6614288182",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "callerIntent": "CAR_RENTAL",
+              "Timestamp": "2026-02-24",
+              "Language": "EN",
+              "VIN": "1FA6P8CF0K5202322",
+              "ContractNumber": "0006GF2Q",
+              "ClaimNumber": "",
+              "salesforceId": "",
+              "productType": "LW",
+              "IdentifierUsed": "ContractNumber",
+              "Identified": true,
+              "ClaimStatus": "NoClaim",
+              "TransferReason": "CallerRequestedAgent",
+              "Question": "Customer has requested escalation to a live human agent after being notified.",
+              "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+            },
+            "request_id": "865eaaa2-cb90-4893-bbda-077a65dde826",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+            "function_version": "18",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {},
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "76feb5a7-a534-4481-a09f-2c636cf542f8",
+        "timestamp": "2026-02-24T23:38:46.715000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "set_variables",
+        "reference_variables": {
+          "ContractNumber": "\"0006GF2Q\"",
+          "TFN_DNIS": "\"4035297\"",
+          "PhoneNumber": "\"6614288182\"",
+          "Timestamp": "\"****-**-**\"",
+          "Language": "\"EN\"",
+          "GAIntent": "\"RCEQUESTION\"",
+          "VIN": "\"1FA6P8CF0K5202322\"",
+          "ClaimNumber": "\"\"",
+          "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+          "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+          "Identified": "true",
+          "IdentifierUsed": "\"ContractNumber\"",
+          "ClaimStatus": "\"NoClaim\"",
+          "salesforceId": "\"\"",
+          "productType": "\"LW\"",
+          "TransferReason": "\"CallerRequestedAgent\"",
+          "callerIntent": "\"CAR_RENTAL\"",
+          "CiscoCallId": "\"9A016CBC111011F18D10AE90913CCC1A\"",
+          "Question": "\"Customer has requested escalation to a live human agent after being notified.\""
+        },
+        "sensitive_variables": []
+      },
+      {
+        "id": "dc377af5-bda6-4927-9f48-71ee113d8128",
+        "timestamp": "2026-02-24T23:38:46.715000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "system_transfer",
+        "system_transfer_metadata": {
+          "transfer_function_request": {
+            "function_name": "escalate_to_agent",
+            "parameters": {
+              "GAIntent": "RCEQUESTION",
+              "TFN_DNIS": "4035297",
+              "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+              "PhoneNumber": "6614288182",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "callerIntent": "CAR_RENTAL",
+              "Timestamp": "2026-02-24",
+              "Language": "EN",
+              "VIN": "1FA6P8CF0K5202322",
+              "ContractNumber": "0006GF2Q",
+              "ClaimNumber": "",
+              "salesforceId": "",
+              "productType": "LW",
+              "IdentifierUsed": "ContractNumber",
+              "Identified": true,
+              "ClaimStatus": "NoClaim",
+              "TransferReason": "CallerRequestedAgent",
+              "Question": "Customer has requested escalation to a live human agent after being notified.",
+              "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+            },
+            "request_id": "865eaaa2-cb90-4893-bbda-077a65dde826",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+            "function_version": "18",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "reference_variables": {
+            "ContractNumber": "0006GF2Q",
+            "TFN_DNIS": "4035297",
+            "PhoneNumber": "6614288182",
+            "Timestamp": "2026-02-24",
+            "Language": "EN",
+            "GAIntent": "RCEQUESTION",
+            "VIN": "1FA6P8CF0K5202322",
+            "ClaimNumber": "",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "Identified": true,
+            "IdentifierUsed": "ContractNumber",
+            "ClaimStatus": "NoClaim",
+            "salesforceId": "",
+            "productType": "LW",
+            "TransferReason": "CallerRequestedAgent",
+            "callerIntent": "CAR_RENTAL",
+            "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+            "Question": "Customer has requested escalation to a live human agent after being notified."
+          },
+          "transfer_variables": {
+            "ContractNumber": "0006GF2Q",
+            "TFN_DNIS": "4035297",
+            "PhoneNumber": "6614288182",
+            "Timestamp": "2026-02-24",
+            "Language": "EN",
+            "GAIntent": "RCEQUESTION",
+            "VIN": "1FA6P8CF0K5202322",
+            "ClaimNumber": "",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "Identified": true,
+            "IdentifierUsed": "ContractNumber",
+            "ClaimStatus": "NoClaim",
+            "salesforceId": "",
+            "productType": "LW",
+            "TransferReason": "CallerRequestedAgent",
+            "callerIntent": "CAR_RENTAL",
+            "CiscoCallId": "9A016CBC111011F18D10AE90913CCC1A",
+            "Question": "Customer has requested escalation to a live human agent after being notified."
+          },
+          "sensitive_variables": []
+        }
+      },
+      {
+        "id": "b82412b5-5062-4bc3-b776-0aaa7e9dee38",
+        "timestamp": "2026-02-24T23:38:49.018000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"I am transferring you to a Customer Service Agent who can assist you further.\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f4403773-66d1-46e2-8968-206912335b88",
+        "timestamp": "2026-02-24T23:38:49.018000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "78cc89a4-6e45-4752-906c-0710d799f3f5",
+        "timestamp": "2026-02-24T23:38:53.869000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "disconnect",
+        "disconnect_metadata": {
+          "reason": "completed",
+          "message": "DigitalGenAgent said: 'Transfer to system'",
+          "conversation_duration_ms": 34149
+        }
+      }
+    ],
+    "conversation_metadata": {},
+    "parent_header": null,
+    "current_datetime": null
+  }
+}

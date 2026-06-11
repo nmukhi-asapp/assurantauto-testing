@@ -31,6 +31,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 |---|---|---|---|
 | `e2e_journey3_rental_inquiry` | contract_holder/journey3_car_rental/scenario_1_rental_inquiry.yaml | Customer inquires about rental coverage while vehicle is being repaired | ✅ run |
 | `e2e_ch_rental_coverage_followup` | contract_holder/journey3_car_rental/scenario_rental_coverage_followup.yaml | CH asks general coverage question then follows up specifically about rental | ✅ run |
+| `e2e_ch_car_rental_spanish_escalation` | contract_holder/journey3_car_rental/scenario_car_rental_spanish_escalation.yaml | Spanish-speaking customer asks if agent speaks Spanish — agent should escalate immediately without deflecting | ✅ run |
 
 ### Journey 4 — Contract Questions
 
@@ -223,11 +224,11 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 
 | Caller Type | Scenarios |
 |---|---|
-| Contract Holder | 48 |
+| Contract Holder | 49 |
 | Repair Facility | 22 |
 | Dealership | 12 |
 | Routing | 6 |
 | Employee | 1 |
-| **Total** | **89** |
+| **Total** | **90** |
 
 > Target scenarios (`target/`) are for a separate client and are excluded from this index.

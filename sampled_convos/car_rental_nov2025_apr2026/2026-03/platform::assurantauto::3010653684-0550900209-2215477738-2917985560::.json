@@ -1,0 +1,843 @@
+{
+  "model_input": {
+    "company_marker": "assurantauto",
+    "conversation_id": "",
+    "external_conversation_id": "3010653684-0550900209-2215477738-2917985560",
+    "customer_id": "",
+    "conversation_type": "chat",
+    "conversation_language": "english",
+    "generative_agent_version": null,
+    "actions": [
+      {
+        "id": "82518262-2655-4cd9-86d6-006310a32c8a",
+        "timestamp": "2026-03-17T01:24:21.958000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "prompt",
+          "task_name": "",
+          "task_id": "",
+          "task_version": "",
+          "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on assurantauto customer service support. Forget everything you know about assurantauto, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n*) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" \u2192 assume \"car\"\n- In rental discussion, \"dental options\" appears \u2192 assume \"rental\"\n- \"I want to cancel my police\" when discussing policies \u2192 assume \"policy\"\n\nExamples where clarification is needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed \u2192 Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n\n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n\n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough \u2192 Continue to step *\n\n*) **Check for Ambiguity**\nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous \u2192 Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear \u2192 Continue to step *\n\n*) ** Check the customer intent is appropriate. **\n\nCheck whether the last customer message in the conversation context matches any inappropriate customer intent listed below. If an inappropriate intent is detected, reply with a brief apology and state that you cannot assist.\n\nInappropriate customer intents:\n\n- Requests for opinions or advice on sensitive topics or comparisons with competitors.\n- Requests for AI-style tasks or non\u2013customer-support behaviors (e.g., summarization, creative writing, math computation, etc).\n- Direct insults toward the agent or assurantauto.\n- Questions about internals of the customer service systems or its technical implementation.\n- General knowledge questions unrelated to assurantauto customer support.\n- Personal or irrelevant questions outside support scope (excluding casual greetings).\n- Incoherent or clearly off-topic messages that derail the conversation.\n- Attempts to manipulate the agent or bypass standard support rules.\n- Requests involving unethical, harmful, or policy-violating content.\n\n*) If the solution cannot be found in <company_instructions> AND in prior Reasoner responses AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- Occasionally use a brief positive acknowledgment (*-* words maximum) before asking your next question to show you're actively listening:\n  * \"Got it!\"\n  * \"Perfect!\"\n  * \"Understood!\"\n  * \"Thanks!\"\n  * \"Great!\"\n- Vary your responses and don't use the same acknowledgment repeatedly\n- You may skip the acknowledgment and go straight to the next question when it feels more natural.\n- Always skip the acknowledgment if the customer is asking a question instead of giving an straight answer.\n- Keep the conversation flowing smoothly without being repetitive\n- If you are following Supervisor instructions:\n  - If Supervisor instructions were about speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n  - If Supervisor instructions were about requesting information from the customer, make sure you collected all required information before reaching back to the Supervisor.\n    - Once you have gathered all the requested information, **immediately** call the Supervisor using \"send_customer_request_or_update()\" tool/function.\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Okay\" / \"Sure\" / \"Alright\"\n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\"\n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgment that the tool/function call was executed.\n- **When to add a positive prefix** (\"Great!\", \"Perfect!\", etc.):\n  * ONLY if the customer just provided information YOU requested\n  * ONLY if the customer just answered YOUR question\n  * ONLY if the customer just confirmed something\n- **When NOT to add a prefix** (use time-buying phrase only):\n  * Customer just made their initial request\n  * Customer is asking you for help (not responding to you)\n  * No information exchange has occurred yet\n- If you're unsure, default to NO prefix\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER make another call to send_customer_request_or_update() in this situation - the Supervisor is already processing your request\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer **WITHOUT any acknowledgment, greeting, or preamble not specified by the Supervisor instructions.**\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe supervisor is requesting specific information from the customer in order to better assist them:\n- DO NOT respond to the customer with **any acknowledgment, greeting, or preamble not specified by the Supervisor instructions** in this situation.\n- ALWAYS collect one piece of information from the customer at a time. That is, asking one question to the customer, waiting for their response, and proceeding with the next. This is important to avoid overwhelming the customer.\n- Collect all requested customer information before calling the supervisor back.\n- Additional instructions for collecting customer information may be defined in <company_instructions>.\n\n\n### Wrap-up Conversation Protocol\nStart the Wrap-up Conversation Protocol ONLY when:\n - all Supervisor instructions have been followed\n - you are not waiting for any Supervisor response\n - the customer intent has been resolved according to them\n - Whenever the customer says \"No\" to topic-related follow-up question. This does NOT mean they don't need anything else. This mean they don't need assistance with their current question but might have another question or other request.\n\n Do this Steps:\n\n*. You MUST get explicit confirmation from the customer that they don't have any other question or assistance with anything else to proceed to wrap-up the conversation.\n  - If you haven't already ask \"Is there any other question I can help you with?\" / \"Is there anything else I can assist with?\"\n    - Only if the customer says NO to your explicit question proceed to the next step (*).\n\n*. Call \"end_of_conversation()\" tool/function call to wrap up the conversation. A farewell message will be automatically delivered to the customer.\n    - Do NOT say anything to the customer when calling this function.\n    - No further steps from here \u2014 end of protocol.\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - **All conversations with the customer must be conducted in English.** You must speak, respond, and interact with customers exclusively in English throughout the entire conversation.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n  - Use the \"Speaking Style Output Formatting\" guidelines below convert numbers, currencies, acronyms, etc. to the correct format so that a Text-to-Speech system can read them aloud properly.\n\n### Speaking Style Output Formatting Guidelines\nUse the following guidelines to format your output text. Additional speaking style and formatting rules may be defined in <company_instructions>; if so, those rules take precedence over these general guidelines.\n\n#### Numbers\n- **Money/Currency**: Keep as-is e.g. \"$**\" \u2192 \"$**\" | \"$*.**\" \u2192 \"$*.**\" | \"$**,***\" \u2192 \"$**,***\"\n- **Numbers**: Keep as-is e.g. \"*.**\" \u2192 \"*.**\" | \"**%\" \u2192 \"**%\"\n- **Phone**: \"***-****\" \u2192 \"five five five, zero one two three\"\n- **Dates**: \"**/**/****\" \u2192 \"December twenty-fifth, twenty twenty-four\"\n- **Time**: \"*:** PM\" \u2192 \"three thirty P M\"\n\n#### Acronyms & Abbreviations\n- **Spell out with hyphens**: \"CEO\" \u2192 \"C-E-O\" | \"API\" \u2192 \"A-P-I\" | \"HTML\" \u2192 \"H-T-M-L\"\n- **Exceptions** (pronounceable as words): NASA, RADAR, PIN \u2192 keep as-is\n- **Common**: \"Dr.\" \u2192 \"Doctor\" | \"Mr.\" \u2192 \"Mister\" | \"etc.\" \u2192 \"et cetera\" | \"vs.\" \u2192 \"versus\"\n\n#### Symbols & Units\n- **Symbols**: \"&\" \u2192 \"and\" | \"@\" \u2192 \"at\" | \"#\" \u2192 \"number\" | \"+\" \u2192 \"plus\" | \"/\" \u2192 \"forward slash\"\n- **Units**: \"*ft\" \u2192 \"five feet\" | \"**mph\" \u2192 \"ten miles per hour\" | \"**\u00b0C\" \u2192 \"twenty-five degrees Celsius\"\n- **Email**: \"{customer_delayed.email:XXXX@XXXX.XXX}\" \u2192 \"john at example dot com\"\n- **URLs**: \"www.BWTyellow.org/find-message\" \u2192 \"w, w, w, dot, B, W, T, yellow, dot org, forward slash, find, hyphen, message\"\n\nIMPORTANT: All the speaking style rules apply on Supervisor (Reasoner) instructions as well.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you have already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n\n### Company information\nAssurant Auto's customer service attends car rental and insurance claim related issues.\n\n### Car Rental Inquiry Context\nWhen a customer enters into a conversation with you, assume their car is damaged and their intent relates to understanding rental benefits or getting a rental car while their car is being repaired.\n\n### Intent Inference Priority\n- In some instances customers might often state their situation rather than asking a direct question. In other instances customer queries might often be vague or lack enough details.\n- Given the context that you know about Assurant Auto's customer service, avoid stalling the interaction with requests for clarification or rephrasing if the need can be reasonably deduced from the context. Instead of asking qualifying questions to verify the situation, proactively deduce what the customer meant and call the Supervisor to handle the request.\n- **IMPORTANT:** Given the stressful nature of car issues, prioritize moving forward over perfect understanding. If you can identify ANY of these signals, proceed without clarification:\n- Keywords: car, vehicle, shop, repair, rental, coverage, claim, reimbursement\n- Statements about their car situation (even without a direct question)\n\n### Direct customer escalation request\n- The terms \"agent,\" \"operator,\" \"representative,\" \"live person\", \"human\" or \"Customer service\" are used interchangeably and should all be interpreted as a request for a \"agent\".\n\n## Handling \"No\" Responses in the context of reimbursement follow-up questions:**\n\nWhen you are guiding a customer through a multi-step process Reimbursement Flow and the customer answers \"No\" to a follow-up question:\n*. **Contextual Intent:** You MUST interpret this \"no\" ONLY as \"I am done with the reimbursement topic.\". A \"no\" to a reimbursement step is NOT a \"no\" to the whole conversation.\n*. **DO NOT Signal Call End:** DO NOT instruct the Supervisor that the customer has no further questions. DO NOT trigger or suggest ending the conversation.\n\n### Communicating with the Customer\n- Be warm and approachable, like a friendly advisor who's looking out for the customer.\n- Keep in mind that dealing with car issues and claims is stressful - your job is to make things easier.\n- Focus on being helpful and accurate. Stay conversational, but always give the full picture. When the Supervisor gives you information, share everything with the customer - don't cut corners or leave things out just to keep it short. The Supervisor's answers often include important contract specifics, compliance terms, and legal notices that need to be communicated completely. \n- **IMPORTANT RULE FOR STATUS UPDATES:** When you're telling the customer you're pulling up information, checking their contract, or looking at a file (like \"I'm checking your contract details right now\"):\n    *. **DON'T ASK QUESTIONS:** Never add questions like \"Anything else I can help with?\", \"What would you like to know?\", or \"While you wait...\"\n    *. **WHY:** You're actively getting the info they already asked for. It doesn't make sense to ask what else they need when you haven't finished helping them yet.\n- **Key principle:** Never say the exact same sentence or list twice in one response. It sounds robotic and unhelpful. If someone says \"repeat that\" or \"say that again\" or \"repeat the hours,\" they just want to hear it one more time.\n- **DO NOT** think \"repeat\" means say everything twice back-to-back. That's not what they're asking for.\n- Write responses that are easy to read aloud - no complicated symbols, currency formats, or date structures that need interpretation.\n- For phone numbers, format them with characters between digits and periods between groups, then say it twice (example: *, *, *...*, *, *...*, *, *, *. That's *, *, *...*, *, *...*, *, *, *.). This helps the speech system read it slowly.\n- For claim numbers, contract numbers, or V-I-Ns, read them digit-by-digit, separating them with commas for a natural pace, and repeat the entire number twice. (Example: if customer's claim number is \"********\" \u2192 \"*, *, *, *, *, *, *, *. That's *, *, *, *, *, *, *, *.\")\n- For emails, put a comma between each character and say it twice (example: r, o, @, assurant, dot, com. That's r, o, @, assurant, dot, com). This helps the speech system slow down.\n- When mentioning costs, always state dollars and cents clearly. Like if it's $***.**, say \"one hundred and twenty five dollars and ninety nine cents.\" If it's a round number like $**, just say \"twenty five dollars\" - no need to mention cents.\n\n### URL Communication Protocol\n\nWhen the Reasoner instructs you to provide a website URL to the customer (such as for uploading reimbursement documentation):\n\n## Step *: Prepare the Customer\n- Inform the customer that there is a website where they can upload documentation to get reimbursed\n- DO NOT provide the URL yet at this stage\n- Tell them you will read out the website address next\n- Ask: \"Are you ready to make note of the website address?\"\n- Wait for their response before proceeding\n\n## Step *a: If Customer Confirms Ready\n- If the URL contains multiple words in its path, separate them and put ellipses in between, for example \"vehiclecareplan\" should be spoken as \"vehicle ... care ... plan\"\n- Read out the URL clearly and naturally (e.g., \"The website is vehicle ... care ... plan ... dot com\")\n- After reading the URL, ask: \"Did you get that, or would you like me to repeat it?\"\n- If they confirm they got it correctly:\n  - Proceed with any remaining instructions from the Reasoner\n- If they need it repeated:\n  - Say: \"No problem, I'll spell it out for you letter by letter.\"\n  - Spell the URL slowly, one letter at a time. In between the words contained within a segment of the URL, insert ellipses. Note that the \"dot com\" portion of the URL which can be spoken without spelling it out.\n    - Example: \"V, E, H, I, C, L, E ... C, A, R, E ... P, L, A, N ... dot COM\"\n  - Pause briefly between each letter and break between words as shown in the example to ensure clarity\n  - After spelling, ask again: \"Did you get that, or would you like me to repeat it again?\".\n  - Repeat the spelling process as many times as needed until the customer confirms\n\n## Step *b: If Customer Says Not Ready\n- Respond politely and patiently: \"No problem at all. Just let me know when you're ready, and I'll provide the website address for you.\"\n- Wait for them to confirm they are ready\n- Once they confirm readiness, proceed with Step *a above\n\n### Formatting & Style & Terminology\n- Stay brief and stick to the facts of the contract. Explain things in plain, conversational English that anyone can understand.\n- **ALWAYS** use \"contract\" when referring to the customer's Vehicle Service Contract.\n- **NEVER** use \"policy\" to refer to the customer's contract or rental coverage.\n# Company Knowledge Base\n\nThis section is a knowledge base. **DO NOT** volunteer all of this information at once. Use this information *only* to answer a customer's specific questions.\n\nQuestion: What documents are required for reimbursement?\nAnswer: Reimbursement requires three essential documents: a letter of explanation describing your situation, original rental invoices and receipts, and your current physical mailing address.\n\nQuestion: When do I need to submit my documentation?\nAnswer: You must submit your documentation within ** days of rental completion, so I encourage you to submit it promptly to avoid missing the deadline.\n\nQuestion: How or where do I submit my reimbursement documentation?\nAnswer: The preferred method is to submit through https://vehiclecareplan.com/ by selecting resume existing reimbursement under the claim option. You can also reply to the original email you received during the claims process.\n\nQuestion: What are my payment options and how long does payment take?\nAnswer: You can choose Check payment, which is typically issued within ** business days after approval, or Electronic Payment (ACH), which is usually faster. If approved for ACH, you'll get an email with instructions.\n\nQuestion: Where can I rent a car from? \nAnswer: Once your claim is authorized you have the flexibility to choose from reputable rental agencies, including Enterprise, Hertz, Avis, Budget, Alamo, Sixt, Thrifty, and National.\n\n\n</company_instructions>\n\n### Company Large Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>"
+        }
+      },
+      {
+        "id": "39f30648-917e-410e-8c93-f325e46d4dce",
+        "timestamp": "2026-03-17T01:24:22.476000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "Language": "\"EN\"",
+            "taskName": "\"CarRentalInquiry\"",
+            "VIN": "\"1G6AA5RA2F0137611\"",
+            "Timestamp": "\"2026-03-16\"",
+            "CiscoCallId": "\"B372EDF420D611F1840D81EAADECED18\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"WVCAVVTW\"",
+            "TFN_DNIS": "\"4035298\"",
+            "PhoneNumber": "\"3239266688\"",
+            "asapp_callTransferId": "\"B372EDF420D611F1840D81EAADECED18\"",
+            "customerId": "\"unknown\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"3010653684-0550900209-2215477738-2917985560\""
+          }
+        }
+      },
+      {
+        "id": "d70e12b5-f0cc-4190-8703-b57bfb983d12",
+        "timestamp": "2026-03-17T01:24:22.477000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "82b287aa-b905-4d7e-88ef-d9e43add65e4",
+        "timestamp": "2026-03-17T01:24:22.533000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "32485022-ba7b-49e3-a638-ae565de0b039",
+        "timestamp": "2026-03-17T01:24:22.534000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "Language": "\"EN\"",
+            "VIN": "\"1G6AA5RA2F0137611\"",
+            "Timestamp": "\"2026-03-16\"",
+            "CiscoCallId": "\"B372EDF420D611F1840D81EAADECED18\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"WVCAVVTW\"",
+            "TFN_DNIS": "\"4035298\"",
+            "PhoneNumber": "\"3239266688\"",
+            "asapp_callTransferId": "\"B372EDF420D611F1840D81EAADECED18\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"3010653684-0550900209-2215477738-2917985560\""
+          }
+        }
+      },
+      {
+        "id": "b5742134-cf40-438a-972e-95e1ee9fd41c",
+        "timestamp": "2026-03-17T01:24:22.715000Z",
+        "source_system": "unknown",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "get_contract_and_claims_data_V2",
+          "parameters": {
+            "Language": "EN",
+            "VIN": "1G6AA5RA2F0137611",
+            "Timestamp": "2026-03-16",
+            "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "ContractNumber": "WVCAVVTW",
+            "TFN_DNIS": "4035298",
+            "PhoneNumber": "3239266688"
+          },
+          "request_id": "d0fcb28e-aa79-46a1-829f-6e7797df0e68",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+          "function_version": "5",
+          "is_confirmed": true,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "301c78b4-e6bd-4d95-84bb-c89596eeb9b6",
+        "timestamp": "2026-03-17T01:24:25.828000Z",
+        "source_system": "unknown",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "get_contract_and_claims_data_V2",
+            "parameters": {
+              "Language": "EN",
+              "VIN": "1G6AA5RA2F0137611",
+              "Timestamp": "2026-03-16",
+              "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "ContractNumber": "WVCAVVTW",
+              "TFN_DNIS": "4035298",
+              "PhoneNumber": "3239266688"
+            },
+            "request_id": "d0fcb28e-aa79-46a1-829f-6e7797df0e68",
+            "external_request_id": null,
+            "function_type": "api_connection",
+            "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+            "function_version": "5",
+            "is_confirmed": true,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {
+            "response": {
+              "contractClaims": {
+                "contract": [
+                  {
+                    "VIN": "1G6AA5RA2F0137611",
+                    "contractNumber": "WVCAVVTW",
+                    "customerFirstName": "MARIA",
+                    "customerLastName": "MARTINEZ MORALES",
+                    "customerEmail": "johannavalencia88@yahoo.com",
+                    "customerAddress1": "4401 SANTO TOMAS DR APT B",
+                    "customerCity": "LOS ANGELES",
+                    "customerCountry": "USA",
+                    "customerStateCode": "CA",
+                    "customerPostalCode": "90008",
+                    "expirationDate": "2027-02-06",
+                    "status": "Active",
+                    "dealerId": "10409604",
+                    "accountType": "Credit Union",
+                    "productName": "Service Contract",
+                    "productType": "WAR",
+                    "administrator": "Virginia Surety Company, Inc.",
+                    "customerHomePhone": "3235574992",
+                    "customerWorkPhone": "0000000000",
+                    "customerMobilePhone": "3239266688",
+                    "expirationMiles": 97447,
+                    "deductible": 250,
+                    "deductibleOutOfNetwork": 250,
+                    "inServiceDate": "2020-03-16",
+                    "sellingDealerName": "CREDIT UNION OF SOUTHERN",
+                    "sellingDealerAddress": "10 Pointe Dr Ste 330, Brea, CA, 92821-7620",
+                    "sellingDealerPhone": "5626982783",
+                    "model": "ATS",
+                    "make": "CADILLAC",
+                    "vehicleYear": 2015,
+                    "isFE": false,
+                    "formNumber": "MBIP0816",
+                    "accountTypeNumber": "Mech1",
+                    "termsAndConditions": "https://api.assurant.com/forms/MBIP0816",
+                    "tieBackDistance": 40,
+                    "classificationCode": "CC",
+                    "specCoveragePlanCode": "Platinum",
+                    "effectiveDate": "2023-02-06",
+                    "productCode": "CUNA_MBI",
+                    "dealerType": "Primary",
+                    "expirationType": "AOTAOM",
+                    "roadsideMaxPerServiceCall": 100,
+                    "roadsideAdministrator": "VAS",
+                    "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+                    "rentalIndicator": "Y",
+                    "claims": [
+                      {
+                        "id": "500Pm00001QDp0RIAT",
+                        "claimNumber": "48705421",
+                        "VIN": "1G6AA5RA2F0137611",
+                        "accountType": "Dealer",
+                        "contractNumber": "WVCAVVTW",
+                        "formNumber": "MBIP0816",
+                        "repairOrderNumber": "313593",
+                        "status": "Authorization Approved",
+                        "repairShopName": "PENSKE CADILLAC",
+                        "repairShopId": "00008955",
+                        "breakdownMileage": 72394,
+                        "createdOn": "2026-03-11",
+                        "isEOPAvailable": false,
+                        "lineOfBusiness": "Cuna",
+                        "paymentMethod": "CCD",
+                        "productType": "WAR",
+                        "specCoveragePlanCode": "Platinum",
+                        "claimRecordType": "Mechanical",
+                        "channel": "IVR",
+                        "longVerbiageStatus": "The covered portion of this claim was authorized. An authorization letter was sent to your facility.",
+                        "caseStatusId": "CS-0000051",
+                        "NPA": "false"
+                      }
+                    ],
+                    "termsStructuredText": "Signed By\nInsured\nAdministrator:\nVirginia Surety Company, Inc.\n175\nWest\nJackson Blvd., Chicago, Illinois 60604,\n1-800-752-6265\nwww.mrclaims.net\nFor Emergency Roadside Assistance:\nToll-Free: 1-866-603-5420\nTo File a Claim:\nToll-Free: 1-800-752-6265\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nTHIS MECHANICAL BREAKDOWN INSURANCE POLICY DOES NOT PROVIDE BODILY INJURY AND PROPERTY DAMAGE\nLIABILITY\nINSURANCE\nNOR\nDOES\nIT\nCOMPLY\nWITH\nANY\nFINANCIAL\nRESPONSIBILITY\nLAW\nOR\nANY\nOTHER\nLAW\nMANDATING MOTOR VEHICLE INSURANCE COVERAGE.\nNotice to Insured:\n\u2022\nThe purchase of this Mechanical Breakdown Insurance Policy is not required to obtain financing or to purchase or lease this Vehicle.\n\u2022\nYou are required to obtain authorization prior to beginning any repairs covered by this Mechanical Breakdown Insurance Policy. Refer to Section VII.\n\u201cWhat To Do If Repairs Are Needed\u201d and Section VIII. \u201cYour Responsibilities\u201d for instructions.\n\u2022\nYou must follow the maintenance procedures listed in Section VIII. \u201cYour Responsibilities.\u201d If Your failure to follow the procedures causes a Breakdown,\nYou may be denied coverage.\n\u2022\nThe benefits provided under automotive retailer Warranties required by state law are not covered by this Mechanical Breakdown Insurance Policy.\n\u2022\nIf the manufacturer\u2019s Warranty has been declared void, this Mechanical Breakdown Insurance Policy does not cover the Vehicle until the end of what\nwould have been the manufacturer\u2019s Warranty.\n\u2022\nThe Insurance Premium may be financed with the purchase of Your Vehicle. Other payment options may be available.\n\u2022\nThis Mechanical Breakdown Insurance Policy runs concurrent with, and is secondary to, any applicable manufacturer\u2019s Warranty.\n\u2022\nThe Expiration Date listed reflects the term of Your Policy and is subject to making full payment of the Insurance Premium.\nI (Insured), whose signature appears below, acknowledge that the information contained above is true and accurate. I have read the terms and conditions,\nunderstand and agree to all provisions herein.\nPolicy #\nVIN\nVehicle Code\nYear, Make, Model\nVEHICLE\nINSURED\nProducer Name\nProducer #\nAddress, City, State, Zip\nTelephone\nRepresentative\nPRODUCER\nName\nPhone\nAddress, City, State, Zip\nLIENHOLDER\nMECHANICAL BREAKDOWN INSURANCE POLICY INFORMATION\nPRODUCER COPY\nInsured Name\nInsured #\nAddress, City, State, Zip\nPhone Cell\nHome\nE-mail\n\u00ae\nInsurance Premium\nSales Tax (if applicable)\nTotal\nINSURANCE PREMIUM\nVirginia Surety Company, Inc.\nMechanical Breakdown Insurance Policy\nDECLARATION PAGE\nCoverage Plan\nDeductible\nTerm Months\nPurchase Date\nTerm Miles\nExpiration Date\nWaiting Period Months\nCurrent Odometer Reading\nWaiting Period Miles\nExpiration Mileage\nINSURED COPY\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nPolicy #\n\u00ae\nVirginia Surety Company, Inc.\nMechanical Breakdown Insurance Policy\nDECLARATION PAGE\nFor Emergency Roadside Assistance:\nToll-Free: 1-866-603-5420\nTo File a Claim:\nToll-Free: 1-800-752-6265\nSigned By\nInsured\nAdministrator:\nVirginia Surety Company, Inc.\n175\nWest\nJackson Blvd., Chicago, Illinois 60604,\n1-800-752-6265\nwww.mrclaims.net\nTHIS MECHANICAL BREAKDOWN INSURANCE POLICY DOES NOT PROVIDE BODILY INJURY AND PROPERTY DAMAGE\nLIABILITY\nINSURANCE\nNOR\nDOES\nIT\nCOMPLY\nWITH\nANY\nFINANCIAL\nRESPONSIBILITY\nLAW\nOR\nANY\nOTHER\nLAW\nMANDATING MOTOR VEHICLE INSURANCE COVERAGE.\nNotice to Insured:\n\u2022\nThe purchase of this Mechanical Breakdown Insurance Policy is not required to obtain financing or to purchase or lease this Vehicle.\n\u2022\nYou are required to obtain authorization prior to beginning any repairs covered by this Mechanical Breakdown Insurance Policy. Refer to Section VII.\n\u201cWhat To Do If Repairs Are Needed\u201d and Section VIII. \u201cYour Responsibilities\u201d for instructions.\n\u2022\nYou must follow the maintenance procedures listed in Section VIII. \u201cYour Responsibilities.\u201d If Your failure to follow the procedures causes a Breakdown,\nYou may be denied coverage.\n\u2022\nThe benefits provided under automotive retailer Warranties required by state law are not covered by this Mechanical Breakdown Insurance Policy.\n\u2022\nIf the manufacturer\u2019s Warranty has been declared void, this Mechanical Breakdown Insurance Policy does not cover the Vehicle until the end of what\nwould have been the manufacturer\u2019s Warranty.\n\u2022\nThe Insurance Premium may be financed with the purchase of Your Vehicle. Other payment options may be available.\n\u2022\nThis Mechanical Breakdown Insurance Policy runs concurrent with, and is secondary to, any applicable manufacturer\u2019s Warranty.\n\u2022\nThe Expiration Date listed reflects the term of Your Policy and is subject to making full payment of the Insurance Premium.\nI (Insured), whose signature appears below, acknowledge that the information contained above is true and accurate. I have read the terms and conditions,\nunderstand and agree to all provisions herein.\nVIN\nVehicle Code\nYear, Make, Model\nVEHICLE\nINSURED\nProducer Name\nProducer #\nAddress, City, State, Zip\nTelephone\nRepresentative\nPRODUCER\nName\nPhone\nAddress, City, State, Zip\nLIENHOLDER\nMECHANICAL BREAKDOWN INSURANCE POLICY INFORMATION\nInsured Name\nInsured #\nAddress, City, State, Zip\nPhone Cell\nHome\nE-mail\nInsurance Premium\nSales Tax (if applicable)\nTotal\nINSURANCE PREMIUM\nCoverage Plan\nDeductible\nTerm Months\nPurchase Date\nTerm Miles\nExpiration Date\nWaiting Period Months\nCurrent Odometer Reading\nWaiting Period Miles\nExpiration Mileage\nCONTRACTT\nMECHANICAL BREAKDOWN INSURANCE POLICY\nThis agreement describes the coverage\nYou\nwill have under\nYour\nMember\u2019s Choice Mechanical Breakdown Insurance Policy (hereafter referred to as \u201cPolicy\u201d). In return\nfor payment by\nYou\nof the\nInsurance Premium\nand\nYour\ncompliance with all the applicable terms of this Policy,\nWe\nagree to provide the insurance described in this Policy.\nThis Policy is between\nUs\nand\nYou\n, and is subject to all the terms and conditions contained herein:\nTABLE OF CONTENTS\nI.\nKEY TERMS\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 2\nII.\nPOLICY PROVISIONS\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 3\nIII.\nSCHEDULE OF COVERAGE. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Pages 3\n\u20134\nIV.\nADDITIONAL BENEFITS\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 4\nA.  RENTAL REIMBURSEMENT\nB.  EMERGENCY ROADSIDE ASSISTANCE\nC.  EMERGENCY TRAVEL EXPENSE REIMBURSEMENT\nD.  MANUFACTURER\u2019S DEDUCTIBLE REIMBURSEMENT\nV.\nMAINTENANCE & PARTS THIS POLICY DOES NOT COVER\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page\n4\nVI.\nPOLICY LIMITATIONS. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Pages\n5\n\u20136\nVII.  WHAT TO DO IF REPAIRS ARE NEEDED. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 6\nVIII.  YOUR RESPONSIBILITIES\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 6\nIX.\nOTHER\nPROVISIONS. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 7\nX.\nSTATE AMENDMENTS\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . Page 8\nI. KEY TERMS\nWhen used, Key Terms will appear in\nbold\nprint.\n\u201cAdministrator\u201d\nmeans Virginia Surety Company, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604, 1-800-752-6265.\n\u201cWe\u201d\n,\n\u201cUs\u201d\nand\n\u201cOur\u201d\nmean Virginia Surety Company, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604, 1-800-752-6265.\n\u201cBreakdown\u201d\nmeans the failure of any original or like replacement part covered by this Policy to perform its intended\nfunction(s) in normal service, providing it has\nreceived all scheduled maintenance as recommended by the manufacturer in the Owners Manual.\nBreakdown\ndoes not include the gradual reduction in operating\nperformance caused by wear and tear where a failure has not occurred.\n\u201cCommercial Purposes\u201d\nmeans\nYour Vehicle\nis used for commercial purposes including but not limited to: hauling, construction work, principal off-road use, pickup\nand/or delivery service, daily rentals, carry passengers for hire (taxi, limousine or shuttle services), towing or road service operations, government/military use, law\nenforcement, fire, ambulance or other emergency services, snowplowing, company pool use or business travel when the\nVehicle\nis used by more than one driver.\n\u201cCost\u201d\nmeans the reasonable and customary charges for parts and labor necessary to repair or replace the parts covered. These charges shall not exceed the\nmanufacturer\u2019s suggested retail price for parts and labor allowances derived from nationally recognized labor time publications.\nAt the Administrator\u2019s option, replacement parts used in covered repairs may include new, remanufactured, used or non-original equipment manufactured\nparts.\n\u201cDeductible\u201d\nmeans the amount\nYou\nmust pay for covered repairs per visit shown on the Declaration Page.\n\u201cInsurance Premium\u201d\nmeans the amount\nYou\npaid for this Policy shown on the Declaration Page.\n\u201cOdometer Miles\u201d\nmeans the actual miles\nYour Vehicle\nhas traveled as recorded on an unaltered odometer.\n\u201cProducer\u201d\nmeans the producer from whom\nYou\npurchased this Policy shown on the Declaration Page.\n\u201cPurchase Date\u201d\nmeans the date\nYou\npurchased this Policy shown on the Declaration Page.\n\u201cRepair Facility\u201d\nmeans a franchised automobile dealer or licensed repair facility that provides a written parts and labor guarantee for covered repairs of not less than 6\nmonths and 6,000 miles. Repairs performed by any facility must receive authorization from the\nAdministrator\nprior to beginning repairs.\n\u201cTerm Miles\u201d\nmeans the number of miles for the Policy Term shown on the Declaration Page.\n\u201cTerm Months\u201d\nmeans the number of months\nfor the Policy Term shown on the Declaration Page.\n\u201cVehicle\u201d\nmeans the vehicle shown on the Declaration Page.\n\u201cWaiting Period\u201d\nmeans the number of months (\nWaiting Period Months\n) that must elapse from the\nPurchase Date\nbefore coverage begins and the number of miles\n(\nWaiting Period Miles\n) that must be driven from the Current Odometer Reading before coverage begins.\n\u201cWaiting Period Miles\u201d\nmeans the number of miles shown on the Declaration Page.\n\u201cWaiting Period Months\u201d\nmeans the number of months\nshown on the Declaration Page.\n\u201cWarranty\u201d\nmeans any\nWarranty\nof the manufacturer, state required\nWarranty\n, automotive retailer\nWarranty\nor a\nRepair Facility\nguarantee.\n\u201cYou\u201d\nand \u201c\nYour\u201d\nmean the Insured shown on the Declaration Page, or an eligible person to whom this Policy has been properly transferred.\n\u00ae\nPage 2 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nPage 3 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nII. POLICY PROVISIONS\nA. Policy Term\nThe Policy Term is the Term\nMonths\nand Term\nMiles\nshown on the Declaration Page. This Policy begins on the\nPurchase Date\nand at the Current Odometer Reading shown\non the Declaration Page. The Policy will end on the first of the following to occur: (1) Expiration Date shown on the Declaration Page is exceeded; or (2) the Expiration\nMileage shown on the Declaration Page is exceeded; or (3) the Policy cancellation date.\nB. Coverage\nThe Coverage Plan\nYou\nselected for\nYour Vehicle\nis fully described in this Policy under Schedule of Coverage section.\nC. Covered Parts and Labor\nDuring the Policy Term, subject to the indicated\nWaiting Period\nand Coverage Plan,\nWe\nwill pay a\nRepair Facility\n, or at\nOur\noption, reimburse\nYou\nthe\nCost\nto remedy\nany covered\nBreakdown\nof the parts listed in the Schedule of Coverage section less\nYour\nDeductible\n.\nAt Our option, replacement parts used in covered repairs may\ninclude new, remanufactured, pre-owned or non-original equipment manufacturer parts.\nD. Deductible\nIn the event of a\nBreakdown\ncovered by this Policy,\nYou\nmay be required to pay a\nDeductible\n. No\nDeductible\npayment is required with respect to the Additional Benefits\nas provided by this Policy. If\nYou\nhave a\nDeductible\n, as shown on the Declaration Page, the\nDeductible\namount will be applied on a per visit basis.\nE. Territory\nThis Policy applies only to\nBreakdowns\noccurring within the continental United States of America, Alaska, Hawaii and Canada.\nF. Limit of Liability\nOur\nlimit of liability is the\nCost\nto repair or replace any covered\nBreakdown\n; but in no event shall this\nCost\nexceed the average retail value of\nYour Vehicle\nas determined\nby the NADA (Official Used Car Guide) at the time of loss.\nG. Our Right To Recover Payment\nIf\nWe\npay for a loss,\nWe\nmay require\nYou\nto assign to\nUs\nYour\nrights of recovery against others.\nWe\nwill not pay for a loss if\nYou\nimpair these rights to recover.\nYour\nrights\nto recover from others may not be waived.\nIII. SCHEDULE OF COVERAGE\nSILVER COVERAGE\nWhen the SILVER Coverage Plan has been purchased as indicated on the Declaration Page, only the following parts are covered. Parts not listed are not covered.\nAssembly Parts Covered\n1. ENGINE Gasoline Engine\n\u2013 Cylinder block and all internal lubricated parts including: crankshaft, rod and main bearings, cam bearings, expansion (freeze) plugs,\nconnecting rods, wrist pins, pistons, piston rings, camshaft, cam tower, lifters, cylinder head, valves and guides, valve springs, rocker arms (cam followers), pushrods,\ntiming chain housing (cover), timing chain and sprockets, timing belt and pulleys, timing belt tensioner, intake and exhaust manifolds, flywheel, balance shafts, harmonic\nbalancer and retainer bolt, crankshaft pulley, valve covers, oil pan, oil pump and pressure relief valve, engine oil cooler hoses, oil filter adapter/housing, engine oil sending\nunit, engine mounts, water pump, temperature sending unit, thermostat and housing, fuel supply pump, vacuum pump, dipstick and tube, fasteners for the components\nlisted above.\nTurbocharged/Supercharged/Rotary/Diesel/Enhanced Engines\n\u2013 All of the above listed parts or equivalent plus: turbocharger, waste gate controller, intercooler, hard\nlines, compressor, clutch and pulley, bypass valve, injection pump, lines and nozzles.\n2. TRANSMISSION Automatic\n\u2013 Case and all internal lubricated parts including: oil pump, valve body, torque converter, vacuum modulator, governor, main shaft, clutches,\nbands, drums, gear sets, bearings, bushings, sealing rings, TV cable, solenoids, electronic shift control unit, transmission mounts, cooler, cooler hoses and hard lines,\ndipstick and tube, fasteners for the components listed above.\nStandard\n\u2013 Case and all internal lubricated parts including: main shaft, gear sets, shift forks, synchronizers, bearings, bushings, fasteners for the components listed above.\nTransfer Case \u2013 (4X4 vehicles)\n\u2013 Case and all internal lubricated parts including: main shaft, gear sets, chain and sprockets, bearings, bushings, mounts, fasteners for\nthe components listed above, electronic and vacuum engagement components.\n3. FRONT WHEEL DRIVE\nFinal drive housing and all internal parts including: carrier case, gear sets, chain and sprockets, bearings, bushings, axle shafts, universal joints,\nfront hub\nbearings, rear hub bearings, locking hub assemblies (4X4), drive shaft support, fasteners for the components listed above.\n4. REAR WHEEL DRIVE\nDrive axle housing and all internal lubricated parts including: carrier case, gear sets, bearings, bushings, limited slip clutch pack, axle shafts, front\nhub bearings, rear hub bearings, propeller shafts, universal joints, drive shaft support, fasteners for the components listed above.\n5. STEERING\nHousing/case and all internal lubricated parts including: rack and pinion equipped valve assembly, sector shaft, rack mounts and cushions, inner rod ends\nand bellows boots, speed sensor or steering gear equipped pitman shaft and valve assembly, sealing rings, bearings, bushings, pitman arm, center link, tie rods, idler arm,\npower steering pump and pulley, electric power steering motor, fluid reservoir, pressure and return hoses, cooler and hard lines, power cylinder assembly, steering main\nand intermediate shafts, coupling, fasteners for the components listed above. (Does not include \u201crear wheel steering\u201d components.)\n6. FRONT SUSPENSION\nUpper and lower control arms, bump stop cushions, control arm shafts, torsion bar mounts and bushings, upper and lower ball joints including\ndust boots, steering knuckle (spindle), wheel bearings and seals, stabilizer shaft, stabilizer linkage including mounts and bushings, strut rods and bushings, king pins,\nfasteners for the components listed above.\n7. BRAKES\nMaster cylinder, assist booster, wheel cylinders, combination valve, disc brake calipers (and rear caliper actuators), hard lines and fittings, backing plates,\nsprings, clips and retainers, self-adjusters, parking brake linkage and cables, fasteners for the components listed above.\n8. ELECTRICAL\nAlternator, voltage regulator, front and rear windshield wiper motors and delay controller, starter motor and drive, starter solenoid, wiring harnesses,\nmanually operated switches (specifically turn signal, headlight, dimmer, and wiper switches), mechanically actuated switches (ignition, brake light and neutral safety\nswitch), electronic fuel injection system (including all input/sensors & output/control units, except EGR valve, related to the fuel injection system), electronic ignition module,\ndistributor and coil, engine management control unit, knock sensor and oxygen sensor.\n9. AIR CONDITIONING\nCompressor and mounting brackets, clutch and pulley, condenser, evaporator, orifice tube, accumulator, temperature control programmer, high/low\npressure cutoff switches, high/low pressure hoses, pressure cycling switch, thermostat, drier, temperature control head, fasteners for the components listed above and\nfreon-refrigerant if necessary in conjunction with the repair of the components listed above.\nIII. SCHEDULE OF COVERAGE (C0NTINUED)\n10. BASIC HYBRID/ELECTRIC VEHICLE COMPONENTS\nElectric motor/generator(s) and all internal components, inverter/converter/transformer units and all internal\ncomponents, inverter/converter/transformer units cover, continuously variable transmission (CVT) and all internal components, power split device and all internal\ncomponents, reduction/reducer box and all internal components, and fasteners for the components listed above. Hybrid battery junction block, hybrid battery main battery\ncable, and electric alternating current compressor.\n11. SEALS AND GASKETS\nAll seals and gaskets on the assemblies listed above.\nGOLD COVERAGE\nWhen the GOLD Coverage Plan has been purchased as indicated on the Declaration Page, only the following parts, in addition to the parts listed under Silver Coverage,\nare covered. Parts not listed are not covered.\n12. ADVANCED COMPONENTS\nAnti-lock brake system, power seat motor(s) and transmission(s), power window motor(s) and power regulator(s), power door lock\nactuator(s), digital and analog instrument display(s), low fuel sensor, low coolant sensor, low oil sensor, electronic rear view mirror motor(s), headlight door motor(s), heated\nback glass, windshield wiper washer pump(s), heater-A/C blower motor, heater core assembly, heater control valve, radiator, radiator fan and clutch, radiator fan motor\nincluding fan blade, temperature sensor and relay, fuel tank and hard lines, fuel tank sending unit, power sun roof motor, convertible top motor, constant velocity joints\nand horn assembly.\n13. ADVANCED HYBRID/ELECTRIC VEHICLE COMPONENTS\nOnboard battery charging system, battery charge controller, motor/generator belt tensioner, drive motor\ndampener, voltage inverter reservoir, three-phase high voltage cables, hydraulic or electric regenerative braking system, onboard computer system including all relays,\nsensors, ECU & ECM (electronic control units/electronic control modules), power switch/button and controller/electronic throttle control system.\nPLATINUM COVERAGE\nWhen the PLATINUM Coverage Plan has been purchased as indicated on the Declaration Page,\nWe\nwill remedy any\nBreakdown\nof\nYour Vehicle\nexcept items listed under\nthe Sections\nIV. \u201cMaintenance & Parts This Policy Does Not Cover\u201d\nand\nV. \u201cPolicy Limitations.\u201d\nIV. ADDITIONAL BENEFITS\nNo\nDeductible\napplies to the following benefits:\nA. Rental Reimbursement\nWe\nwill pay your actual expenses to rent a replacement vehicle from a licensed rental agency if\nYour Vehicle\nis held by a\nRepair Facility\nfor a covered repair. Rental\nreimbursement shall not exceed $35 per day for a maximum of five (5) days for any one\nBreakdown.\nIf a covered repair cannot be completed within the first five (5) days\nof a rental period due to a parts delay or other reasonable cause, the five (5) day maximum is extended to ten (10) days. Rental Reimbursement is available beginning on\nthe first day of the covered repair.\nB. Emergency Roadside Assistance\nEmergency Roadside Assistance is available 24 hours a day, 365 days a year.\nWe\nwill pay for a covered emergency up to $100 per occurrence with no out-of-pocket\nexpense to\nYou\n. If the covered emergency exceeds $100 per occurrence,\nYou\nare responsible for that portion that exceeds $100.\nYou\nare responsible for any non-covered\nexpenses. This benefit is available only for\nYour Vehicle\n.\nThe following are covered emergencies under Emergency Roadside Assistance:\n\u2022\nTowing Assistance\n\u2013 when\nYour Vehicle\nis inoperable or unsafe to drive,\nYour Vehicle\nwill be towed to the closest\nRepair Facility\nor to any other location requested\nby\nYou\n.\n\u2022\nFlat Tire Assistance\n\u2013 service consists of the removal of the flat tire and its replacement with\nYour\nspare tire located with\nYour Vehicle\n.\n\u2022\nFuel, Oil, Fluid and Water Delivery Service\n\u2013 an emergency supply of fuel, oil, fluid and water will be delivered if\nYour Vehicle\nis in immediate need.\nYou\nwill be\nresponsible for the cost of these supplies.\n\u2022\nLock-out Assistance\n\u2013 if\nYour\nkeys are locked inside\nYour Vehicle\n, assistance will be provided in gaining entry into\nYour\nVehicle.\n\u2022\nBattery Assistance\n\u2013 if battery failure occurs, a jump-start will be provided to start\nYour Vehicle\n.\nFor Emergency Roadside Assistance, call toll-free: 1-866-603-5420.\nC. Emergency Travel Expense Reimbursement\nWhen a covered\nBreakdown\nrenders\nYour Vehicle\ninoperable or unsafe to drive and requires\nYour Vehicle\nto be held overnight by a\nRepair Facility\nfor covered repairs\nwhile traveling 100 miles or more from\nYour\nhome,\nWe\nwill pay for emergency local commercial lodging, meals and transportation expenses up to $200 per day for a\nmaximum of five (5) days.\nD. Manufacturer\u2019s Deductible Reimbursement\nWe\nwill reimburse\nYou\nfor the difference between the\nDeductible\namount shown on the Declaration Page and any required manufacturer\u2019s deductible, if applicable, when\na\nBreakdown\nof a covered part occurs and is covered by a manufacturer\u2019s\nWarranty\n.\nV. MAINTENANCE & PARTS THIS POLICY DOES NOT COVER\nMAINTENANCE AND PARTS THAT ARE NOT COVERED\nA.\nMAINTENANCE NOT COVERED \u2013 THE MAINTENANCE SERVICES AND PARTS DESCRIBED IN THE MANUFACTURER\u2019S MAINTENANCE SCHEDULE FOR YOUR\nVEHICLE. OTHER NORMAL MAINTENANCE SERVICES AND PARTS INCLUDING ENGINE TUNE-UP, (INCLUDES SPARK PLUGS, GLOW PLUGS, IGNITION WIRES,\nDISTRIBUTOR CAP AND ROTOR), ALL BATTERIES (INCLUDING BUT NOT LIMITED TO: HYBRID/ELECTRIC VEHICLE BATTERIES), FILTERS, LUBRICANTS OR\nFLUIDS, AIR CONDITIONING REFRIGERANT, ENGINE COOLANT, ALL HOSES AND BELTS (NOT SPECIFICALLY LISTED), WIPER BLADES, BRAKE PADS AND\nSHOES, BRAKE ROTORS AND DRUMS, SUSPENSION ALIGNMENT.\nB.\nPARTS\nNOT\nCOVERED\n\u2013\nCONSTANT\nVELOCITY\nBOOTS,\nTIRES,\nWHEEL\nCOVERS,\nWHEEL\nRIMS,\nWHEELS,\nWHEEL\nBALANCING,\nSHOCK\nABSORBERS,\nSUSPENSION AIR BAGS, EXHAUST SYSTEM, CATALYTIC CONVERTER, FRICTION CLUTCH DISC AND PRESSURE PLATE AND CLUTCH RELEASE BEARING,\nGLASS, GLASS FRAMEWORK AND FASTENING ADHESIVES, SEALED BEAM HEAD LAMPS, LIGHT BULBS, LENSES, TRIM, MOLDINGS, BRIGHT METAL,\nUPHOLSTERY, PAINT, SHEET METAL, BUMPERS, ALIGNMENT OF BODY PARTS, FLEXIBLE BODY PARTS, DOOR PANELS, BODY PANELS, STRUCTURAL\nFRAMEWORK, CONVERTIBLE TOP FRAMEWORK, STRUCTURAL WELDS, HINGES, DOOR HANDLES, VINYL AND CONVERTIBLE TOPS AND NON-MECHANICAL\nREMOVABLE HARDTOP ASSEMBLIES.\nPage 4 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nVI. POLICY LIMITATIONS\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING:\n1.\nMODIFICATIONS:\nA.\nAFTERMARKET ACCESSORIES OR EQUIPMENT, COMPONENTS AND SYSTEMS, INCLUDING BUT NOT LIMITED TO: ANTI-THEFT SYSTEMS, RADAR DETECTORS,\nCB\nRADIOS,\nRADIO/SPEAKER\nEQUIPMENT,\nCRUISE\nCONTROL,\nSUNROOF,\nSOLAR\nPOWERED\nDEVICES,\nTELEPHONES,\nTV/VCR/DVD\nAND\nRELATED\nCOMPONENTS AND APPLIANCES (UNLESS INSTALLED BY THE MANUFACTURER).\nB.\nIF YOUR VEHICLE HAS BEEN MODIFIED TO PLOW SNOW, WHETHER THE SNOW PLOW BLADE IS ATTACHED TO THE VEHICLE OR NOT.\nC.\nBREAKDOWN\nCAUSED\nBY\nOR\nINVOLVING\nMODIFICATIONS\nUNLESS\nTHOSE\nMODIFICATIONS\nWERE\nPERFORMED\nBY\nTHE\nMANUFACTURER\nAND\nTHE\nMODIFICATIONS MEET THE MANUFACTURER\u2019S SPECIFICATIONS (E.G. TIRES TWO OR MORE SIZES LARGER OR SMALLER THAN THE MANUFACTURER\u2019S\nSPECIFICATIONS, LIFT KITS, AFTERMARKET PERFORMANCE PARTS OR SYSTEMS).\nD.\nBREAKDOWN CAUSED BY OR INVOLVING EQUIPMENT, COMPONENTS OR SYSTEMS NOT INSTALLED BY THE MANUFACTURER.\n2.\nNON-STANDARD USE:\nA.\nBREAKDOWN CAUSED BY TOWING A TRAILER OR ANOTHER VEHICLE UNLESS YOUR VEHICLE IS EQUIPPED FOR THIS AS RECOMMENDED BY THE\nMANUFACTURER.\nB.\nANY BREAKDOWN WHERE THE VEHICLE HAS BEEN USED FOR A COMMERCIAL PURPOSE, AS DEFINED IN SECTION I. KEY TERMS, AT ANY TIME WHILE\nOWNED BY YOU.\nC.\nBREAKDOWN CAUSED BY USING YOUR VEHICLE FOR STREET RACING OR OTHER COMPETITION.\n3.\nNEGLIGENCE, MISREPRESENTATION OR MISUSE:\nA.\nBREAKDOWN CAUSED BY ABUSE, MISUSE, ALTERATIONS OR LACK OF CUSTOMARY MAINTENANCE AS DETAILED IN SECTION VII. YOUR RESPONSIBILITIES.\nB.\nBREAKDOWN CAUSED BY CONTAMINATION, OVERHEATING, LACK OF COOLANT, LACK OF LUBRICANTS, IMPROPER SPECIFICATION (TYPE) OF FLUIDS, LACK\nOF OIL VISCOSITY, SLUDGE OR RESTRICTED OIL FLOW. EXAMPLES INCLUDE BUT ARE NOT LIMITED TO: ENGINE AND TRANSMISSION.\nC.\nBREAKDOWN WHEN CONTAMINATED FLUIDS CAUSED OR CONTRIBUTED TO THE BREAKDOWN.\nD.\nLOSS OR DAMAGE CAUSED BY YOU OR THE OPERATOR\u2019S FAILURE TO USE ALL REASONABLE PRECAUTIONS TO PROTECT THE VEHICLE FROM ANY FURTHER\nLOSS OR DAMAGE AFTER A BREAKDOWN OR FAILURE HAS OCCURRED OR BEEN INDICATED.\nE.\nIF YOUR VEHICLE\u2019S ODOMETER HAS BEEN STOPPED, ALTERED OR MISREPRESENTS YOUR VEHICLE'S ACTUAL MILEAGE INCLUDING BUT NOT LIMITED TO\nODOMETER MISREPRESENTATION CAUSED BY THE USE OR MODIFICATION OF THE VEHICLE WITH UNDERSIZE OR OVERSIZE TIRE AND WHEEL ASSEMBLIES.\nF.\nDAMAGE CAUSED TO YOUR ENGINE RESULTING FROM THE INGESTION OF WATER.\nG.\nBREAKDOWN OR DAMAGE CAUSED BY NEGLECTING TO FOLLOW PROPER CHARGING PROCEDURES OR USE OF INCOMPATIBLE CHARGING DEVICES FOR\nYOUR PLUG-IN HYBRID/ELECTRIC VEHICLE.\n4.\nCOLLISION, PHYSICAL DAMAGE AND COSMETICS:\nA.\nBREAKDOWN CAUSED BY OR INVOLVING COLLISION, FIRE, THEFT, VANDALISM, RIOT, TERRORIST ACTS, WAR, EXPLOSION, LIGHTNING, EARTHQUAKE,\nHURRICANE, TROPICAL STORM, VOLCANIC ERUPTION, WINDSTORM, HAIL, WATER, FREEZING OR FLOOD.\nB.\nTO CORRECT A COSMETIC IMPERFECTION OR BREAKDOWN CAUSED BY RUST OR WEATHER RELATED CORROSION.\n5.\nWARRANTIES AND MANUFACTURER RECALLS:\nA.\nCOSTS OR SERVICES COVERED BY ANY WARRANTY REGARDLESS OF WHETHER THEY HONOR SUCH WARRANTY.\nB.\nCOSTS THAT ARE OR WOULD HAVE BEEN COVERED UNDER ANY VEHICLE MANUFACTURER WARRANTY WHETHER OR NOT SUCH WARRANTY IS IN EFFECT\nIN ANOTHER COUNTRY OR HAS BEEN VOIDED BY THE MANUFACTURER.\nC.\nBREAKDOWN THAT IS A DIRECT RESULT OF A MECHANICAL OR STRUCTURAL DEFECT WHEN THE MANUFACTURER HAS ANNOUNCED A PUBLIC RECALL FOR\nTHE PURPOSE OF CORRECTING SUCH A DEFECT.\n6.\nVEHICLE TYPE:\nA.\nIF YOUR VEHICLE HAD BEEN DECLARED A TOTAL LOSS, SALVAGED TITLE OR JUNK VEHICLE.\nB.\nIF YOUR VEHICLE IS A TRUCK RATED MORE THAN 1 TON.\nC.\nIF YOUR VEHICLE WAS MANUFACTURED AS A NON-U.S. SPECIFICATION MODEL.\nD.\nIF YOUR VEHICLE IS POWERED BY COMPRESSED NATURAL GAS, LIQUIFIED NATURAL GAS, PROPANE OR HYDROGEN.\n7.\nCONSEQUENTIAL DAMAGE:\nA.\nLOSS OF TIME, ECONOMIC LOSS, INCONVENIENCE, LODGING, FOOD, FREIGHT CHARGES, CORE CHARGES, STORAGE CHARGES, OR OTHER CONSEQUENTIAL\nLOSS\nOR\nDAMAGE\nTHAT\nRESULTED\nFROM\nA\nBREAKDOWN\nUNLESS\nAS\nPROVIDED\nUNDER\nEMERGENCY\nTRAVEL\nEXPENSE\nREIMBURSEMENT.\nCONSEQUENTIAL OR INCIDENTAL DAMAGE OR LOSS SHOULD YOUR VEHICLE BE INVOLVED IN A COLLISION CAUSED BY OR INVOLVING A BREAKDOWN OF\nA COMPONENT COVERED BY THIS POLICY.\nB.\nBREAKDOWN OF A COVERED PART RESULTING FROM THE FAILURE OF A NON-COVERED PART. HOWEVER, COVERAGE WILL BE PROVIDED FOR THE FAILURE\nOF A NON-COVERED PART RESULTING FROM A BREAKDOWN OF A COVERED PART.\nC.\nBREAKDOWN OR DAMAGE CAUSED BY A POWER SURGE WHILE CHARGING YOUR VEHICLE.\n8.\nNON-COVERED CONDITIONS:\nA.\nPRE-EXISTING \u2013 BREAKDOWN WHICH EXISTED PRIOR TO OR WAS CAUSED BY A CONDITION WHICH EXISTED PRIOR TO THE PURCHASE DATE.\nB.\nREPAIRS\nPERFORMED\nWITHOUT\nTHE\nADMINISTRATOR\u2019S\nPRIOR\nAUTHORIZATION\nEXCEPT\nWHEN\nTHE\nADMINISTRATOR\u2019S\nOFFICE\nIS\nCLOSED\nAND\nEMERGENCY REPAIRS ARE NECESSARY (SEE SECTION VI. WHAT TO DO IF REPAIRS ARE NEEDED).\nC.\nREPAIR OF VALVES AND/OR RINGS FOR THE PURPOSE OF RAISING THE ENGINE\u2019S COMPRESSION WHEN A BREAKDOWN HAS NOT OCCURRED.\nD.\nREPAIRS MADE SOLELY TO MEET OR MAINTAIN ANY GOVERNMENTAL EMISSION STANDARDS.\nE.\nREPAIRS OF AIR LEAKS, RATTLES, SQUEAKS, WIND NOISE AND WATER LEAKS WHERE WATER IS ENTERING THE VEHICLE EXTERNALLY.\nF.\nTO REPAIR, REPLACE, ADJUST OR ALIGN ANY PART NOT COVERED BY THIS POLICY EXCEPT AS REQUIRED FOR THE REPAIR OF A COVERED PART.\nG.\nDIAGNOSIS CHARGES, COST OF DISASSEMBLY OR ASSEMBLY IF YOUR REPAIR IS NOT COVERED OR HAS BEEN DENIED.\nH.\nANY BREAKDOWN OCCURRING DURING THE WAITING PERIOD.\n9.\nMISCELLANEOUS EXPENSES:\nA.\nEXPENSES CHARGED FOR THE DISPOSAL OF ENVIRONMENTALLY UNSAFE MATERIALS, NON-SPECIFIC MATERIALS OR SHOP SUPPLIES.\nPage 5 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nVI. POLICY LIMITATIONS (CONTINUED)\n10.EMERGENCY ROADSIDE ASSISTANCE LIMITATIONS:\nA.\nFOR EMERGENCIES RESULTING FROM THE USE OF INTOXICANTS OR NARCOTICS, OR THE USE OF YOUR VEHICLE IN THE COMMISSION OF A FELONY.\nB.\nFOR COST OF PARTS, REPLACEMENT KEYS, FLUIDS, LUBRICANTS, FUEL, MATERIALS, ADDITIONAL LABOR RELATED TO TOWING OR COST OF INSTALLATION\nOF PRODUCTS.\nC.\nFOR NON-EMERGENCY TOWING OR OTHER NON-EMERGENCY SERVICE.\nD.\nFOR MOUNTING OR REMOVING OF SNOW TIRES OR CHAINS; WINCHING; EXTRICATION; TIRE REPAIR.\nE.\nFOR SHOVELING SNOW AROUND YOUR VEHICLE.\nF.\nFOR CAMPING TRAILERS, TRAVEL TRAILERS, RECREATIONAL VEHICLES (INCLUDING SELF-MOTORIZED RVS) OR ANY VEHICLES IN TOW.\nG.\nFOR ANY AND ALL TAXES, TOLLS AND/OR FINES.\nH.\nFOR TOWING FROM OR REPAIR WORK PERFORMED AT A SERVICE STATION, GARAGE OR REPAIR SHOP.\nI.\nFOR TOWING BY OTHER THAN A LICENSED SERVICE STATION OR GARAGE.\nJ.\nFOR A SECOND TOW FOR THE SAME DISABLEMENT.\nK.\nFOR MORE THAN ONE DISABLEMENT FOR THE SAME SERVICE TYPE DURING ANY SEVEN DAY PERIOD.\nL.\nFOR SERVICE ON A VEHICLE THAT IS NOT IN A SAFE CONDITION TO BE TOWED OR SERVICED, OR THAT MAY RESULT IN DAMAGE TO YOUR VEHICLE IF TOWED\nOR SERVICED.\nM.\nFOR TOWING OR SERVICE ON ROADS NOT REGULARLY MAINTAINED, SUCH AS SAND BEACHES, OPEN FIELDS, FORESTS AND AREAS DESIGNATED AS NOT\nPASSABLE DUE TO CONSTRUCTION.\nN.\nFOR TOWING AT THE DIRECTION OF A LAW ENFORCEMENT OFFICER RELATING TO TRAFFIC OBSTRUCTION, IMPOUNDMENT, ABANDONMENT, ILLEGAL\nPARKING OR OTHER VIOLATIONS OF LAW.\nO.\nFOR REPEATED SERVICE CALLS FOR A VEHICLE IN NEED OF ROUTINE MAINTENANCE OR REPAIR.\nP.\nFOR\nSERVICE\nSECURED\nTHROUGH\nANY\nSOURCE\nOTHER\nTHAN\nUS\nWITHOUT\nOUR\nPRIOR\nAUTHORIZATION.\nTHIS\nIS\nNOT\nA\nROADSIDE\nASSISTANCE\nREIMBURSEMENT SERVICE.\n11.EMERGENCY TRAVEL EXPENSE REIMBURSEMENT LIMITATIONS:\nA.\nFOR ADDITIONAL COMMERCIAL LODGING ENTERTAINMENT EXPENSES.\nB.\nFOR ANY BREAKDOWN THAT OCCURS LESS THAN 100 MILES FROM YOUR HOME.\nVII. WHAT TO DO IF REPAIRS ARE NEEDED\nBefore any covered repairs can begin, You must contact the Administrator. We can be reached toll-free:\n1-800-752-6265\nService hours Monday through Friday 7:00 A.M. \u2013 7:00 P.M. (Central Time)\nTo Register Your Policy for Self-Service, Visit Us At:\nwww.mrclaims.net\nEmergency Repair Instructions: In the event that a Breakdown of a covered part occurs when the Administrator\u2019s office is closed and emergency repairs are\nnecessary, You may follow the claim procedures and commence emergency repairs without securing the Administrator\u2019s prior authorization. However, You or\nthe Repair Facility must notify the Administrator of the repairs as soon as the Administrator\u2019s office reopens. You must submit written information and\ndocumentation concerning the Breakdown and repairs no later than thirty (30) days after the Breakdown. Reimbursement of emergency repairs will be subject\nto all terms and conditions of this Policy and nothing herein authorizes repairs not otherwise covered. Emergency repairs are those required because Your\nVehicle was inoperable or unsafe to drive. Parts must be available for inspection when the Administrator\u2019s office reopens.\nVIII. YOUR RESPONSIBILITIES\n1.\nYou must perform maintenance services to Your Vehicle, at the proper intervals, as required by the Owner\u2019s Manual for Your Vehicle. If Your failure to follow\nthese procedures causes a Breakdown, You may be denied coverage. If You do not have an Owner\u2019s Manual, contact Your Vehicle\u2019s manufacturer to obtain\none.\n2.\nYou must keep receipts which verify the Vehicle Identification Number, work orders and other documentation that show a date, a description of Your Vehicle,\nmileage and services performed. We may require You to furnish the Administrator with proof that the specified services have been performed. Failure to\nshow proof of servicing may result in the denial of coverage.\n3.\nYou are responsible for making sure the oil warning light/gauge and the temperature warning light/gauge are functioning before driving Your Vehicle. You\nare required to safely pull Your Vehicle off the road and shut down the engine immediately when either of these lights/gauges indicates a problem.\n4.\nIf You experience a Breakdown, You agree to:\na.  Use all reasonable means to protect Your Vehicle from further damage.\nb.  Notify the Administrator as soon as possible.\nc.  Authorize the Repair Facility to perform necessary diagnostic work and provide \u201cteardown authorization\u201d so that the Repair Facility can provide an\naccurate diagnosis and estimate of repairs. IMPORTANT: WE WILL NOT PAY FOR DIAGNOSIS CHARGES FOR REPAIRS NOT COVERED UNDER THIS POLICY.\nd.  Furnish the Administrator with such information as the Administrator may reasonably require and if requested provide proof of Your Vehicle\u2019s regular\nmaintenance during the Policy Term as noted above.\ne.  Reserve for the Administrator the right to refer Your Vehicle to a Repair Facility that sells and services Your type of Vehicle, for certain repairs.\nf.   Allow the Administrator to examine Your Vehicle if the Administrator asks to do so.\ng.  Obtain authorization from the Administrator prior to beginning any repairs covered by this Policy except when the Administrator\u2019s office is closed and\nemergency repairs are necessary (See Emergency Repair Instructions within Section VI. WHAT TO DO IF REPAIRS ARE NEEDED).\n5.\nYour help and cooperation is required if We ask You to help Us enforce Your rights against any manufacturer or Repair Facility who may be responsible to\nYou for the Cost of repairs covered by this Policy.\nPage 6 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nIX. OTHER PROVISIONS\n1.\nIf You Have Other Coverage\nIf the manufacturer or\nRepair Facility\nagrees to cover all or some of the\nCost\nof a\nBreakdown\nafter a\nWarranty\nor guarantee has expired,\nWe\nwill pay only for any\nextra\nCost\n. If\nYou\nhave any other Rental Reimbursement coverage, Emergency Roadside Assistance coverage or Emergency Travel Expense Reimbursement coverage,\nWe\nwill pay only the amount in excess of that coverage, subject to the limits of this Policy.\n2.\nDispute Resolution \u2013 Arbitration\nThis Policy requires binding arbitration if there is an unresolved dispute between\nYou\nand\nUs\nconcerning this Policy (including the\nCost\nof, lack of or actual repair or\nreplacement arising from a\nBreakdown\n). Under this Arbitration provision,\nYou\ngive up\nYour\nright to resolve any dispute arising from this Policy by a judge and/or a\njury.\nYou\nalso agree not to participate as a class representative or class member in any class action litigation, any class arbitration or any consolidation of individual\narbitrations. In arbitration, a group of three arbitrators (each of whom is an independent, neutral third party) will give a decision after hearing\nYour\nand\nOur\npositions.\nThe decision of a majority of the arbitrators will determine the outcome of the arbitration and the decision of the arbitrators shall be final and binding and cannot be\nreviewed or changed by, or appealed to, a court of law.\nTo start arbitration, either\nYou\nor\nWe\nmust make a written demand to the other party for arbitration. This demand must be made within one (1) year of the earlier of\nthe date the\nBreakdown\noccurred or the dispute arose.\nYou\nand\nWe\nwill each separately select an arbitrator. The two arbitrators will select a third arbitrator called\nan \"umpire.\" Each party will each pay the expense of the arbitrator selected by that party. The expense of the umpire will be shared equally by\nYou\nand\nUs\n. Unless\notherwise agreed to by\nYou\nand\nUs\n, the arbitration will take place in the county and state in which\nYou\nlive. The arbitration shall be governed by the Federal Arbitration\nAct (9 U.S.C.A. \u00a7 1 et. seq.) and not by any state law concerning arbitration. The rules of the American Arbitration Association (www.adr.org) will apply to any arbitration\nunder this Policy. The laws of the state of Illinois (without giving effect to its conflict of law principles) govern all matters arising out of or relating to this Policy and\nall transactions contemplated by this Policy, including, without limitation, the validity, interpretation, construction, performance and enforcement of this Policy.\n3.\nHow This Policy May Be Transferred\nYour\nrights and duties under this Policy may only be transferred to a subsequent purchaser directly by\nYou\nwithin thirty (30) days from the date of sale to the\nsubsequent owner. This Policy may not be transferred to any entity in the business of selling or leasing motor vehicles. This Policy can only be transferred if the\nremaining portion of the\nWarranty\nincluding Powertrain Warranty has not been reduced or voided. In the event of\nYour\ndeath, the benefits of this Policy will be available\nto\nYour\nspouse, domestic partner or legal representative.\nTo transfer this Policy,\nYou\nmust submit the following information to the\nAdministrator\n:\na. Completed Transfer Request form, which can be obtained by contacting the\nAdministrator\n;\nb. Copy of\nYour\nPolicy;\nc. Bill of Sale indicating date of sale of the\nVehicle\n;\nd. $50 transfer fee made payable to the\nAdministrator\n.\n4.\nHow This Policy May Be Canceled \u2013\nIncluding Refunds And Charges\nCancellation By You\nYou\nmay cancel this Policy at any time. To cancel, contact the\nProducer\n. The\nProducer\nwill assist with\nYour\ncancellation request. Alternatively,\nYou\nmust provide\nwritten notice to the\nAdministrator\n. A copy of\nYour\nPolicy and an odometer reading statement must be included with\nYour\nrequest for cancellation.\nCancellation By Us\nIf\nWe\ncancel this Policy,\nWe\nwill mail\nYou\nwritten notice at least thirty (30) days prior to cancellation. This notice shall state the effective date of and reason for\ncancellation.\nWe\nmay cancel this Policy for any reason within ninety (90) days of the\nPurchase Date\n. After ninety (90) days,\nWe\nmay cancel this Policy:\n\u2022\nIf there has been a material misrepresentation or fraud by\nYou\n;\n\u2022\nIf\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022\nIf the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer;\n\u2022\nIf\nYou\ndo not pay the\nInsurance Premium\n;\n\u2022\nIf\nYour Vehicle\nhas a salvage title; or\n\u2022\nIf\nYou\nuse\nYour Vehicle\nin any manner not covered by this Policy.\nCancellation By Lienholder\nIf this Policy is financed, the Lienholder (shown on the Declaration Page) may cancel the Policy in the event\nYou\ndefault in\nYour\nobligation to such Lienholder or in the\nevent\nYour Vehicle\nis declared a total loss or is repossessed.\nHow Refunds are Calculated\nIf this Policy is canceled within sixty (60) days of the\nPurchase Date\nand a claim has not been incurred, a 100% refund of the\nInsurance Premium\nwill be made.\nAfter sixty (60) days or if\nYou\nhave incurred a claim within the first sixty (60) days, a pro-rata refund of the unused\nMonths\nor unused\nMiles\nwill be made. The pro-\nrata refund will be calculated by multiplying the\nInsurance Premium\nby the lesser percentage of the unused\nMonths\nor unused\nMiles\ncompared to the total\nMonths\nor total\nMiles\nof\nYour\nPolicy Term, less an administrative fee of $50. All refunds will be paid to the Lienholder if any, otherwise to\nYou\n. For refund calculations, if the\nPolicy is canceled by\nUs\n, all references to sixty (60) days are replaced with ninety (90) days.\n5.\nNo Benefit to Bailee\nWe\nwill not recognize any assignment, nor grant any coverage that benefits any person or organization that holds, stores or moves\nYour Vehicl\ne or its equipment.\n6.\nTerms of Policy Conform to Statute\nAny terms of this Policy that are in conflict with the statutes of the State where it was issued are amended to conform to the minimum requirements of the statute.\n7.\nEntire Policy\nThis Policy represents the entire agreement between\nYou\nand\nUs\n. No person has the authority to change this Policy or to waive any of its provisions. No other written\nor oral statements apply to this Policy.\nPage 7 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)\nIX. STATE AMENDMENTS\nThis Policy is amended to comply with the following state requirements:\nArizona\nNOTICE TO MEMBER\n\u2013 is amended to include:\nIn the event a\nBreakdown\noccurs when the\nAdministrator\u2019s\noffice is closed,\nYou\nmay follow the claim procedures in this Policy without prior authorization. Reimbursement\nwill be made to\nYou\nor the\nRepair Facility\nin accordance with Policy provisions.\nPOLICY\nLIMITATIONS\n\u2013 is amended as follows:\nItems #1B, 1C, 1D, 2A, 2B, 2C, 3A, 3B, 3E, 3F are amended to include:\n\u201cWHILE THE VEHICLE IS OWNED BY YOU.\u201d\nItems #6A, 6B, 6C, 8A are deleted in their entirety.\nOTHER PROVISIONS\n\u2013 Section 2 \u201cDispute Resolution \u2013 Arbitration\u201d is deleted in its entirety.\nOTHER PROVISIONS\n\u2013 Section 4 \u201cHow This Policy May Be Canceled \u2013 Including Refunds And Charges,\nCancellation By Us\n\u201d is deleted in its entirety and replaced by the\nfollowing:\nIf\nWe\ncancel this Policy,\nWe\nwill mail\nYou\nwritten notice at least thirty (30) days prior to cancellation. This notice shall state the effective date of and reason for cancellation.\nWe\nmay cancel this Policy:\n\u2022 If there has been a material misrepresentation or fraud by\nYou\n;\n\u2022 If\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022 If, while owned by\nYou\n, the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer; or\n\u2022 If\nYou\ndo not pay the\nPolicy Insurance Premium.\nCalifornia\nOTHER PROVISIONS\n\u2013 Section 4 \u201cHow This Policy May Be Canceled \u2013 Including Refunds And Charges\u201d\nHow Refunds are Calculated\nis amended to include:\nNo administrative fee will be charged within the first sixty (60) days of cancellation from the Policy\nPurchase Date\n.\nThe $50 administrative fee is deleted and replaced with an administrative fee of $25 or 10% of the refund amount, whichever is less.\nKentucky\nADDITIONAL BENEFITS\n\u2013 is amended as follows:\nEmergency Roadside Assistance is deleted in its entirety and replaced by the following:\nWhen a covered\nBreakdown\ndisables\nYour Vehicle\n,\nWe\nwill pay\nfor towing expenses not to exceed one hundred dollars ($100) per disablement.\nEmergency Travel Expense Reimbursement is deleted in its entirety.\nMaryland\nOTHER PROVISIONS\n\u2013 Section 4 \u201cHow This Policy May Be Canceled \u2013 Including Refunds And Charges,\nCancellation By You\n\u201d is amended to include: If\nYou\ncancel this\nPolicy, a ten percent (10%) penalty per month shall be added to a refund that is not paid within forty-five (45) days of return of this Policy\nto the\nProducer\nor the\nAdministrator\n.\nMassachusetts\nNOTICE TO INSURED: THE COVERAGE\nYOU\nARE BUYING IS\nNOT\nREQUIRED IN ORDER TO REGISTER OR FINANCE A VEHICLE. THE BENEFITS PROVIDED\nMAY\nDUPLICATE\nEXPRESS\nMANUFACTURER\u2019S OR SELLER\u2019S\nWARRANTIES\nTHAT COME AUTOMATICALLY WITH EVERY SALE.\nYOU\nCAN BE REQUIRED BY THE\nSELLER OF THIS COVERAGE TO\nPURSUE THOSE\nWARRANTIES\nWHICH ARE AVAILABLE TO\nYOU\nWITHOUT THIS CONTRACT.\nNorth Carolina\nOTHER PROVISIONS\n\u2013\nSection 4 \u201cHow This Policy May Be Canceled \u2013 Including Refunds And Charges\u201d\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Policy,\nWe\nwill mail\nYou\nwritten notice at least thirty (30) days prior to cancellation.\nWe\nmay only cancel this Policy at any time for any of the reasons\nlisted below:\n\u2022If there has been a material misrepresentation or fraud by\nYou\n; or\n\u2022If\nYou\ndo not pay the\nPolicy Insurance Premium\n.\nHow Refunds are Calculated\nis amended to include:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or ten percent (10%) of the refund amount, whichever is less.\nPage 8 of 8\nMBIP (08/16)\n(Stock Reorder Number)\nMBIP (08/16)"
+                  }
+                ]
+              }
+            }
+          },
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "5112bd67-1801-409b-9404-2376fb3c8aef",
+        "timestamp": "2026-03-17T01:24:25.843000Z",
+        "source_system": "welcome_message",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello! I see you're calling about your CADILLAC ATS. Your most recent claim is authorized, which means your rental benefits are ready to go! Do you have questions about how to get your rental car, extend your rental or get reimbursed?",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "bd127339-85c8-4fae-82d4-787e0296ef4f",
+        "timestamp": "2026-03-17T01:24:25.880000Z",
+        "source_system": "welcome_message",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"Hello! I see you're calling about your CADILLAC ATS. Your most recent claim is authorized, which means your rental benefits are ready to go! Do you have questions about how to get your rental car, extend your rental or get reimbursed?\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1cdbd8e6-b8bb-4aad-be52-ec1fc320c007",
+        "timestamp": "2026-03-17T01:24:25.880000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello! I see you're calling about your CADILLAC ATS. Your most recent claim is authorized, which means your rental benefits are ready to go! Do you have questions about how to get your rental car, extend your rental or get reimbursed?",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "f66a63cf-e0cc-4761-9de7-b121b0eec315",
+        "timestamp": "2026-03-17T01:24:44.999000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Get a rental.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KKWPAESFWFVM4DXZG5YXDFJ3",
+        "timestamp": "2026-03-17T01:24:46.955000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer wants to get a rental car for their authorized claim.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ae3f87e4-207b-45a9-aea5-9549366fab33",
+        "timestamp": "2026-03-17T01:24:47.072000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to get a rental car for their authorized claim."
+          },
+          "request_id": "call_AvOvlkB9vvIvTOQ6qT7fVsME",
+          "external_request_id": "46dfd552-c497-4ecd-b773-15f2aa1f9339",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "dc2dbb11-f144-4ef5-b06c-efad84a85ecf",
+        "timestamp": "2026-03-17T01:24:47.072000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "\"- Acknowledge the customer with a BRIEF (maximum 5 words) time-buying response telling that you are working on its request. You MUST sound natural, include some very short informative context about what you are doing and start with an suitable phrase choosen from this list:\n  * I'll look into this\n  * I'm pulling that up now",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "76374099-1138-458b-8fbb-eea72fbb21f7",
+        "timestamp": "2026-03-17T01:24:47.325000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "137",
+          "content": null
+        }
+      },
+      {
+        "id": "b45dd279-1db7-4c6a-af1f-94f08720e5cb",
+        "timestamp": "2026-03-17T01:24:48.536000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm pulling that up now\u2014checking your rental options.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5f289b74-4021-4092-a1d5-354f75efb94d",
+        "timestamp": "2026-03-17T01:24:54.242000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hey.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e3c80f7c-d1af-4357-b836-367cfba1ad3b",
+        "timestamp": "2026-03-17T01:24:54.916000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "openai-gpt-4.1",
+          "num_input_tokens": 20972,
+          "num_output_tokens": 157,
+          "prompt_type": "task_reasoner",
+          "request_id": "req_66037fa8db9f4ef193fc9d2e50dec7e0",
+          "llm_id": "litellm",
+          "cost": 0.04320000112056732,
+          "call_duration": 7554
+        }
+      },
+      {
+        "id": "1891d41b-c1e4-4b83-9f19-54ef5d59ef1f",
+        "timestamp": "2026-03-17T01:24:54.919000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(2.1) The customer's goal is to get a rental car for their authorized claim. (2.2) The solution is determined by the task instructions: since the claim is authorized, I need to present the two booking options verbatim and wait for the customer's choice."
+      },
+      {
+        "id": "c02e72b5-5471-4eee-ac04-9dc82c3854aa",
+        "timestamp": "2026-03-17T01:24:54.919000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Tell the customer: \u201cI can help with a couple of rental options. You can book a rental yourself with any licensed rental agency, choosing whichever location is most convenient for you, I can provide you information on how you will get reimbursed. Or, if you\u2019d prefer to rent through Enterprise, Assurant can book the rental for you. Which option would you like to proceed with?\u201d Call me back with their answer so I can guide you on the next steps.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "013e7c14-67c8-43c3-921b-40a8684be940",
+        "timestamp": "2026-03-17T01:24:54.956000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to get a rental car for their authorized claim."
+            },
+            "request_id": "call_AvOvlkB9vvIvTOQ6qT7fVsME",
+            "external_request_id": "46dfd552-c497-4ecd-b773-15f2aa1f9339",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Tell the customer: \u201cI can help with a couple of rental options. You can book a rental yourself with any licensed rental agency, choosing whichever location is most convenient for you, I can provide you information on how you will get reimbursed. Or, if you\u2019d prefer to rent through Enterprise, Assurant can book the rental for you. Which option would you like to proceed with?\u201d Call me back with their answer so I can guide you on the next steps.",
+          "last_action_id": "c02e72b5-5471-4eee-ac04-9dc82c3854aa",
+          "error": null
+        }
+      },
+      {
+        "id": "e10b17a2-a908-4f9d-b349-7e5b2ae544c5",
+        "timestamp": "2026-03-17T01:24:54.956000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Tell the customer: \u201cI can help with a couple of rental options. You can book a rental yourself with any licensed rental agency, choosing whichever location is most convenient for you, I can provide you information on how you will get reimbursed. Or, if you\u2019d prefer to rent through Enterprise, Assurant can book the rental for you. Which option would you like to proceed with?\u201d Call me back with their answer so I can guide you on the next steps.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "31259cde-e665-43c3-a004-10390e63fb14",
+        "timestamp": "2026-03-17T01:24:57.087000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I can help with a couple of rental options. You can book a rental yourself with any licensed rental agency, choosing whichever location is most convenient for you, and I can provide you information on how you will get reimbursed. Or, if you\u2019d prefer to rent through Enterprise, Assurant can book the rental for you. Which option would you like to proceed with?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "67760a5c-1695-4b8e-9724-5c401e259323",
+        "timestamp": "2026-03-17T01:25:23.321000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Assurant do my rental.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KKWPBMXR3F6Y6B8XV736W146",
+        "timestamp": "2026-03-17T01:25:26.024000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer would like Assurant to book the rental through Enterprise for them.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "636d46c8-2d0f-42eb-a0ca-d343356fe53d",
+        "timestamp": "2026-03-17T01:25:26.123000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer would like Assurant to book the rental through Enterprise for them."
+          },
+          "request_id": "call_dZ6hrXpDqaqDtMutLOmVoOeg",
+          "external_request_id": "ef5a1945-2e26-4b46-b766-140082d4c23c",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "7b77436f-d9b8-4d43-875c-42dbc52b5144",
+        "timestamp": "2026-03-17T01:25:26.123000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "\"- Acknowledge the customer with a BRIEF (maximum 5 words) time-buying response telling that you are working on its request. You MUST sound natural, include some very short informative context about what you are doing and start with an suitable phrase choosen from this list:\n  * Just a second\n  * Let me check",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "09fd5aa8-1950-4d51-9520-6bd0c4324b4d",
+        "timestamp": "2026-03-17T01:25:26.154000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "137",
+          "content": null
+        }
+      },
+      {
+        "id": "1fd2dd13-641d-40f5-997c-9725f80649e5",
+        "timestamp": "2026-03-17T01:25:27.174000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Just a second\u2014arranging your Enterprise rental.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "35da9001-fb00-475b-9312-2853c360f97a",
+        "timestamp": "2026-03-17T01:25:28.591000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-southcentralus-gpt-4.1",
+          "num_input_tokens": 21151,
+          "num_output_tokens": 252,
+          "prompt_type": "task_reasoner",
+          "request_id": "8b3e9f86-14f6-4285-a7cb-14cfb804465f",
+          "llm_id": "litellm",
+          "cost": 0.040286000818014145,
+          "call_duration": 2401
+        }
+      },
+      {
+        "id": "ffbabfcc-1575-4708-a7ba-9e601e076d12",
+        "timestamp": "2026-03-17T01:25:28.593000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(2.2) Customer chose Enterprise booking, which per task instructions requires immediate escalation via Unified Escalation Protocol. (3.1) I have all required information for escalation API. (3.2) Proceed to escalate_to_agent with correct parameters for Enterprise booking scenario."
+      },
+      {
+        "id": "3a2bf129-894e-4c5c-8132-90361509ae67",
+        "timestamp": "2026-03-17T01:25:28.597000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "e8b5727e-46f1-431b-90c5-8a957952d6cb",
+        "timestamp": "2026-03-17T01:25:28.631000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer would like Assurant to book the rental through Enterprise for them."
+            },
+            "request_id": "call_dZ6hrXpDqaqDtMutLOmVoOeg",
+            "external_request_id": "ef5a1945-2e26-4b46-b766-140082d4c23c",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "last_action_id": "3a2bf129-894e-4c5c-8132-90361509ae67",
+          "error": null
+        }
+      },
+      {
+        "id": "8009a430-b77e-4ec5-b298-2e7154c264d1",
+        "timestamp": "2026-03-17T01:25:28.652000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "escalate_to_agent",
+          "parameters": {
+            "GAIntent": "RCEQUESTION",
+            "TFN_DNIS": "4035298",
+            "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+            "PhoneNumber": "3239266688",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "callerIntent": "CAR_RENTAL",
+            "Timestamp": "2026-03-16",
+            "Language": "EN",
+            "VIN": "1G6AA5RA2F0137611",
+            "ContractNumber": "WVCAVVTW",
+            "ClaimNumber": "48705421",
+            "productType": "WAR",
+            "IdentifierUsed": "ContractNumber",
+            "Identified": true,
+            "ClaimStatus": "Authorized",
+            "TransferReason": "OOSIntent",
+            "Question": "Customer would like Assurant to book the rental through Enterprise for them.",
+            "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+          },
+          "request_id": "039db645-c06a-4702-ae4e-9200c09713be",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+          "function_version": "18",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "09b461bc-5fbd-4f0f-bf69-a708811fcd5e",
+        "timestamp": "2026-03-17T01:25:28.672000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "escalate_to_agent",
+            "parameters": {
+              "GAIntent": "RCEQUESTION",
+              "TFN_DNIS": "4035298",
+              "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+              "PhoneNumber": "3239266688",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "callerIntent": "CAR_RENTAL",
+              "Timestamp": "2026-03-16",
+              "Language": "EN",
+              "VIN": "1G6AA5RA2F0137611",
+              "ContractNumber": "WVCAVVTW",
+              "ClaimNumber": "48705421",
+              "productType": "WAR",
+              "IdentifierUsed": "ContractNumber",
+              "Identified": true,
+              "ClaimStatus": "Authorized",
+              "TransferReason": "OOSIntent",
+              "Question": "Customer would like Assurant to book the rental through Enterprise for them.",
+              "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+            },
+            "request_id": "039db645-c06a-4702-ae4e-9200c09713be",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+            "function_version": "18",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {},
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "1b71a15f-f1ac-4f7f-94d9-a89fcd3102d0",
+        "timestamp": "2026-03-17T01:25:28.672000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "set_variables",
+        "reference_variables": {
+          "ContractNumber": "\"WVCAVVTW\"",
+          "TFN_DNIS": "\"4035298\"",
+          "PhoneNumber": "\"3239266688\"",
+          "Timestamp": "\"****-**-**\"",
+          "Language": "\"EN\"",
+          "GAIntent": "\"RCEQUESTION\"",
+          "VIN": "\"1G6AA5RA2F0137611\"",
+          "ClaimNumber": "\"48705421\"",
+          "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+          "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+          "Identified": "true",
+          "IdentifierUsed": "\"ContractNumber\"",
+          "ClaimStatus": "\"Authorized\"",
+          "salesforceId": "null",
+          "productType": "\"WAR\"",
+          "TransferReason": "\"OOSIntent\"",
+          "callerIntent": "\"CAR_RENTAL\"",
+          "CiscoCallId": "\"B372EDF420D611F1840D81EAADECED18\"",
+          "Question": "\"Customer would like Assurant to book the rental through Enterprise for them.\""
+        },
+        "sensitive_variables": []
+      },
+      {
+        "id": "479328ad-04d1-4aa9-ab1f-965db27cccf9",
+        "timestamp": "2026-03-17T01:25:28.672000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "system_transfer",
+        "system_transfer_metadata": {
+          "transfer_function_request": {
+            "function_name": "escalate_to_agent",
+            "parameters": {
+              "GAIntent": "RCEQUESTION",
+              "TFN_DNIS": "4035298",
+              "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+              "PhoneNumber": "3239266688",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "callerIntent": "CAR_RENTAL",
+              "Timestamp": "2026-03-16",
+              "Language": "EN",
+              "VIN": "1G6AA5RA2F0137611",
+              "ContractNumber": "WVCAVVTW",
+              "ClaimNumber": "48705421",
+              "productType": "WAR",
+              "IdentifierUsed": "ContractNumber",
+              "Identified": true,
+              "ClaimStatus": "Authorized",
+              "TransferReason": "OOSIntent",
+              "Question": "Customer would like Assurant to book the rental through Enterprise for them.",
+              "escalation_reason_description": "I am transferring you to a Customer Service Agent who can assist you further."
+            },
+            "request_id": "039db645-c06a-4702-ae4e-9200c09713be",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "755f5c2c-c813-4c30-a637-79f73e68459f",
+            "function_version": "18",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "reference_variables": {
+            "ContractNumber": "WVCAVVTW",
+            "TFN_DNIS": "4035298",
+            "PhoneNumber": "3239266688",
+            "Timestamp": "2026-03-16",
+            "Language": "EN",
+            "GAIntent": "RCEQUESTION",
+            "VIN": "1G6AA5RA2F0137611",
+            "ClaimNumber": "48705421",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "Identified": true,
+            "IdentifierUsed": "ContractNumber",
+            "ClaimStatus": "Authorized",
+            "salesforceId": null,
+            "productType": "WAR",
+            "TransferReason": "OOSIntent",
+            "callerIntent": "CAR_RENTAL",
+            "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+            "Question": "Customer would like Assurant to book the rental through Enterprise for them."
+          },
+          "transfer_variables": {
+            "ContractNumber": "WVCAVVTW",
+            "TFN_DNIS": "4035298",
+            "PhoneNumber": "3239266688",
+            "Timestamp": "2026-03-16",
+            "Language": "EN",
+            "GAIntent": "RCEQUESTION",
+            "VIN": "1G6AA5RA2F0137611",
+            "ClaimNumber": "48705421",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "Identified": true,
+            "IdentifierUsed": "ContractNumber",
+            "ClaimStatus": "Authorized",
+            "salesforceId": null,
+            "productType": "WAR",
+            "TransferReason": "OOSIntent",
+            "callerIntent": "CAR_RENTAL",
+            "CiscoCallId": "B372EDF420D611F1840D81EAADECED18",
+            "Question": "Customer would like Assurant to book the rental through Enterprise for them."
+          },
+          "sensitive_variables": []
+        }
+      },
+      {
+        "id": "e015f80d-f7f7-4be1-b820-7b388435f389",
+        "timestamp": "2026-03-17T01:25:32.396000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"I am transferring you to a Customer Service Agent who can assist you further.\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9b0783db-467b-414a-bb73-45289152a1f0",
+        "timestamp": "2026-03-17T01:25:32.396000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am transferring you to a Customer Service Agent who can assist you further.",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "f4e61199-75b4-454b-a17b-8f03faab0722",
+        "timestamp": "2026-03-17T01:25:37.298000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "disconnect",
+        "disconnect_metadata": {
+          "reason": "completed",
+          "message": "DigitalGenAgent said: 'Transfer to system'",
+          "conversation_duration_ms": 74824
+        }
+      }
+    ],
+    "conversation_metadata": {},
+    "parent_header": null,
+    "current_datetime": null
+  }
+}

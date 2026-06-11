@@ -1,0 +1,991 @@
+{
+  "model_input": {
+    "company_marker": "assurantauto",
+    "conversation_id": "",
+    "external_conversation_id": "7F4A72CDECCA11F0AC34BB6B092F0E50",
+    "customer_id": "",
+    "conversation_type": "chat",
+    "conversation_language": "english",
+    "generative_agent_version": null,
+    "actions": [
+      {
+        "id": "0aa797da-2175-4449-af65-3637f20a5692",
+        "timestamp": "2026-01-09T19:46:41.588000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "prompt",
+          "task_name": "",
+          "task_id": "",
+          "task_version": "",
+          "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" \u2192 assume \"car\"\n- In rental discussion, \"dental options\" appears \u2192 assume \"rental\"\n- \"I want to cancel my police\" when discussing policies \u2192 assume \"policy\"\n\nExamples where clarification IS needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed \u2192 Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n  \n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n  \n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough \u2192 Continue to step 2\n\n2) **Check for Ambiguity** \nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous \u2192 Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear \u2192 Continue to step 3\n\n3) If the solution cannot be found in <company_instructions> AND in prior Reasoner responses AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- If you are following Supervisor instructions:\n    - If they were speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n    - If they were requesting information, make sure you collected all required information before reaching back to the Supervisor.\n      - Once you have gathered all the requested information, send it to the Supervisor through send_customer_request_or_update().\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Thank you\" / \"Thanks\" / \"Okay\" / \"Sure\" / \"Alright\" \n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\" \n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgement that the tool/function call was executed. \n- Acknowledge with a BRIEF (under 5 words), non-committal response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER do a tool/function call in this situation\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer.\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe Supervisor is requesting specific information from the customer to better assist them:\n- Collect ALL the requested customer information before calling back the Supervisor.\n- DO NOT mention you are going to spell or confirm the information.\n- DO NOT ask the customer to spell the information to you.\n- Each time the customer provides the piece of information you requested, repeat it back using clear spelling, and ask the customer whether is correct or not. DO NOT spell dates.\n- If the customer indicates any part is incorrect, only re-confirm the incorrect portion by following this guidelines for that specific detail.\n- After confirming each piece of information is correct, call the Supervisor using \"send_customer_request_or_update()\" tool/function call providing the requested information.\n- IMPORTANT: This procedure must be done ONLY if the Supervisor has requested you to collect information from the customer.\n\n### Wrap-up Conversation Protocol\nFollow this steps in order to successfully wrap-up the conversation ONLY when all Supervisor instructions have been followed, your are not waiting for any Supervisor response and the customer intent has been resolved according to them:\n\n1. Ask the customer if they have any other question you can assist with.\n    - If customer says YES \u2192 Exit the protocol and help the customer\n    - If customer says NO \u2192 Continue to Step 2\n2. Call the Supervisor using \"send_customer_request_or_update()\" tool/function call requesting to end the conversation as the customer doesn't need assistance with anything else.\n   - Continue to Step 3\n3. Unless specified otherwise in the <company_instructions>, farewell the customer.\n    - No further steps from here\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER speak to the customer before making a tool call when you want to send a request to the Supervisor.\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - Speak with the customer only in English.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n\n### Company information\nAssurant Auto's customer service attends car rental and insurance claim related issues.\n\n### Direct customer escalation request\n- The terms \"agent,\" \"operator,\" \"representative,\" \"live person\", \"human\" or \"Customer service\" are used interchangeably and should all be interpreted as a request for a \"agent\".\n- If the customer's FIRST response after your initial greeting contains a request for an agent DO NOT call the escalate_to_live_agent() function immediately. You must attempt to deflect by saying EXACTLY THIS: \"I can certainly get an agent for you \u2014 It looks like there's a 5-minute wait. If you like, I can check if your rental coverage is already approved in the meantime. Would you like to hear your claim status while you wait?\"\n  - If the customer agrees and explains their issue: Proceed to call the Supervisor to handle the request\n  - If the customer disagrees and insists on talking to an agent: Immediately call the escalate_to_live_agent() function.\n- If the customer asks for an agent AFTER you have already started helping them, do not attempt any deflection. Immediately call the escalate_to_live_agent() function.\n\n**Important Notes**:\n- A \"first turn\" means the customer's immediate response to your opening greeting\n- Do NOT deflect if the customer has already engaged in conversation about their issue\n- Do NOT deflect multiple times - only attempt once per conversation\n\n\n#### Rental requests\n\nWhen a customer mentions needing a rental, booking a rental, wanting a rental, setting up a rental or asks about getting a car - including messages with similar meaning even if phrased differently - follow this decision tree:\n\n**Step 1: Assess the customer's intent**\n\n- Determine the customer\u2019s intent using the following priority order: Explicit booking intent \u2192 Ambiguous intent. These have been explained below: \n- **Explicit booking intent**: \n  - Does the customer's message contain EXPLICIT booking language? Examples of explicit booking language include phrases like \u201cbook a rental\u201d, \u201creserve a car\u201d, \u201cmake a reservation\u201d, \u201cschedule a rental\u201d, \u201ccan you book it for me?\u201d, \u201cset it up for me\u201d, \"book one\". \n  - If Yes \u2192 Go to Step 3 (Present Booking Options)\n- **Ambiguous intent**:\n  - Does the customer use ambiguous phrases that could mean either booking OR seeking information? Examples of ambiguous intent includes phrases like \u201cset up a rental\u201d, \u201cget a rental\u201d, \u201cneed a car\u201d, \u201carrange a rental\u201d, \u201cwhat do I do next?\u201d, \u201chow do I get a rental?\u201d \n  - If Yes \u2192 Go to Step 2 (Clarify Intent)\n\n**Step 2: Clarify Intent (for Ambiguous intents only)**\n\n- Ask the customer to clarify their intent using ONE of these clarifying questions (rotate to avoid repetition):\n  - \"Would you like me to book a rental for you right now, or would you like to learn about the rental process first?\"\n  - \"Are you ready to book a rental, or would you like me to explain how the rental process works?\"\n  - \"I can help you book a rental or explain the process. Which would you prefer?\"\n\n- Wait for the customer's response:\n  - If customer wants to book \u2192 Go to Step 3 (Present Booking Options)\n  - If customer wants information \u2192 Go to Step 5 (Call Supervisor for Information)\n  - If still unclear \u2192 Ask one more clarifying question with more context, then default to Step 5 (Call Supervisor for Information)\n\n**Step 3: Present Booking Options (When Booking intent is confirmed)**\n\n**IMPORTANT**: Do NOT call the Supervisor at this step. Present the options below directly to the customer yourself.\n- Say the following verbatim: \u201cI can help with a couple of rental options. You can book a rental yourself with any rental car company, choosing whichever location is most convenient for you, and then request reimbursement. Or, if you\u2019d prefer to rent through Enterprise, Assurant can book the rental for you. Which option would you like to proceed with?\u201d\n\n- Wait for the customer's response:\n  - If customer chooses Enterprise booking \u2192 Go to Step 4 (Immediate Escalation)\n  - If customer chooses self-booking \u2192 Continue to Step 3A (Self-booking follow-up)\n  - If what the customer says is unclear \u2192 Ask again: \"Would you like to book yourself and get reimbursed, or would you like us to book Enterprise for you?\".\n\n**Step 3A: Self-booking follow-up**\n\n- Ask the customer the following: \u201cDo you have any questions about the process or would you like to know the next steps?\u201d\n- Wait for the customer's response:\n  - If customer asks a further question \u2192 Go to Step 5 (Call Supervisor for Information)\n  - If customer says no \u2192 Go to Section **### End of conversation** to end the conversation as the customer doesn't need assistance with anything else.\n\n**Step 4: Immediate Escalation**\n\n- Immediately call the escalate_to_live_agent() function.\n\n**Step 5: Call Supervisor for Information**\n\n- Call send_customer_request_or_update() to get instructions on how to explain:\n  - Rental benefits in the customer\u2019s contract\n  - Next steps after claim approval\n  - How to book a rental independently\n  - Any other rental-related information\n\n**Special Cases:**\n- If customer has already received rental process information from you or the Supervisor AND then asks to proceed with booking \u2192 Immediately escalate (Step 4)\n- If customer asks \"can you book it for me?\" or similar direct requests \u2192 Immediately escalate (Step 4)\n\n<company_frequently_asked_questions>\n### Reimbursement Queries\n\n- This section is a knowledge base for when customers have reimbursement related question. **DO NOT** volunteer all of this information at once. Use this information *only* to answer a customer's specific questions about reimbursement.\n\nQuestion: What documents are required for reimbursement?\nAnswer: Reimbursement requires three essential documents: a letter of explanation describing your situation, original rental invoices and receipts, and your current physical mailing address.\n\nQuestion: When do I need to submit my documentation?\nAnswer: You must submit your documentation within 30 days of rental completion, so I encourage you to submit it promptly to avoid missing the deadline.\n\nQuestion: How or where do I submit my reimbursement documentation?\nAnswer: The preferred method is to submit through https://vehiclecareplan.com/ by selecting 'resume existing reimbursement' under the claim option. You can also reply to the original email you received during the claims process.\n\nQuestion: What are my payment options and how long does payment take?\nAnswer: You can choose Check payment, which is typically issued within 14 business days after approval, or Electronic Payment (ACH), which is usually faster. If approved for ACH, you'll get an email with instructions.\n\n- If the customer's query is outside the questions listed above you must call the escalate_to_live_agent() function. \n\n### Rental Queries\n\nQuestion \"How does the rental process work?\"\nAnswer: \"The rental process starts after a repair claim is filed and authorized. Once it's authorized by our claims department, your rental benefits become available. You can rent from any licensed rental agency and get reimbursed subject to what is approved in your claim.\"\n\n</company_frequently_asked_questions>\n\n### Communicating with the Customer\n- Be warm and approachable, like a friendly advisor who's looking out for the customer.\n- Keep in mind that dealing with car issues and claims is stressful - your job is to make things easier.\n- Focus on being helpful and accurate. Stay conversational, but always give the full picture. When the Supervisor gives you information, share everything with the customer - don't cut corners or leave things out just to keep it short. The Supervisor's answers often include important contract specifics, compliance terms, and legal notices that need to be communicated completely. \n- **IMPORTANT RULE FOR STATUS UPDATES:** When you're telling the customer you're pulling up information, checking their contract, or looking at a file (like \"I'm checking your contract details right now\"):\n    1. **DON'T ASK QUESTIONS:** Never add questions like \"Anything else I can help with?\", \"What would you like to know?\", or \"While you wait...\"\n    2. **WHY:** You're actively getting the info they already asked for. It doesn't make sense to ask what else they need when you haven't finished helping them yet.\n- **Key principle:** Never say the exact same sentence or list twice in one response. It sounds robotic and unhelpful. If someone says \"repeat that\" or \"say that again\" or \"repeat the hours,\" they just want to hear it one more time.\n- **DO NOT** think \"repeat\" means say everything twice back-to-back. That's not what they're asking for.\n- Write responses that are easy to read aloud - no complicated symbols, currency formats, or date structures that need interpretation.\n- For phone numbers, format them with characters between digits and periods between groups, then say it twice (example: 2, 1, 2. 3, 4, 5. 7, 8, 9, 0. That's 2, 1, 2. 3, 4, 5. 7, 8, 9, 0.). This helps the speech system read it slowly.\n- For emails, put a comma between each character and say it twice (example: r, o, @, assurant, dot, com. That's r, o, @, assurant, dot, com). This helps the speech system slow down.\n- When mentioning costs, always state dollars and cents clearly. Like if it's $125.99, say \"one hundred and twenty five dollars and ninety nine cents.\" If it's a round number like $25, just say \"twenty five dollars\" - no need to mention cents.\n\n\n### URL Communication Protocol\n\nWhen the Reasoner instructs you to provide a website URL to the customer (such as for uploading reimbursement documentation):\n\n## Step 1: Prepare the Customer\n- Inform the customer that there is a website where they can upload documentation to get reimbursed\n- DO NOT provide the URL yet at this stage\n- Tell them you will read out the website address next\n- Ask: \"Are you ready to make note of the website address?\"\n- Wait for their response before proceeding\n\n## Step 2a: If Customer Confirms Ready\n- If the URL contains multiple words in its path, separate them out, for example \"vehiclecareplan\" should be spoken as \"vehicle care plan\"\n- Read out the URL clearly and naturally (e.g., \"The website is vehicle care plan dot com\")\n- After reading the URL, ask: \"Did you get that, or would you like me to repeat it?\"\n- If they confirm they got it correctly:\n  - Proceed with any remaining instructions from the Reasoner\n- If they need it repeated:\n  - Say: \"No problem, I'll spell it out for you letter by letter.\"\n  - Spell the URL slowly, one letter at a time, except for the suffix which can be spoken\n    - Example: \"V, E, H, I, C, L, E. C, A, R, E. P, L, A, N dot COM\"\n  - Pause briefly between each letter to ensure clarity\n  - After spelling, ask again: \"Did you get that, or would you like me to repeat it again?\".\n  - Repeat the spelling process as many times as needed until the customer confirms\n\n## Step 2b: If Customer Says Not Ready\n- Respond politely and patiently: \"No problem at all. Just let me know when you're ready, and I'll provide the website address for you.\"\n- Wait for them to confirm they are ready\n- Once they confirm readiness, proceed with Step 2a above\n\n### Formatting & Style & Terminology\n- Stay brief and stick to the facts of the contract. Explain things in plain, conversational English that anyone can understand.\n- **ALWAYS** use \"contract\" when referring to the customer's Vehicle Service Contract.\n- **NEVER** use \"policy\" to refer to the customer's contract or rental coverage.\n\n### End of conversation\n- If the customer explicitly states they have no further questions (e.g., \"No thanks\", \"I'm good\"):\n  - Say a polite closing statement (e.g., \"Thank you for calling Assurant. Have a great day!\").\n  - Immediately call the Supervisor. \n\n</company_instructions>\n\n### Company's Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>"
+        }
+      },
+      {
+        "id": "d8af7755-d1d8-4e00-9282-6a958aef0cdd",
+        "timestamp": "2026-01-09T19:46:42.206000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "Language": "\"EN\"",
+            "taskName": "\"CarRentalInquiry\"",
+            "VIN": "\"5N1AT2MT9FC924273\"",
+            "Timestamp": "\"2026-01-09\"",
+            "CiscoCallId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"WWF19TWM\"",
+            "TFN_DNIS": "\"4035298\"",
+            "PhoneNumber": "\"9018590288\"",
+            "asapp_callTransferId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\"",
+            "customerId": "\"unknown\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\""
+          }
+        }
+      },
+      {
+        "id": "4fcba944-4a65-4204-98dc-db1e03f32484",
+        "timestamp": "2026-01-09T19:46:42.206000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "f2d7b715-503b-4962-a335-02de64663b17",
+        "timestamp": "2026-01-09T19:46:42.207000Z",
+        "source_system": "voice_assistant_welcome",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"For car rental questions you can talk to me like a real person. How can I help you today?\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "120385f7-e1d0-45db-9642-66f667d5f1c1",
+        "timestamp": "2026-01-09T19:46:42.207000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "For car rental questions you can talk to me like a real person. How can I help you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "981f1f59-6a53-4043-b7c1-f77c7d3948d4",
+        "timestamp": "2026-01-09T19:46:53.014000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hi. I had a claims number, and I wanted to set up a rental.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "c880c8f1-c5e2-43c6-95bc-a598b918d40c",
+        "timestamp": "2026-01-09T19:46:54.047000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Would you like me to book a rental for you right now, or would you like to learn about the rental process first?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7ade1af2-7369-47ce-87ee-3099cc281380",
+        "timestamp": "2026-01-09T19:47:03.483000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I wanna learn about the rental process.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f5bb3696-f204-462f-a68e-1b2db12df5b4",
+        "timestamp": "2026-01-09T19:47:03.984000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "message::01KEJ4RNPR5ASYTSSCHTAXSBGN",
+        "timestamp": "2026-01-09T19:47:04.984000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer wants to learn about the rental process after having a claim number.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "81a36d4a-64c5-43d3-aa5c-5c73341d5f4c",
+        "timestamp": "2026-01-09T19:47:05.084000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "Language": "\"EN\"",
+            "VIN": "\"5N1AT2MT9FC924273\"",
+            "Timestamp": "\"2026-01-09\"",
+            "CiscoCallId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"WWF19TWM\"",
+            "TFN_DNIS": "\"4035298\"",
+            "PhoneNumber": "\"9018590288\"",
+            "asapp_callTransferId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"7F4A72CDECCA11F0AC34BB6B092F0E50\""
+          }
+        }
+      },
+      {
+        "id": "f90aa38e-c9f5-4132-bb4a-0b4e90562565",
+        "timestamp": "2026-01-09T19:47:05.091000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to learn about the rental process after having a claim number."
+          },
+          "request_id": "call_9kiVDNJCMOFkPZfFjBmTXnZx",
+          "external_request_id": "cf749b1a-430a-407e-927c-b4cbcd1e84f5",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "9208a37f-505f-4c6c-baa8-c3fb0f04ee49",
+        "timestamp": "2026-01-09T19:47:05.119000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "113",
+          "content": null
+        }
+      },
+      {
+        "id": "28f6b2e2-c44e-44f4-8a93-97a32a21ac7b",
+        "timestamp": "2026-01-09T19:47:06.748000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "One moment please.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f7feb1ab-d71a-44b1-b9f7-e38b8ec9bc79",
+        "timestamp": "2026-01-09T19:47:07.561000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-westus3-gpt-4.1",
+          "num_input_tokens": 6627,
+          "num_output_tokens": 229,
+          "prompt_type": "task_reasoner",
+          "request_id": "0ef0a5e6-e463-4403-891a-1f8e7b461bf1",
+          "llm_id": "litellm",
+          "cost": 0.012013999745249748,
+          "call_duration": 2402
+        }
+      },
+      {
+        "id": "73d30de6-2757-4998-b70b-48efaac655bb",
+        "timestamp": "2026-01-09T19:47:07.564000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(1.1) The customer wants to learn about the rental process after having a claim number (1.2) The goal is clear and specific, related to rental process with a claim number (2.1) I can solve this using the get_contract_and_claims_data_V2 API as instructed in the task instructions (2.2) My next action requires using the API to retrieve contract and claims data (3.1) All required arguments are available in the INPUT_VARIABLES from the conversation context (3.2) My next action is to call the API to retrieve contract and claims data."
+      },
+      {
+        "id": "2c268c10-a76d-4246-832d-79f2e6864cae",
+        "timestamp": "2026-01-09T19:47:07.568000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm reviewing your contract details now. Thank you for your patience.",
+          "sender": "bot",
+          "is_synthetic_interim_message": true
+        }
+      },
+      {
+        "id": "97f1d296-2651-4448-8914-473924d0bedc",
+        "timestamp": "2026-01-09T19:47:07.608000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to learn about the rental process after having a claim number."
+            },
+            "request_id": "call_9kiVDNJCMOFkPZfFjBmTXnZx",
+            "external_request_id": "cf749b1a-430a-407e-927c-b4cbcd1e84f5",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "I'm reviewing your contract details now. Thank you for your patience.",
+          "last_action_id": "2c268c10-a76d-4246-832d-79f2e6864cae",
+          "error": null
+        }
+      },
+      {
+        "id": "e23211a4-e209-45a9-aeb8-cab845e316f9",
+        "timestamp": "2026-01-09T19:47:07.629000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "get_contract_and_claims_data_V2",
+          "parameters": {
+            "CiscoCallId": "7F4A72CDECCA11F0AC34BB6B092F0E50",
+            "ClaimNumber": "",
+            "ContractNumber": "WWF19TWM",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "Language": "EN",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "PhoneNumber": "9018590288",
+            "TFN_DNIS": "4035298",
+            "Timestamp": "2026-01-09",
+            "VIN": "5N1AT2MT9FC924273"
+          },
+          "request_id": "18c85129-1382-4c71-bcd2-a48fda0ea9a4",
+          "external_request_id": null,
+          "function_type": "api_connection",
+          "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+          "function_version": "5",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "8591ad43-9319-4320-8e4c-61b5ecae4c2b",
+        "timestamp": "2026-01-09T19:47:10.394000Z",
+        "source_system": "voice_assistant_welcome",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"I'm reviewing your contract details now. Thank you for your patience.\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ae9e3869-dc1e-4859-9866-f7bf48c0c920",
+        "timestamp": "2026-01-09T19:47:10.394000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm reviewing your contract details now. Thank you for your patience.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e7a036c7-6c92-4d39-a81a-aedbc6825a83",
+        "timestamp": "2026-01-09T19:47:11.259000Z",
+        "source_system": "function_caller_lexicon",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "get_contract_and_claims_data_V2",
+            "parameters": {
+              "CiscoCallId": "7F4A72CDECCA11F0AC34BB6B092F0E50",
+              "ClaimNumber": "",
+              "ContractNumber": "WWF19TWM",
+              "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+              "Language": "EN",
+              "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+              "PhoneNumber": "9018590288",
+              "TFN_DNIS": "4035298",
+              "Timestamp": "2026-01-09",
+              "VIN": "5N1AT2MT9FC924273"
+            },
+            "request_id": "18c85129-1382-4c71-bcd2-a48fda0ea9a4",
+            "external_request_id": null,
+            "function_type": "api_connection",
+            "function_id": "65dc63d5-e30c-4947-85cd-671c07b2f77c",
+            "function_version": "5",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {
+            "response": {
+              "contractClaims": {
+                "contract": [
+                  {
+                    "VIN": "5N1AT2MT9FC924273",
+                    "contractNumber": "WWF19TWM",
+                    "customerFirstName": "Quintina",
+                    "customerLastName": "Martin",
+                    "customerEmail": "qtmartin2@hotmail.com",
+                    "customerAddress1": "6339 VILLAGE GROVE PLACE",
+                    "customerAddress2": "APT 6",
+                    "customerCity": "Memphis",
+                    "customerCountry": "USA",
+                    "customerStateCode": "TN",
+                    "customerPostalCode": "38115",
+                    "expirationDate": "2026-07-08",
+                    "status": "Active",
+                    "dealerId": "04108513",
+                    "accountType": "Credit Union",
+                    "productName": "Service Contract",
+                    "productType": "WAR",
+                    "administrator": "Consumer Program Administrators, Inc.",
+                    "customerHomePhone": "9018590288",
+                    "customerWorkPhone": "9018590288",
+                    "customerMobilePhone": "9018590288",
+                    "expirationMiles": 147702,
+                    "deductible": 250,
+                    "deductibleOutOfNetwork": 250,
+                    "inServiceDate": "2015-11-03",
+                    "sellingDealerName": "FEDEX EMPLOYEES CREDIT A",
+                    "sellingDealerAddress": "2731 S Nonconnah Blvd, Memphis, TN, 38132-2110",
+                    "sellingDealerPhone": "9013442500",
+                    "model": "ROGUE S/SL/SV",
+                    "make": "NISSAN",
+                    "vehicleYear": 2015,
+                    "isFE": false,
+                    "formNumber": "MCMRCVSCNTB1120",
+                    "accountTypeNumber": "Mech1",
+                    "termsAndConditions": "https://api.assurant.com/forms/MCMRCVSCNTB1120",
+                    "tieBackDistance": 40,
+                    "classificationCode": "CC",
+                    "specCoveragePlanCode": "Platinum",
+                    "effectiveDate": "2021-07-08",
+                    "productCode": "CUNA",
+                    "dealerType": "Primary",
+                    "expirationType": "AOTAOM",
+                    "roadsideMaxPerServiceCall": 100,
+                    "roadsideAdministrator": "VAS",
+                    "roadsideAdministratorPhoneNumber": "1-866-603-5420",
+                    "rentalIndicator": "Y",
+                    "claims": [
+                      {
+                        "id": "500Pm000018fhlSIAQ",
+                        "claimNumber": "47040358",
+                        "VIN": "5N1AT2MT9FC924273",
+                        "contractNumber": "WWF19TWM",
+                        "formNumber": "MCMRCVSCNTB1120",
+                        "status": "Closed",
+                        "createdOn": "2025-10-29",
+                        "closedOn": "2025-10-29",
+                        "isEOPAvailable": false,
+                        "lineOfBusiness": "Cuna",
+                        "productType": "WAR",
+                        "specCoveragePlanCode": "Platinum",
+                        "claimRecordType": "Inquiry",
+                        "channel": "IVR",
+                        "longVerbiageStatus": "",
+                        "NPA": "false"
+                      },
+                      {
+                        "id": "500Pm00001GftLOIAZ",
+                        "claimNumber": "47782518",
+                        "VIN": "5N1AT2MT9FC924273",
+                        "contractNumber": "WWF19TWM",
+                        "formNumber": "MCMRCVSCNTB1120",
+                        "status": "Closed",
+                        "createdOn": "2025-12-30",
+                        "closedOn": "2025-12-31",
+                        "isEOPAvailable": false,
+                        "lineOfBusiness": "Cuna",
+                        "productType": "WAR",
+                        "specCoveragePlanCode": "Platinum",
+                        "claimRecordType": "Inquiry",
+                        "channel": "IVR",
+                        "longVerbiageStatus": "",
+                        "NPA": "false"
+                      },
+                      {
+                        "id": "500Pm00001Gjo5VIAR",
+                        "claimNumber": "47795556",
+                        "VIN": "5N1AT2MT9FC924273",
+                        "contractNumber": "WWF19TWM",
+                        "formNumber": "MCMRCVSCNTB1120",
+                        "status": "Closed",
+                        "breakdownMileage": 121579,
+                        "createdOn": "2025-12-31",
+                        "closedOn": "2025-12-31",
+                        "isEOPAvailable": false,
+                        "lineOfBusiness": "Cuna",
+                        "productType": "WAR",
+                        "specCoveragePlanCode": "Platinum",
+                        "claimRecordType": "Inquiry",
+                        "channel": "IVR",
+                        "longVerbiageStatus": "",
+                        "NPA": "false"
+                      },
+                      {
+                        "id": "500Pm00001HIQHtIAP",
+                        "claimNumber": "47869382",
+                        "VIN": "5N1AT2MT9FC924273",
+                        "accountType": "Repair Shop",
+                        "contractNumber": "WWF19TWM",
+                        "formNumber": "MCMRCVSCNTB1120",
+                        "repairOrderNumber": "719892",
+                        "status": "Authorization Approved",
+                        "repairShopName": "Wolfchase Nissan",
+                        "repairShopId": "S7280077",
+                        "breakdownMileage": 121579,
+                        "createdOn": "2026-01-06",
+                        "isEOPAvailable": false,
+                        "lineOfBusiness": "Cuna",
+                        "paymentMethod": "CCD",
+                        "productType": "WAR",
+                        "specCoveragePlanCode": "Platinum",
+                        "claimRecordType": "Mechanical",
+                        "channel": "IVR",
+                        "longVerbiageStatus": "The covered portion of this claim was authorized. An authorization letter was sent to your facility.",
+                        "caseStatusId": "CS-0000051",
+                        "NPA": "false"
+                      }
+                    ],
+                    "termsStructuredText": "Coverage Plan\nPurchase Date\nDeductible\n$\nExpiration Date\nTerm Months\nCurrent Mileage\nTerm Miles\nExpiration Mileage\nS\nigned By\nMember\nMCMRC-VSC-NTB (11/20)\nNotice to Member:\n\u2022\nThe purchase of this Vehicle Service Contract is not required to obtain financing or to purchase or lease this Vehicle.\n\u2022\nYou are required to obtain authorization prior to beginning any repairs covered by this Vehicle Service Contract. Refer to Section VI. What To Do If Repairs Are Needed and Section VII.\nYour Responsibilities for instructions.\n\u2022\nYou must follow the maintenance procedures listed in Section VII. Your Responsibilities. If Your failure to follow the procedur\nes causes a Breakdown, You may be denied coverage.\n\u2022\nThe benefits provided under automotive retailer Warranties required by state law are not covered by this Vehicle Service Contra\nct.\n\u2022\nIf the manufacturer\u2019s Warranty is void at the Purchase Date or becomes void during the Service Contract Term, We will not autom\natically suspend all coverage. We will not provide any\ncoverage that would have otherwise been provided under the manufacturer\u2019s Warranty, until the full term of the manufacturer\u2019s W\narranty elapses. However, We will continue to provide any\nother coverage under this Vehicle Service Contract, unless such coverage is otherwise excluded by the terms of this Vehicle Ser\nvice Contract.\n\u2022\nThis Vehicle Service Contract runs concurrent with, and is secondary to, any applicable manufacturer\u2019s Warranty.\nI (Member), whose signature appears below, acknowledge that the information contained above is true and accurate. I have read t\nhe terms and conditions, understand and agree to all of the\nprovisions herein.\nINFORMATION SCHEDULE\nC\nontract\n#\nVEHICLE SERVICE CONTRACT\nVIN\nVehicle Code\nYear, Make, Model\nVEHICLE INFORMATION\nMEMBER INFORMATION\nProducer Name\nProducer #\nAddress, City, State, Zip\nTelephone\nRepresentative\nPRODUCER INFORMATION\nName\nPhone\nAddress, City, State, Zip\nLIENHOLDER INFORMATION\nVEHICLE SERVICE CONTRACT INFORMATION\nCREDIT UNION COPY\nMember Name\nMember #\nAddress, City, State, Zip\nPhone Cell\nHome\nE-mail\nMember Cost  $\nSales Tax (if applicable) $\nTotal Member Cost $\nSERVICE CONTRACT PRICE\nFor Emergency Roadside Assistance:\nToll-Free: 1-866-603-5420\nTo File a Claim:\nVisit us at www.mrclaims.net or\nToll-Free: 1-800-752-6265\nProvider and Administrator:\nIn FL &\u2008OK:\nAutomotive Warranty Services of Florida, Inc., Florida License #60023, Oklahoma\nLicense #44198051\nIn NH:\nConsumer Program Administrators, Inc. dba Consumer Warranty Program Administrators\nIn TX:\nConsumer Program Administrators, Inc. dba The Administrators of Consumer Programs,\nTX License #175\nAll Other States:\nConsumer Program Administrators, Inc.\nAll located at 175 West Jackson Blvd., Chicago, Illinois 60604, 1-800-752-6265\n\u00ae\nV2\nCoverage Plan\nPurchase Date\nDeductible\n$\nExpiration Date\nTerm Months\nCurrent Mileage\nTerm Miles\nExpiration Mileage\nMCMRC-VSC-NTB (11/20)\nMEMBER COPY\nVIN\nVehicle Code\nYear, Make, Model\nVEHICLE INFORMATION\nMEMBER INFORMATION\nProducer Name\nProducer #\nAddress, City, State, Zip\nTelephone\nRepresentative\nPRODUCER INFORMATION\nName\nPhone\nAddress, City, State, Zip\nLIENHOLDER INFORMATION\nVEHICLE SERVICE CONTRACT INFORMATION\nMember Name\nMember #\nAddress, City, State, Zip\nPhone Cell\nHome\nE-mail\nMember Cost  $\nSales Tax (if applicable) $\nTotal Member Cost $\nSERVICE CONTRACT PRICE\nINFORMATION SCHEDULE\nC\nontract\n#\nVEHICLE SERVICE CONTRACT\nS\nigned By\nMember\nNotice to Member:\n\u2022\nThe purchase of this Vehicle Service Contract is not required to obtain financing or to purchase or lease this Vehicle.\n\u2022\nYou are required to obtain authorization prior to beginning any repairs covered by this Vehicle Service Contract. Refer to Section VI. What To Do If Repairs Are Needed and Section VII.\nYour Responsibilities for instructions.\n\u2022\nYou must follow the maintenance procedures listed in Section VII. Your Responsibilities. If Your failure to follow the procedur\nes causes a Breakdown, You may be denied coverage.\n\u2022\nThe benefits provided under automotive retailer Warranties required by state law are not covered by this Vehicle Service Contra\nct.\n\u2022\nIf the manufacturer\u2019s Warranty is void at the Purchase Date or becomes void during the Service Contract Term, We will not autom\natically suspend all coverage. We will not provide any\ncoverage that would have otherwise been provided under the manufacturer\u2019s Warranty, until the full term of the manufacturer\u2019s W\narranty elapses. However, We will continue to provide any\nother coverage under this Vehicle Service Contract, unless such coverage is otherwise excluded by the terms of this Vehicle Ser\nvice Contract.\n\u2022\nThis Vehicle Service Contract runs concurrent with, and is secondary to, any applicable manufacturer\u2019s Warranty.\nI (Member), whose signature appears below, acknowledge that the information contained above is true and accurate. I have read t\nhe terms and conditions, understand and agree to all of the\nprovisions herein.\nFor Emergency Roadside Assistance:\nToll-Free: 1-866-603-5420\nTo File a Claim:\nVisit us at www.mrclaims.net or\nToll-Free: 1-800-752-6265\nProvider and Administrator:\nIn FL &\u2008OK:\nAutomotive Warranty Services of Florida, Inc., Florida License #60023, Oklahoma\nLicense #44198051\nIn NH:\nConsumer Program Administrators, Inc. dba Consumer Warranty Program Administrators\nIn TX:\nConsumer Program Administrators, Inc. dba The Administrators of Consumer Programs,\nTX License #175\nAll Other States:\nConsumer Program Administrators, Inc.\nAll located at 175 West Jackson Blvd., Chicago, Illinois 60604, 1-800-752-6265\n\u00ae\nV2\nCONTRACTT\nVEHICLE SERVICE CONTRACT\nThis agreement is a Vehicle Service Contract between\nYou\nand\nUs\n, and describes the coverage\nYou\nwill have under\nYour\nMember\u2019s Choice Vehicle Service\nContract (hereafter referred to as \u201cService Contract\u201d). In return for payment by\nYou\nof the\nService Contract Price\nand subject to all the terms of this Service\nContract,\nWe\nagree with\nYou\nas follows:\nTABLE OF CONTENTS\nI.\nKEY TERMS\n.....................................................................................\nPage 2\nII.\nWHAT THIS SERVICE CONTRACT COVERS\n.................................................................\nPage 3\nIII.\nADDITIONAL BENEFITS\n..............................................................................\nPages\n4\n\u2013\n6\nIV.\nMAINTENANCE & PARTS THIS SERVICE CONTRACT DOES NOT COVER\n.............................................\nPage\n6\nV.\nSERVICE CONTRACT LIMITATIONS\n......................................................................\nPages\n6\n\u2013\n7\nVI.\nWHAT TO DO IF REPAIRS ARE NEEDED\n..................................................................\nP\nage 7\nVII.\nYOUR RESPONSIBILITIES\n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n. . . . . . . . . . . . .\nPage 7\nVIII.\nGENERAL PROVISIONS\n..............................................................................\nPages 8\n\u2013\n9\nIX.\nSTATE AMENDMENTS\n...............................................................................\nPages 9\n\u2013\n16\nI. KEY TERMS\nWhen used, Key Terms will appear in\nbold\nprint.\n\u201cProvider\u201d\n,\n\u201cWe\u201d\n,\n\u201cUs\u201d\n,\n\u201cOur\u201d\nand\n\u201cAdministrator\u201d\nmean Consumer Program Administrators, Inc., except in the states of Florida and Oklahoma where\nProvider\n,\nWe\n,\nUs\n,\nOur\nand\nAdministrator\nmean Automotive Warranty Services of Florida, Inc., Florida License #60023, Oklahoma License #44198051; in the\nstate of New Hampshire where\nProvider\n,\nWe\n,\nUs\n,\nOur\nand\nAdministrator\nmean Consumer Program Administrators, Inc. dba Consumer Warranty Program\nAdministrators; in the state of Texas where\nProvider\n,\nWe\n,\nUs\n,\nOur\nand\nAdministrator\nmean Consumer Program Administrators, Inc. dba The Administrators of\nConsumer Programs, TX License #175, all located at 175 West Jackson Blvd., Chicago, Illinois 60604, 1-800-752-6265.\n\u201cBreakdown\u201d\nmeans the failure of any original or like replacement part covered by this Service Contract to perform its intended\nfunction(s) in normal service,\nproviding it has received all scheduled maintenance, at the proper intervals, as recommended by the manufacturer in the Owners Manual.\nBreakdown\ndoes not\ninclude the gradual reduction in operating performance caused by wear and tear where a failure has not occurred.\n\u201cCost\u201d\nmeans the reasonable and customary charges for parts and labor necessary to repair or replace the parts covered. These charges shall not exceed the\nmanufacturer\u2019s suggested retail price for parts and labor allowances derived from nationally recognized labor time publications\n.\nWe may use replacement parts used in covered repairs that may include new, remanufactured, used or non-original equipment manuf\nactured parts.\n\u201cDeductible\u201d means the amount You\nmust pay for covered repairs per visit shown on the Information Schedule.\n\u201cKey(s)\u201d\nmeans up to two properly functioning master\nKeys\n(including FOB and/or remote, if applicable) provided at the time of\nYour Vehicle\u2019s\noriginal delivery\nor any\nKey\nreplaced during the Service Contract Term\n.\n\u201cPermitted Commercial Purposes\u201d\nmeans\nYour Vehicle\nis used for commercial purposes including but not limited to: vehicles used by a single driver for sales/\nservices (e.g. real estate, cleaning services, home health/aide care services and gardening) or light duty contracting (e.g. electrician, carpenter and plumber).\n\u201cProducer\u201d\nmeans the producer from whom\nYou\npurchased this Service Contract shown on the Information Schedule.\n\u201cProhibited Commercial Purposes\u201d\nmeans\nYour Vehicle\nis used for commercial purposes including but not limited to: hauling, construction work, principal\noff-road use, pickup and/or delivery service, daily rentals, carry passengers for hire (taxi, limousine or shuttle services), towing or road service operations,\ngovernment/military use, law enforcement, fire, ambulance or other emergency services, snowplowing, company pool use or business travel when the\nVehicle\nis used by more than one driver.\n\u201cPurchase Date\u201d\nmeans the date\nYou\npurchased this Service Contract shown on the Information Schedule.\n\u201cRepair Facility\u201d\nmeans a franchised automobile dealer or licensed repair facility that provides a written parts and labor guarantee for covered repairs of not\nless than 12 months and 12,000 miles. Repairs performed by any facility must receive authorization from the\nAdministrator\nprior to beginning repairs\n.\n\u201cService Contract Price\u201d\nmeans the amount\nYou\npaid for this Service Contract shown on the Information Schedule.\n\u201cTerm Miles\u201d\nmeans the number of miles for the Service Contract Term shown on the Information Schedule.\n\u201cTerm Months\u201d\nmeans the number of months\nfor the Service Contract Term shown on the Information Schedule.\n\u201cVehicle\u201d\nmeans the vehicle shown on the Information Schedule.\n\u201cWarranty\u201d\nmeans any\nWarranty\nof the manufacturer, state required\nWarranty\n, automotive retailer\nWarranty\nor a\nRepair Facility\nguarantee.\n\u201cYou\u201d\nand \u201c\nYour\u201d\nmean the Member shown on the Information Schedule, or an eligible person to whom this Service Contract has been properly transferred.\nPage 2 of 16\nMCMRC-VSC-NTB (11/20)\n\u00ae\nV2\nII. WHAT THIS SERVICE CONTRACT COVERS\nDuring the Service Contract Term, subject to the indicated Coverage Plan,\nWe\nwill pay a\nRepair Facility,\nor at\nOur\noption, reimburse\nYou\nthe\nCost\nto remedy\nany covered\nBreakdown\nof the following parts less\nYour Deductible\n.\nWe may use replacement parts used in covered repairs that may include new, remanufactured, pre-owned or non-original equipment\nmanufacturer parts.\nSILVER COVERAGE\nWhen the SILVER Coverage Plan has been purchased as indicated on the Information Schedule, only the following parts are covered. Parts not\nlisted are not covered.\nAssembly Parts Covered\n1. ENGINE Gasoline Engine\n\u2013 Cylinder block and all internal lubricated parts including: crankshaft, rod and main bearings, cam bearings, expansion\n(freeze) plugs, connecting rods, wrist pins, pistons, piston rings, camshaft, cam tower, lifters, cylinder head, valves and guides, valve springs,\nrocker arms (cam followers), pushrods, timing chain housing (cover), timing chain and sprockets, timing belt and pulleys, timing belt tensioner,\nintake and exhaust manifolds, flywheel, balance shafts, harmonic balancer and retainer bolt, crankshaft pulley, valve covers, oil pan, oil pump and\npressure relief valve, engine oil cooler hoses, oil filter adapter/housing, engine oil sending unit, engine mounts, water pump, temperature sending\nunit, thermostat and housing, fuel supply pump, vacuum pump, dipstick and tube, fasteners for the components listed above.\nTurbocharged/Supercharged/Rotary/Diesel/Enhanced Engines\n\u2013 All of the above listed parts or equivalent plus: turbocharger, waste gate controller,\nintercooler, hard lines, compressor, clutch and pulley, bypass valve, injection pump, lines and nozzles.\n2. TRANSMISSION Automatic\n\u2013 Case and all internal lubricated parts including: oil pump, valve body, torque converter, vacuum modulator,\ngovernor, main shaft, clutches, bands, drums, gear sets, bearings, bushings, sealing rings, TV cable, solenoids, electronic shift control unit,\ntransmission mounts, cooler, cooler hoses and hard lines, dipstick and tube, fasteners for the components listed above.\nStandard\n\u2013 Case and all internal lubricated parts including: main shaft, gear sets, shift forks, synchronizers, bearings, bushings, fasteners for the\ncomponents listed above.\nTransfer Case \u2013 (4X4 vehicles)\n\u2013 Case and all internal lubricated parts including: main shaft, gear sets, chain and sprockets, bearings, bushings,\nmounts, fasteners for the components listed above, electronic and vacuum engagement components.\n3. FRONT WHEEL DRIVE\nFinal drive housing and all internal parts including: carrier case, gear sets, chain and sprockets, bearings, bushings, axle\nshafts, universal joints, front hub\nbearings, rear hub bearings, locking hub assemblies (4X4), drive shaft support, fasteners for the components\nlisted above.\n4. REAR WHEEL DRIVE\nDrive axle housing and all internal lubricated parts including: carrier case, gear sets, bearings, bushings, limited slip clutch\npack, axle shafts, front hub bearings, rear hub bearings, propeller shafts, universal joints, drive shaft support, fasteners for the components listed\nabove.\n5. STEERING\nHousing/case and all internal lubricated parts including: rack and pinion equipped valve assembly, sector shaft, rack mounts and\ncushions, inner rod ends and bellows boots, speed sensor or steering gear equipped pitman shaft and valve assembly, sealing rings, bearings,\nbushings, pitman arm, center link, tie rods, idler arm, power steering pump and pulley, electric power steering motor, fluid reservoir, pressure and\nreturn hoses, cooler and hard lines, power cylinder assembly, steering main and intermediate shafts, coupling, fasteners for the components listed\nabove. (Does not include \u201crear wheel steering\u201d components.)\n6. FRONT SUSPENSION\nUpper and lower control arms, bump stop cushions, control arm shafts, torsion bar mounts and bushings, upper and\nlower ball joints including dust boots, steering knuckle (spindle), wheel bearings and seals, stabilizer shaft, stabilizer linkage including mounts and\nbushings, strut rods and bushings, king pins, fasteners for the components listed above.\n7. BRAKES\nMaster cylinder, assist booster, wheel cylinders, combination valve, disc brake calipers (and rear caliper actuators), hard lines and\nfittings, backing plates, springs, clips and retainers, self-adjusters, parking brake linkage and cables, fasteners for the components listed above.\n8. ELECTRICAL\nAlternator, voltage regulator, front and rear windshield wiper motors and delay controller, starter motor and drive, starter solenoid,\nwiring harnesses, manually operated switches (specifically turn signal, headlight, dimmer, and wiper switches), mechanically actuated switches\n(ignition, brake light and neutral safety switch), electronic fuel injection system (including all input/sensors & output/control units, except EGR valve,\nrelated to the fuel injection system), electronic ignition module, distributor and coil, engine management control unit, knock sensor and oxygen\nsensor.\n9. AIR CONDITIONING\nCompressor and mounting brackets, clutch and pulley, condenser, evaporator, orifice tube, accumulator, temperature control\nprogrammer, high/low pressure  cutoff switches, high/low pressure hoses, pressure cycling switch, thermostat, drier, temperature control head,\nfasteners for the components listed above and freon-refrigerant if necessary in conjunction with the repair of the components listed above.\n10. BASIC HYBRID/ELECTRIC VEHICLE COMPONENTS\nElectric motor/generator(s) and all internal components, inverter/converter/transformer\nunits and all internal components, inverter/converter/transformer units cover, continuously variable transmission (CVT) and all internal components,\npower split device and all internal components, reduction/reducer box and all internal components, and fasteners for the components listed above.\nHybrid battery junction block, hybrid battery main battery cable, and electric alternating current compressor.\n11. SEALS AND GASKETS\nAll seals and gaskets on the assemblies listed above.\nGOLD COVERAGE\nWhen the GOLD Coverage Plan has been purchased as indicated on the Information Schedule, only the following parts, in addition to the parts listed\nunder Silver Coverage, are covered. Parts not listed are not covered.\n12. ADVANCED COMPONENTS\nAnti-lock brake system, power seat motor(s) and transmission(s), power window motor(s) and power regulator(s),\npower door lock actuator(s), digital and analog instrument display(s), low fuel sensor, low coolant sensor, low oil sensor, electronic rear view mirror\nmotor(s), headlight door motor(s), heated back glass, windshield wiper washer pump(s), heater-A/C blower motor, heater core assembly, heater\ncontrol valve, radiator, radiator fan and clutch, radiator fan motor including fan blade, temperature sensor and relay, fuel tank and hard lines, fuel\ntank sending unit, power sun roof motor, convertible top motor, constant velocity joints and horn assembly.\n13. ADVANCED HYBRID/ELECTRIC VEHICLE COMPONENTS\nOnboard battery charging system, battery charge controller, motor/generator belt\ntensioner, drive motor dampener, voltage inverter reservoir, three-phase high voltage cables, hydraulic or electric regenerative braking system,\nonboard computer system including all relays, sensors, ECU & ECM (electronic control units/electronic control modules), power switch/button and\ncontroller/electronic throttle control system.\nPLATINUM COVERAGE\nWhen the PLATINUM Coverage Plan has been purchased as indicated on the Information Schedule,\nWe\nwill remedy any\nBreakdown\nof\nYour Vehicle\nexcept items listed under the Sections\nIV. Maintenance & Parts This Service Contract Does Not Cover\nand\nV. Service Contract Limitations.\nMCMRC-VSC-NTB (11/20)\nP\nL\nA\nT\nI\nN\nU\nM\nS\nI\nL\nV\nE\nR\nPage 3 of 16\nG\nO\nL\nD\nV2\nIII. ADDITIONAL BENEFITS\nThe Additional Benefits shown below are included with the Coverage Plan purchased.\nA. Emergency Roadside Assistance\nEmergency Roadside Assistance is available 24 hours a day, 365 days a year.\nWe\nwill pay for a covered emergency up to $100 per occurrence with no out-of-\npocket expense to\nYou\n. If the covered emergency exceeds $100 per occurrence,\nYou\nare responsible for that portion that exceeds $100.\nYou\nare responsible\nfor any non-covered expenses. This benefit is available only for\nYour Vehicle\n.\nThe following are covered emergencies under Emergency Roadside Assistance:\n\u2022\nTowing Assistance\n\u2013 when\nYour Vehicle\nis inoperable or unsafe to drive,\nYour Vehicle\nwill be towed to the closest\nRepair Facility\nor to any other location\nrequested by\nYou\n.\n\u2022\nFlat Tire Assistance\n\u2013 service consists of (a) the removal of the flat tire and (b) replacing the flat tire with\nYour\nspare tire located with\nYour Vehicle\n.\n\u2022\nFuel, Oil, Fluid and Water Delivery Service\n\u2013 an emergency supply of fuel, oil, fluid and water will be delivered if\nYour Vehicle\nis in immediate need.\nYou\nwill be responsible for the cost of these supplies.\n\u2022\nLock-out Assistance\n\u2013 if\nYour\nkeys are locked inside\nYour Vehicle\n, assistance will be provided in gaining entry into\nYour Vehicle\n.\n\u2022\nBattery Assistance\n\u2013 if battery failure occurs, a jump-start will be provided to start\nYour Vehicle\n.\nFOR EMERGENCY ROADSIDE ASSISTANCE, CALL TOLL FREE: 1-866-603-5420\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING UNDER\nEMERGENCY ROADSIDE ASSISTANCE:\n1.\nFOR EMERGENCIES RESULTING FROM THE USE OF INTOXICANTS OR NARCOTICS, OR THE USE OF YOUR VEHICLE IN THE COMMISSION OF A\nFELONY.\n2.\nFOR COST OF PARTS, REPLACEMENT KEYS, FLUIDS, LUBRICANTS, FUEL, MATERIALS, ADDITIONAL LABOR RELATED TO TOWING OR COST OF\nINSTALLATION OF PRODUCTS.\n3.\nFOR NON-EMERGENCY TOWING OR OTHER NON-EMERGENCY SERVICE.\n4.\nFOR MOUNTING OR REMOVING OF SNOW TIRES OR CHAINS; WINCHING; EXTRICATION; TIRE REPAIR.\n5.\nFOR SHOVELING SNOW AROUND YOUR VEHICLE.\n6.\nFOR CAMPING TRAILERS, TRAVEL TRAILERS, RECREATIONAL VEHICLES (INCLUDING SELF-MOTORIZED RVS) OR ANY VEHICLES IN TOW.\n7.\nFOR ANY AND ALL TAXES, TOLLS AND/OR FINES.\n8.\nFOR TOWING FROM OR REPAIR WORK PERFORMED AT A SERVICE STATION, GARAGE OR REPAIR SHOP.\n9.\nFOR TOWING BY OTHER THAN A LICENSED SERVICE STATION OR GARAGE.\n10.\nFOR A SECOND TOW FOR THE SAME DISABLEMENT.\n11.\nFOR MORE THAN ONE DISABLEMENT FOR THE SAME SERVICE TYPE DURING ANY SEVEN DAY PERIOD.\n12.\nFOR SERVICE ON A VEHICLE THAT IS NOT IN A SAFE CONDITION TO BE TOWED OR SERVICED, OR THAT MAY RESULT IN DAMAGE TO YOUR VEHICLE\nIF TOWED OR SERVICED.\n13.\nFOR TOWING OR SERVICE ON ROADS NOT REGULARLY MAINTAINED, SUCH AS SAND BEACHES, OPEN FIELDS, FORESTS AND AREAS DESIGNATED\nAS NOT PASSABLE DUE TO CONSTRUCTION.\n14.\nFOR TOWING AT THE DIRECTION OF A LAW ENFORCEMENT OFFICER RELATING TO TRAFFIC OBSTRUCTION, IMPOUNDMENT, ABANDONMENT,\nILLEGAL PARKING OR OTHER VIOLATIONS OF LAW.\n15.\nFOR REPEATED SERVICE CALLS FOR A VEHICLE IN NEED OF ROUTINE MAINTENANCE OR REPAIR.\n16.\nFOR SERVICE SECURED THROUGH ANY SOURCE OTHER THAN US WITHOUT OUR PRIOR AUTHORIZATION. THIS IS NOT A ROADSIDE ASSISTANCE\nREIMBURSEMENT SERVICE.\nB. Rental Reimbursement\nWe\nwill pay\nYour\nactual expenses to rent a replacement vehicle from a licensed rental agency if\nYour Vehicle\nis held by a\nRepair Facility\nfor a covered repair.\nRental reimbursement shall not exceed $35 per day for a maximum of five days for any one\nBreakdown\n. If a covered repair cannot be completed within the first\nfive days of a rental period due to a parts delay or other reasonable cause, the five day maximum is extended to 10 days. Rental Reimbursement is available\nbeginning on the first day of the covered repair.\nFOR RENTAL REIMBURSEMENT, CALL TOLL FREE: 1-800-752-6265\nC. Emergency Travel Expense Reimbursement\nWhen a covered\nBreakdown\nrenders\nYour Vehicle\ninoperable or unsafe to drive and requires\nYour Vehicle\nto be held overnight by a\nRepair Facility\nfor covered\nrepairs while traveling 100 miles or more from\nYour\nhome,\nWe\nwill pay for emergency local commercial lodging, meals and transportation expenses up to\n$200 per day for a maximum of five days.\nFOR EMERGENCY TRAVEL EXPENSE REIMBURSEMENT, CALL TOLL FREE: 1-800-752-6265\nEMERGENCY TRAVEL EXPENSE REIMBURSEMENT IS NOT AVAILABLE IF YOU RESIDE IN THE STATE(S) OF:\nNEW YORK\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING UNDER\nEMERGENCY TRAVEL EXPENSE REIMBURSEMENT:\n1.\nFOR ADDITIONAL COMMERCIAL LODGING ENTERTAINMENT EXPENSES.\n2.\nFOR ANY BREAKDOWN THAT OCCURS LESS THAN 100 MILES FROM YOUR HOME.\nD. Manufacturer\u2019s Deductible Reimbursement\nWe\nwill reimburse\nYou\nfor the difference between the\nDeductible\namount shown on the Information Schedule and any required manufacturer\u2019s deductible, if\napplicable, when a\nBreakdown\nof a covered part occurs and is covered by a manufacturer\u2019s\nWarranty\n.\nFOR MANUFACTURER\u2019S DEDUCTIBLE REIMBURSEMENT, CALL TOLL FREE: 1-800-752-6265\nMCMRC-VSC-NTB (11/20)\nPage 4 of 16\nV2\nE. Key Replacement\nIf\nYour Vehicle\u2019s Key\nis lost, stolen or damaged and will not work,\nWe\nwill pay a\nRepair Facility,\nor at\nOur\noption, reimburse\nYou\nthe\nCost\nto repair or if non-\nrepairable, the\nCost\nto replace\nYour Key\nincluding any programming (if applicable) up to $800 per occurrence. No\nDeductible\napplies to this benefit.\nFOR KEY REPLACEMENT COVERAGE, CALL TOLL FREE: 1-800-752-6265\nKEY REPLACEMENT COVERAGE IS NOT AVAILABLE IF YOU RESIDE IN THE STATE(S) OF:\nCONNECTICUT, MASSACHUSETTS, MONTANA, PENNSYLVANIA, SOUTH DAKOTA, VERMONT, WISCONSIN, WYOMING\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING UNDER KEY REPLACEMENT:\n1.\nFOR DAMAGE OR INJURY TO PERSON OR PROPERTY; OTHER THAN TO REPAIR OR REPLACE THE COVERED KEY IN ACCORDANCE WITH THE TERMS\nAND CONDITIONS OF THIS SERVICE CONTRACT.\n2.\nFOR ANY CHARGE ASSESSED BY THE SELLING DEALER FOR MISSING KEY(S) ON THE END-OF-LEASE INSPECTION REPORT OR ANY CLAIM FILED\nAFTER THE FINAL LEASE INSPECTION.\n3.\nFOR ANY DAMAGE TO OR NON-FUNCTIONING OF KEY(S) CAUSED BY WEAR AND TEAR (E.G., BATTERY FAILURE/LOSS OF CHARGE, COSMETIC\nDAMAGE).\n4.\nFOR ANY REPLACEMENT OF KEY(S) WHEN AT LEAST TWO SETS OF KEY(S) WERE NOT DELIVERED AT THE TIME OF THE PURCHASE OF YOUR\nVEHICLE.\n5.\nFOR ANY VALET KEYS OR AFTERMARKET DEVICES (SUCH AS REMOTE START).\nF. Paintless Dent Repair\nPaintless Dent Repair (PDR) is a process developed by automobile manufacturing production teams that use specialized hand tools to permanently remove dings\nand minor dents without affecting the existing paint finish but does not include services that involve the replacement of vehicle body panels or sanding, bonding\nor repainting. During the Service Contract Term,\nWe\nwill pay a\nRepair Facility\n, or at\nOur\noption, reimburse\nYou\nthe\nCost\nincurred to repair covered dents and\ndings on exterior body of\nYour Vehicle\nthat are accessible and are repairable through existing PDR techniques. This benefit is limited to vehicles with steel or\naluminum body panels. No\nDeductible\napplies to this coverage.\nFOR PAINTLESS DENT REPAIR COVERAGE, CALL TOLL FREE: 1-800-752-6265\nPAINTLESS DENT REPAIR COVERAGE IS NOT AVAILABLE IF YOU RESIDE IN THE STATE OF:\nCONNECTICUT\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING UNDER PAINTLESS DENT REPAIR:\n1.\nFOR DAMAGE OR INJURY TO PERSON OR PROPERTY; OTHER THAN TO REPAIR THE COVERED PANEL IN ACCORDANCE WITH THE TERMS AND\nCONDITIONS OF THIS SERVICE CONTRACT.\n2.\nFOR COSMETIC DAMAGE (INCLUDING BUT NOT LIMITED TO SCRATCHES, NICKS, DISCOLORATION AND DETERIORATION) TO YOUR VEHICLE\u2019S\nPAINT.\n3.\nFOR DENTS THAT HAVE BEEN PREVIOUSLY REPAIRED USING METHODS OF BODY FILLERS AND REPAINTING.\n4.\nFOR LARGE OR DEEP DENTS OR DINGS IN EXCESS OF 4 INCHES IN LENGTH/DIAMETER.\n5.\nFOR DENTS THAT ARE INACCESSIBLE DUE TO THE FOLLOWING: (A) THE EXISTENCE OF AFTER-MARKET EQUIPMENT, OR (B) WHERE SUCH\nAFTER-MARKET EQUIPMENT OR INSTALLATION THEREOF HAS ALTERED THE ORIGINAL VEHICLE CONFIGURATION OR (C) EDGES WHERE IT IS\nDETERMINED THAT THE MANUFACTURER\u2019S BRACING DOES NOT ALLOW FOR THE PDR PROCESS.\n6.\nFOR REPAIRS TO CREASED METALS OR DENTS AND DINGS THAT HAVE BROKEN THE PAINT OR PUNCTURED THE METAL OF YOUR VEHICLE.\n7.\nFOR REPAIRS TO ANY DENT OR DING THAT, IF REPAIRED, COULD IN ANY WAY DAMAGE THE VEHICLE\u2019S ORIGINAL MANUFACTURER\u2019S PAINT OR\nFINISH.\n8.\nFOR VEHICLES WHICH UTILIZE 100% PLASTIC, FIBERGLASS OR OTHER NON-METAL COMPOSITE BODY PANEL.\nG. Permitted Commercial Purposes\nWe\nwill pay for covered\nBreakdowns\nto\nYour Vehicle\nwhen\nYour Vehicle\nis used for\nPermitted Commercial Purposes\n.\nH. Rideshare\nWe\nwill pay for covered\nBreakdowns\nto\nYour Vehicle\nwhen\nYour Vehicle\nis used for Rideshare (i.e. Uber, Lyft) purposes.\nI. Lift Kit/Leveling Kit\nWe\nwill pay for covered\nBreakdowns\nto\nYour Vehicle\nwhen\nYour Vehicle\nis equipped with a lift kit not to exceed 6 inches. If the lift kit includes oversize wheels\nand/or tires, overall width may not exceed 6 inches from original manufacturer tire width and overall height may not exceed 6 inches from original manufacturer\ntire height. The lift kit itself, all of its assembly and any aftermarket and/or manufacturer or dealer installed lift kit accessories and/or equipment are not covered.\nWe\nwill pay for covered\nBreakdowns\nto\nYour Vehicle\nwhen\nYour Vehicle\nis equipped with a leveling kit not to exceed 2.5 inches. If the leveling kit includes\noversize wheels and/or tires, overall width may not exceed 2.5 inches from original manufacturer tire width and overall height may not exceed 2.5 inches from\noriginal manufacturer tire height. The leveling kit itself, all of its assembly and any aftermarket and/or manufacturer or dealer installed leveling kit accessories\nand/or equipment are not covered.\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING UNDER LIFT KIT / LEVELING KIT:\n1.\nFOR COVERED BREAKDOWNS WHERE YOUR VEHICLE IS EQUIPPED WITH A LIFT KIT THAT EXCEEDS 6 INCHES.\n2.\nIF THE LIFT KIT INCLUDES OVERSIZE WHEELS AND/OR TIRES WHERE THE OVERALL WIDTH EXCEEDS 6 INCHES FROM THE ORIGINAL\nMANUFACTURER TIRE WIDTH AND OVERALL HEIGHT EXCEEDS 6 INCHES FROM THE ORIGINAL MANUFACTURER TIRE HEIGHT.\n3.\nFOR THE LIFT KIT, ALL OF ITS ASSEMBLY AND ANY AFTERMARKET AND/OR MANUFACTURER OR DEALER INSTALLED LIFT KIT ACCESSORIES AND/\nOR EQUIPMENT.\n4.\nFOR COVERED BREAKDOWNS WHERE YOUR VEHICLE IS EQUIPPED WITH A LEVELING KIT THAT EXCEEDS 2.5 INCHES.\n5.\nIF THE LEVELING KIT INCLUDES OVERSIZE WHEELS AND/OR TIRES WHERE THE OVERALL WIDTH EXCEEDS 2.5 INCHES FROM THE ORIGINAL\nMANUFACTURER TIRE WIDTH AND OVERALL HEIGHT EXCEEDS 2.5 INCHES FROM THE ORIGINAL MANUFACTURER TIRE HEIGHT.\n6.\nFOR THE LEVELING KIT, ALL OF ITS ASSEMBLY AND ANY AFTERMARKET AND/OR MANUFACTURER OR DEALER INSTALLED LEVELING KIT\nACCESSORIES AND/OR EQUIPMENT.\nMCMRC-VSC-NTB (11/20)\nPage 5 of 16\nV2\nJ. Mobility Equipment\nCoverage is extended to the following parts and components when installed by the manufacturer or a licensed, manufacturer-authorized installer, unless the\nalterations made to accommodate the equipment fall outside manufacturer\u2019s specifications and tolerances: chair lift motors and assemblies, electric/hydraulic\nramp controls and assemblies, adjustable seating mechanisms, adjustable pedal and steering control mechanisms, hoist and swing-arm mechanisms.\nFOR COVERED BREAKDOWNS, CALL TOLL FREE: 1-800-752-6265\nIV. MAINTENANCE & PARTS THIS SERVICE CONTRACT DOES NOT COVER\nMAINTENANCE AND PARTS THAT ARE NOT COVERED\nA.\nMAINTENANCE NOT COVERED \u2013 THE MAINTENANCE SERVICES AND PARTS DESCRIBED IN THE MANUFACTURER\u2019S MAINTENANCE SCHEDULE FOR\nYOUR VEHICLE. OTHER NORMAL MAINTENANCE SERVICES AND PARTS INCLUDING ENGINE TUNE-UP, (INCLUDES SPARK PLUGS, GLOW PLUGS,\nIGNITION WIRES, DISTRIBUTOR CAP AND ROTOR), ALL BATTERIES (INCLUDING BUT NOT LIMITED TO: HYBRID/ELECTRIC VEHICLE BATTERIES),\nFILTERS, LUBRICANTS OR FLUIDS, AIR CONDITIONING REFRIGERANT, ENGINE COOLANT, ALL HOSES AND BELTS (NOT SPECIFICALLY LISTED),\nWIPER BLADES, BRAKE PADS AND SHOES, BRAKE ROTORS AND DRUMS, SUSPENSION ALIGNMENT.\nB.\nPARTS NOT COVERED \u2013 CONSTANT VELOCITY BOOTS, TIRES, WHEEL COVERS, WHEEL RIMS, WHEELS, WHEEL BALANCING, SHOCK ABSORBERS,\nSUSPENSION AIR BAGS, EXHAUST SYSTEM, CATALYTIC CONVERTER, FRICTION CLUTCH DISC AND PRESSURE PLATE AND CLUTCH RELEASE\nBEARING, GLASS, GLASS FRAMEWORK AND FASTENING ADHESIVES, SEALED BEAM HEAD LAMPS, LIGHT BULBS, LENSES, TRIM, MOLDINGS,\nBRIGHT METAL, UPHOLSTERY, PAINT, SHEET METAL, BUMPERS, ALIGNMENT OF BODY PARTS, FLEXIBLE BODY PARTS, DOOR PANELS,\nBODY PANELS, STRUCTURAL FRAMEWORK, CONVERTIBLE TOP FRAMEWORK, STRUCTURAL WELDS, HINGES, DOOR HANDLES, VINYL AND\nCONVERTIBLE TOPS AND NON-MECHANICAL REMOVABLE HARDTOP ASSEMBLIES.\nV. SERVICE CONTRACT LIMITATIONS\nWE WILL NOT PAY FOR OR COVER THE FOLLOWING:\n1.\nMODIFICATIONS:\nA.\nAFTERMARKET ACCESSORIES OR EQUIPMENT, COMPONENTS AND SYSTEMS, INCLUDING BUT NOT LIMITED TO: ANTI-THEFT SYSTEMS, RADAR\nDETECTORS, CB RADIOS, RADIO/SPEAKER EQUIPMENT, CRUISE CONTROL, SUNROOF, SOLAR POWERED DEVICES, TELEPHONES, TV/VCR/DVD\nAND RELATED COMPONENTS AND APPLIANCES (UNLESS INSTALLED BY THE MANUFACTURER).\nB.\nIF YOUR VEHICLE HAS BEEN MODIFIED TO PLOW SNOW, WHETHER THE SNOW PLOW BLADE IS ATTACHED TO THE VEHICLE OR NOT.\nC.\nBREAKDOWN CAUSED BY OR INVOLVING MODIFICATIONS UNLESS THOSE MODIFICATIONS WERE PERFORMED BY THE MANUFACTURER AND\nTHE MODIFICATIONS MEET THE MANUFACTURER\u2019S SPECIFICATIONS (E.G. TIRES TWO OR MORE SIZES LARGER OR SMALLER THAN THE\nMANUFACTURER\u2019S SPECIFICATIONS, AFTERMARKET PERFORMANCE PARTS OR SYSTEMS).\nD.\nBREAKDOWN CAUSED BY OR INVOLVING EQUIPMENT, COMPONENTS OR SYSTEMS NOT INSTALLED BY THE MANUFACTURER.\n2.\nNON-STANDARD USE:\nA.\nBREAKDOWN CAUSED BY TOWING A TRAILER OR ANOTHER VEHICLE UNLESS YOUR VEHICLE IS EQUIPPED FOR THIS AS RECOMMENDED BY THE\nMANUFACTURER.\nB.\nANY BREAKDOWN WHERE THE VEHICLE HAS BEEN USED FOR A PROHIBITED COMMERCIAL PURPOSE, AT ANY TIME WHILE OWNED BY YOU.\nC.\nBREAKDOWN CAUSED BY USING YOUR VEHICLE FOR STREET RACING OR OTHER COMPETITION.\n3.\nNEGLIGENCE, MISREPRESENTATION OR MISUSE:\nA.\nBREAKDOWN CAUSED BY ABUSE, MISUSE, ALTERATIONS OR LACK OF CUSTOMARY MAINTENANCE AS DETAILED IN SECTION VII. YOUR\nRESPONSIBILITIES.\nB.\nBREAKDOWN CAUSED BY CONTAMINATION, OVERHEATING, LACK OF COOLANT, LACK OF LUBRICANTS, IMPROPER SPECIFICATION (TYPE)\nOF FLUIDS, LACK OF OIL VISCOSITY, SLUDGE OR RESTRICTED OIL FLOW. EXAMPLES INCLUDE BUT ARE NOT LIMITED TO: ENGINE AND\nTRANSMISSION.\nC.\nBREAKDOWN WHEN CONTAMINATED FLUIDS CAUSED OR CONTRIBUTED TO THE BREAKDOWN.\nD.\nLOSS OR DAMAGE CAUSED BY YOU OR THE OPERATOR\u2019S FAILURE TO USE ALL REASONABLE PRECAUTIONS TO PROTECT THE VEHICLE FROM ANY\nFURTHER LOSS OR DAMAGE AFTER A BREAKDOWN OR FAILURE HAS OCCURRED OR BEEN INDICATED.\nE.\nIF YOUR VEHICLE\u2019S ODOMETER HAS BEEN STOPPED, ALTERED OR MISREPRESENTS YOUR VEHICLE\u2019S ACTUAL MILEAGE INCLUDING BUT NOT\nLIMITED TO ODOMETER MISREPRESENTATION CAUSED BY THE USE OR MODIFICATION OF THE VEHICLE WITH UNDERSIZE OR OVERSIZE TIRE AND\nWHEEL ASSEMBLIES.\nF.\nDAMAGE CAUSED TO YOUR ENGINE RESULTING FROM THE INGESTION OF WATER.\nG.\nBREAKDOWN OR DAMAGE CAUSED BY NEGLECTING TO FOLLOW PROPER CHARGING PROCEDURES OR USE OF INCOMPATIBLE CHARGING\nDEVICES FOR YOUR PLUG-IN HYBRID/ELECTRIC VEHICLE.\n4.\nCOLLISION, PHYSICAL DAMAGE AND COSMETICS:\nA.\nBREAKDOWN CAUSED BY OR INVOLVING COLLISION, FIRE, THEFT, VANDALISM, RIOT, TERRORIST ACTS, WAR, EXPLOSION, LIGHTNING,\nEARTHQUAKE, HURRICANE, TROPICAL STORM, VOLCANIC ERUPTION, WINDSTORM, HAIL, WATER, FREEZING OR FLOOD.\nB.\nTO CORRECT A COSMETIC IMPERFECTION OR BREAKDOWN CAUSED BY RUST OR WEATHER RELATED CORROSION.\n5.\nWARRANTIES AND MANUFACTURER RECALLS:\nA.\nCOSTS OR SERVICES COVERED BY ANY WARRANTY REGARDLESS OF WHETHER THEY HONOR SUCH WARRANTY.\nB.\nCOSTS THAT ARE OR WOULD HAVE BEEN COVERED UNDER ANY VEHICLE MANUFACTURER WARRANTY WHETHER OR NOT SUCH WARRANTY IS IN\nEFFECT IN ANOTHER COUNTRY OR HAS BEEN VOIDED BY THE MANUFACTURER.\nC.\nBREAKDOWN THAT IS A DIRECT RESULT OF A MECHANICAL OR STRUCTURAL DEFECT WHEN THE MANUFACTURER HAS ANNOUNCED A PUBLIC\nRECALL FOR THE PURPOSE OF CORRECTING SUCH A DEFECT.\n6.\nVEHICLE TYPE:\nA.\nIF YOUR VEHICLE HAD BEEN DECLARED A TOTAL LOSS, SALVAGED TITLE OR JUNK VEHICLE.\nB.\nIF YOUR VEHICLE IS A TRUCK RATED MORE THAN 1 TON.\nC.\nIF YOUR VEHICLE WAS MANUFACTURED AS A NON-U.S. SPECIFICATION MODEL.\nD.\nIF YOUR VEHICLE IS POWERED BY COMPRESSED NATURAL GAS, LIQUIFIED NATURAL GAS, PROPANE OR HYDROGEN.\nMCMRC-VSC-NTB (11/20)\nPage 6 of 16\nV2\n7.\nCONSEQUENTIAL DAMAGE:\nA.\nLOSS OF TIME, ECONOMIC LOSS, INCONVENIENCE, LODGING, FOOD, FREIGHT CHARGES, CORE CHARGES, STORAGE CHARGES, OR OTHER\nCONSEQUENTIAL LOSS OR DAMAGE THAT RESULTED FROM A BREAKDOWN UNLESS AS PROVIDED UNDER EMERGENCY TRAVEL EXPENSE\nREIMBURSEMENT. CONSEQUENTIAL OR INCIDENTAL DAMAGE OR LOSS SHOULD YOUR VEHICLE BE INVOLVED IN A COLLISION CAUSED BY OR\nINVOLVING A BREAKDOWN OF A COMPONENT COVERED BY THIS SERVICE CONTRACT.\nB.\nBREAKDOWN OF A COVERED PART RESULTING FROM THE FAILURE OF A NON-COVERED PART. HOWEVER, COVERAGE WILL BE PROVIDED FOR\nTHE FAILURE OF A NON-COVERED PART RESULTING FROM A BREAKDOWN OF A COVERED PART.\nC.\nBREAKDOWN OR DAMAGE CAUSED BY A POWER SURGE WHILE CHARGING YOUR VEHICLE.\n8.\nNON-COVERED CONDITIONS:\nA.\nPRE-EXISTING \u2013 BREAKDOWN WHICH EXISTED PRIOR TO OR WAS CAUSED BY A CONDITION WHICH EXISTED\nPRIOR TO THE PURCHASE DATE.\nB.\nREPAIRS PERFORMED WITHOUT THE ADMINISTRATOR\u2019S PRIOR AUTHORIZATION EXCEPT WHEN THE ADMINISTRATOR\u2019S OFFICE IS CLOSED AND\nEMERGENCY REPAIRS ARE NECESSARY (SEE SECTION VI. WHAT TO DO IF REPAIRS ARE NEEDED).\nC.\nREPAIR OF VALVES AND/OR RINGS FOR THE PURPOSE OF RAISING THE ENGINE\u2019S COMPRESSION WHEN A BREAKDOWN HAS NOT OCCURRED.\nD.\nREPAIRS MADE SOLELY TO MEET OR MAINTAIN ANY GOVERNMENTAL EMISSION STANDARDS.\nE.\nREPAIRS OF AIR LEAKS, RATTLES, SQUEAKS, WIND NOISE AND WATER LEAKS WHERE WATER IS ENTERING THE VEHICLE EXTERNALLY.\nF.\nTO REPAIR, REPLACE, ADJUST OR ALIGN ANY PART NOT COVERED BY THIS SERVICE CONTRACT EXCEPT AS REQUIRED FOR THE REPAIR OF A\nCOVERED PART.\nG.\nDIAGNOSIS CHARGES, COST OF DISASSEMBLY OR ASSEMBLY IF YOUR REPAIR IS NOT COVERED OR HAS BEEN DENIED.\n9.\nMISCELLANEOUS EXPENSES:\nA.\nEXPENSES CHARGED FOR THE DISPOSAL OF ENVIRONMENTALLY UNSAFE MATERIALS, NON-SPECIFIC MATERIALS OR SHOP SUPPLIES.\nVI. WHAT TO DO IF REPAIRS ARE NEEDED\nCustomer Instructions\nIn the event of a Breakdown, You can locate a preferred Repair Facility by visiting the Administrator\u2019s self-service claim port\nal:\nwww.mrclaims.net\nIf You are unable to locate a preferred Repair Facility through the Administrator\u2019s self-service claim portal or have questions\n, contact the Administrator at:\n1-800-752-6265\nCustomer Service Hours\n7:00 a.m. \u2013 7:00 p.m. C.T. Monday \u2013 Friday\nEmergency Repair Instructions: In the event that a Breakdown of a covered part occurs when the Administrator\u2019s office is clos\ned and emergency repairs are\nnecessary, You may commence with emergency repairs without securing the Administrator\u2019s prior authorization. However, You or t\nhe Repair Facility must\nnotify the Administrator of the repairs as soon as the Administrator\u2019s office reopens. You must submit written information and documentation concerning\nthe Breakdown and repairs no later than 30 days after the Breakdown. Reimbursement of emergency repairs will be subject to all\nterms and conditions of\nthis Service Contract and nothing herein authorizes repairs not otherwise covered.\nEmergency repairs are those required because Your Vehicle was inoperable or unsafe to drive. Parts must be available for inspec\ntion when the\nAdministrator\u2019s office reopens.\nRepair Facility Instructions\nTo initiate a claim, visit the Administrator\u2019s self-service claim portal:\nwww.mrclaims.net\nVII. YOUR RESPONSIBILITIES\n1.\nYou must perform maintenance services to Your Vehicle, at the proper intervals, as required by the Owner\u2019s Manual for Your Vehi\ncle. If Your failure\nto follow these procedures causes a Breakdown, You may be denied coverage. If You do not have an Owner\u2019s Manual, contact Your V\nehicle\u2019s\nmanufacturer to obtain one.\n2.\nYou must keep receipts which verify the Vehicle Identification Number, work orders and other documentation that show a date, a description of Your\nVehicle, mileage and services performed. We may require You to furnish the Administrator with proof that the specified services\nhave been performed.\nFailure to show proof of servicing may result in the denial of coverage.\n3.\nYou are responsible for making sure the oil warning light/gauge and the temperature warning light/gauge are functioning before\ndriving Your Vehicle.\nYou are required to safely pull Your Vehicle off the road and shut down the engine immediately when either of these lights/\ngauges indicates a problem.\n4.\nIf You experience a Breakdown, You agree to:\na.\nUse all reasonable means to protect Your Vehicle from further damage.\nb.\nNotify the Administrator as soon as possible.\nc.\nAuthorize the Repair Facility to perform necessary diagnostic work and provide \u201cteardown authorization\u201d so that the Repair Faci\nlity can provide an\naccurate diagnosis and estimate of repairs. IMPORTANT: WE WILL NOT PAY FOR DIAGNOSIS CHARGES FOR REPAIRS NOT COVERED UNDER THIS\nSERVICE CONTRACT.\nd.\nFurnish the Administrator with such information as the Administrator may reasonably require and if requested provide proof of Y\nour Vehicle\u2019s\nregular maintenance during the Service Contract Term as noted above.\ne.\nReserve for the Administrator the right to refer Your Vehicle to a Repair Facility that sells and services Your type of Vehicl\ne, for certain repairs.\nf.\nAllow the Administrator to examine Your Vehicle if the Administrator asks to do so.\ng.\nObtain authorization from the Administrator prior to beginning any repairs covered by this Service Contract except when the Adm\ninistrator\u2019s office\nis closed and emergency repairs are necessary (See Emergency Repair Instructions within Section VI. WHAT TO DO IF REPAIRS ARE N\nEEDED).\n5.\nYour help and cooperation is required if We ask You to help Us enforce Your rights against any manufacturer or Repair Facility who may be responsible\nto You for the Cost of repairs covered by this Service Contract.\nMCMRC-VSC-NTB (11/20)\nPage 7 of 16\nV2\nVIII. GENERAL PROVISIONS\n1.\nService Contract Term\nThe Service Contract Term is the\nTerm Months\nand\nTerm Miles\nshown on the Information Schedule. This Service Contract begins on the\nPurchase Date\nand at the Current Mileage shown on the Information Schedule. The Service Contract ends following the Expiration Date or when\nthe Expiration Mileage is\nexceeded, both as shown on the Information Schedule, whichever occurs first. The Service Contract Term expiration (Expiration Date or Expiration Mileage)\nis measured in\nTerm Months\nfrom the\nPurchase Date\nand in\nTerm Miles\nfrom the Current Mileage.\n2.\nWhen And Where You Are Covered\nYou\nare covered when this Service Contract is issued or transferred to\nYou\n. This Service Contract applies only to\nBreakdowns\noccurring\nwithin the\ncontinental United States of America, Alaska, Hawaii and Canada.\n3.\nIf You Have Other Coverage\nIf the manufacturer or\nRepair Facility\nagrees to cover all or some of the\nCost\nof a\nBreakdown\nafter a\nWarranty\nor guarantee has expired,\nWe\nwill pay\nonly for any extra\nCost\n. If\nYou\nhave any other Emergency Roadside Assistance coverage, Rental Reimbursement coverage, Emergency Travel Expense\nReimbursement coverage, Key Replacement coverage, Paintless Dent Repair coverage or Mobility Equipment coverage,\nWe\nwill pay only the amount in\nexcess of that coverage, subject to the limits of this Service Contract.\n4.\nLimit of Liability\nOur limit of liability is the Cost to repair or replace any covered Breakdown; but in no event shall this Cost exceed the aver\nage retail value of Your\nVehicle as determined by the NADA (Official Used Car Guide) at the time of loss.\n5.\nSubrogation\nIf\nWe\npay for a loss,\nWe\nmay require\nYou\nto assign to\nUs Your\nrights of recovery against others.\nWe\nwill not pay for a loss if\nYou\nimpair these rights to\nrecover.\nYour\nrights to recover from others may not be waived.\n6.\nDispute Resolution \u2013 Arbitration\nThis Service Contract requires binding arbitration if there is an unresolved dispute between\nYou\nand\nUs\nconcerning this Service Contract (including\nthe\nCost\nof, lack of or actual repair or replacement arising from a\nBreakdown\n). Under this Arbitration provision,\nYou\ngive up\nYour\nright to resolve any dispute\narising from this Service Contract by a judge and/or a jury.\nYou\nalso agree not to participate as a class representative or class member in any class action\nlitigation, any class arbitration or any consolidation of individual arbitrations. In arbitration, a group of three arbitrators (each of whom is an independent,\nneutral third party) will give a decision after hearing\nYour\nand\nOur\npositions. The decision of a majority of the arbitrators will determine the outcome of the\narbitration and the decision of the arbitrators shall be final and binding and cannot be reviewed or changed by, or appealed to, a court of law. Any dispute\non the application of this arbitration provision will be made by the local court of law in the county and state where\nYou\nlive. Notwithstanding this arbitration\nprovision,\nYou\nare not prohibited from bringing an action in Small Claims Court to resolve\nYour\ndispute.\nThe Consumer Arbitration Rules of the American Arbitration Association (\nwww.adr.org\n) will apply to any arbitration under this Service Contract.\nTo start\narbitration, either\nYou\nor\nWe\nmust make a written demand to the other party for arbitration. This demand must be made within one (1) year of the earlier of\nthe date the\nBreakdown\noccurred or the dispute arose or the applicable statute of limitations period, whichever is longer.\nYou\nand\nWe\nwill each separately\nselect an arbitrator. The two arbitrators will select a third arbitrator called an \u201cumpire.\u201d All costs and expenses of the arbitration will be shared equally\nby\nYou\nand\nUs\n.\nUnless otherwise agreed to by\nYou\nand\nUs\n, the arbitration will take place in the county and state in which\nYou\nlive. The procedural rules\nfor arbitration shall be governed by the Federal Arbitration Act (9 U.S.C.A. \u00a7 1 et. seq.) and not by any state law concerning arbitration. The laws of the\nstate of Illinois (without giving effect to its conflict of law principles) govern all substantive matters arising out of or relating to this Service Contract and all\ntransactions contemplated by this Service Contract, including, without limitation, the validity, interpretation, construction, performance and enforcement of\nthis Service Contract.\n7.\nHow This Service Contract May Be Transferred\nYour rights and duties under this Service Contract may only be transferred to a subsequent purchaser directly by You within 30 days from the date\nof sale to the subsequent owner. This Service Contract may not be transferred to any entity in the business of selling or leasi\nng motor vehicles. This\nService Contract can only be transferred if the remaining portion of the Warranty including Powertrain Warranty has not been r\neduced or voided. In\nthe event of Your death, the benefits of this Service Contract will be available to Your spouse, domestic partner or legal repr\nesentative.\nTo transfer this Service Contract, You must submit the following information to the Administrator\n:\na. Completed Transfer Request form, which can be obtained by contacting the Administrator;\nb. Copy of Your Service Contract;\nc. Bill of Sale indicating date of sale of the Vehicle;\nd. $50 transfer fee made payable to the Administrator.\n8.\nHow This Service Contract May Be Canceled\n\u2013\nIncluding Refunds And Charges\nCancellation By You\nYou\nmay cancel this Service Contract at any time. To cancel, contact the\nProducer\n. The\nProducer\nwill assist with\nYour\ncancellation request. Alternatively,\nYou\nmust provide written notice to the\nAdministrator\n. A copy of\nYour\nService Contract and an odometer reading statement must be included with\nYour\nrequest for cancellation.\nCancellation By Us\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and\nreason for cancellation.\nWe\nmay cancel this Service Contract for any reason within 90 days of the\nPurchase Date\n. After 90 days,\nWe\nmay cancel this Service\nContract:\n\u2022\nIf there has been a material misrepresentation or fraud by\nYou\n;\n\u2022\nIf\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022\nIf the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer;\n\u2022\nIf\nYou\ndo not pay the\nService Contract Price\n;\n\u2022\nIf\nYour Vehicle\nhas a salvage title; or\n\u2022\nIf\nYou\nuse\nYour Vehicle\nin any manner not covered by this Service Contract.\nMCMRC-VSC-NTB (11/20)\nPage 8 of 16\nV2\nCancellation By Lienholder\nIf this Service Contract is financed, the Lienholder (shown on the Information Schedule) may cancel the Service Contract in the event\nYou\ndefault in\nYour\nobligation to such Lienholder or in the event\nYour Vehicle\nis declared a total loss or is repossessed.\nHow Refunds are Calculated\nIf this Service Contract is canceled within 60 days of the\nPurchase Date\nand a claim has not been incurred, a 100% refund of the\nService Contract Price\nwill be made. After 60 days or if\nYou\nhave incurred a claim within the first 60 days, a pro-rata refund of the unused\nTerm Months\nor unused\nTerm Miles\nwill be made. The pro-rata refund will be calculated by multiplying the\nService Contract Price\nby the lesser percentage of: (a) the unused\nTerm Months\ndivided by the total\nTerm Months\nof\nYour\nService Contract Term; or (b) the unused\nTerm Miles\ndivided by the total\nTerm Miles\nof\nYour\nService Contract\nTerm; less an administrative fee of $50.\nYou\nauthorize that all refunds will be paid to the Lienholder if any, otherwise the refund will be paid to\nYou\n. If this\nService Contract is canceled by\nUs\n, no administrative fee will be charged. For refund calculations, if the Service Contract is canceled by\nUs\n, all references\nto 60 days are replaced with 90 days.\n9.\nInsurance\nThis Service Contract is not an insurance contract. Our obligations under this Service Contract are insured under an insurance\npolicy issued by Virginia\nSurety Company, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604. In the event We cease to operate, are bankrupt or other\nwise financially\nimpaired or Your claim is not paid within 60 days after proof of loss has been filed, You\nmay file a direct claim with Virginia Surety Company, Inc. To\ndo so, please call the following toll-free number for instructions: 1-800-209-6206.\n10.\nEntire Service Contract\nThis Service Contract represents the entire agreement between\nYou\nand\nUs\n. No person has the authority to change this Service Contract or to waive any of\nits provisions. No other written or oral statements apply to this Service Contract.\nIX. STATE AMENDMENTS\nThis Service Contract is amended and the language below governs if\nYou\nreside in a state listed below:\nAlabama\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is amended as follows:\nAll references to the state of \u201cIllinois\u201d are replaced with \u201cAlabama\u201d.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with a $25 administrative fee.\nAlaska\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows:\nItem #4A \u2013 Any reference to\n\u201cTERRORISTS ACTS\u201d\nis deleted in its entirety.\nItem #7A is deleted in its entirety and replaced by the following:\nLOSS OF TIME, ECONOMIC LOSS, INCONVENIENCE, LODGING, FOOD, FREIGHT CHARGES, CORE CHARGES, STORAGE CHARGES, OR OTHER CONSEQUENTI\nAL\nLOSS OR DAMAGE THAT RESULTED FROM A BREAKDOWN UNLESS AS PROVIDED UNDER EMERGENCY TRAVEL EXPENSE REIMBURSEMENT.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a penalty in the amount of 10% of the\nService Contract Price\nfor each 30-day period or portion thereof shall be added to a\nrefund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract:\n\u2022\nIf\nYou\ndo not pay the\nService Contract Price;\n\u2022\nIf\nYou\nare convicted of a crime that results in an increase in the risk covered under this Service Contract;\n\u2022\nIf there has been a material misrepresentation or fraud by\nYou\n;\n\u2022\nIf\nWe\ndiscover an act or omission by\nYou\nafter the\nPurchase Date\nthat substantially and materially increases the risk covered under this Service Contract; or\n\u2022\nFor substantial breach of duties by\nYou\nrelating to the use of the covered\nVehicle\n.\nIf\nWe\ncancel this Service Contract, a penalty in the amount of 10% of the unearned\nProvider\nfee (\nService Contract Price\n) for each 30-day period or portion\nthereof shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 7.5% of the refund amount, whichever is less.\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is deleted in its entirety and replaced by the following:\nThis Service Contract is not an insurance contract.\nOur\nobligations under this Service Contract are insured under an insurance policy issued by Virginia Surety\nCompany, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604. In the event\nWe\ncease to operate, are bankrupt or otherwise financially impaired or\nYour\nclaim\nis not paid within 30 days after proof of loss has been filed,\nYou\nmay file a direct claim with Virginia Surety Company, Inc. To do so, please call the following\ntoll-free number for instructions: 1-800-209-6206.\nArizona\nNOTICE TO MEMBER\n\u2013 is amended to include:\nIn the event a Breakdown occurs when the Administrator\u2019s office is closed, You may follow the claim procedures in this Service\nContract without prior\nauthorization. Reimbursement will be made to You or the Repair Facility in accordance with Service Contract provisions.\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows:\nItems #1B, 1C, 1D, 2A, 2B, 2C, 3A, 3B, 3E and 3F are amended to include:\n\u201cWHILE THE VEHICLE IS OWNED BY YOU.\u201d\nItems #6A, 6B, 6C and 8A are deleted in their entirety.\nMCMRC-VSC-NTB (11/20)\nPage 9 of 16\nV2\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract:\n\u2022 If there has been a material misrepresentation or fraud by\nYou\n;\n\u2022 If\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022 If, while owned by\nYou\n, the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer; or\n\u2022 If\nYou\ndo not pay the\nService Contract Price.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\npaid by\nYou\n, whichever is less.\nColorado\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is amended to include: Insurance Policy #3450.\nConnecticut\nThe coverage afforded by this Service Contract is still available should the Service Contract Term lapse while\nYour Vehicle\nis in the custody of a\nRepair Facility\nfor a covered repair.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is amended as follows:\nIf\nYou\nand the\nProvider\nare unable to resolve any disputes arising under this Service Contract, the State of Connecticut has established a process to settle\ndisputes arising from service contracts as outlined in R.C.S.A \u00a7\u00a7 42-260-1 to 5. If\nYou\npurchase this Service Contract in Connecticut, to initiate the process\nYou\nmust first submit a written complaint which may be mailed to: State of Connecticut, Insurance Department, P.O. Box 816, Hartford, CT 06142-0816, Attention:\nConsumer Affairs. The written complaint must contain a description of the dispute, the\nService Contract Price\n, the\nCost\nof repair of the\nVehicle\nand a copy of\nthis Service Contract.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nYou\nmay cancel this Service Contract in the event the\nVehicle\nis returned, sold, lost, stolen or destroyed.\nCancellation By Us\nis amended as follows:\nThe 30 day written notice prior to cancellation is deleted and replaced with 45 days.\nDistrict of Columbia\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\n, whichever is less.\nFlorida\nThe rate charged for this Service Contract is not subject to regulation by the Office of Insurance Regulation.\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows: Item #6A is deleted in its entirety.\nWHAT TO DO IF REPAIRS ARE NEEDED \u2013 \u201cEmergency Repair Instructions\u201d\nis amended as follows: The 30 day time period for filing a claim after a\nBreakdown\nis deleted and replaced with 90 days.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 7 How This Service Contract May Be Transferred is amended as follows:\nThe $50 transfer fee is deleted and replaced with a $40 transfer fee.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges is deleted in its entirety and replaced by the\nfollowing:\nCancellation By You\nYou\nmay cancel this Service Contract at any time. To cancel, contact the\nProducer\nor the\nAdministrator\n. The\nProducer\nwill assist with\nYour\ncancellation request.\nAlternatively,\nYou\nmust provide written notice to\nthe\nAdministrator\n. A copy of\nYour\nService Contract and an odometer reading statement must be included with\nYour\nrequest for cancellation. If\nYou\ncancel this Service Contract within 60 days of the\nPurchase Date\n, a 100% refund of the\nService Contract Price\nwill be made\nless any claims paid on this Service Contract. After 60 days, a pro-rata refund of the lesser of unused\nTerm Months\nor unused\nTerm Miles\nwill be made. The\npro-rata refund will be calculated by multiplying the\nService Contract Price\nby the lesser percentage of: (a) the unused\nTerm Months\ndivided by the total\nTerm\nMonths\nof\nYour\nService Contract Term; or (b) the unused\nTerm Miles\ndivided by the total\nTerm Miles\nof\nYour\nService Contract Term; less an administrative\nfee of $50 or 10% of the refund amount, whichever is less.\nYou\nauthorize that all refunds will be paid to the Lienholder if any, otherwise the refund will be paid\nto\nYou\n.\nCancellation By Us\nWe\nmay cancel this Service Contract for any reason within 60 days of the\nPurchase Date\n. After 60 days,\nWe\nmay cancel this Service Contract:\n\u2022 If there has been a material misrepresentation or fraud by\nYou\n;\n\u2022 If\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022 If the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer; or\n\u2022 If\nYou\ndo not pay the\nService Contract Price\n.\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice by certified mail at least 30 days prior to cancellation. This notice shall state the effective\ndate of and reason for cancellation. If\nWe\ncancel this Service Contract within 60 days of the\nPurchase Date,\na 100% refund of the\nService Contract Price\nwill\nbe made less any claims paid on this Service Contract. After 60 days, a pro-rata refund of the lesser of unused\nTerm Months\nor unused\nTerm Miles\nwill be\nmade. The pro-rata refund will not be less than 100% of the paid unearned pro-rata\nService Contract Price\nless any claims paid on this Service Contract. If\nthis Service Contract is canceled by\nUs\n, no administrative fee will be charged.\nYou\nauthorize that all refunds will be paid to the Lienholder if any, otherwise the\nrefund will be paid to\nYou\n.\nIf this Service Contract is financed and\nYour Vehicle\nis a total loss or is repossessed,\nYou\nauthorize\nYour\nLienholder (shown on the Information Schedule) to\ncancel this Service Contract and receive the refund.\nMCMRC-VSC-NTB (11/20)\nPage 10 of 16\nV2\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is amended as follows:\nThe sentence \u201cThis Service Contract is not an insurance contract.\u201d is deleted in its entirety.\nGeorgia\nKEY TERMS \u2013 \u201cProhibited Commercial Purposes\u201d\nis amended to delete any reference to \u201cdelivery service\u201d in its entirety.\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows:\nItem #8A is deleted in its entirety.\nItem #3B \u2013 Any reference to \u201c\nSLUDGE\n\u201d is deleted in its entirety.\nItem #1C is amended to include the text:\n\u201cMADE SUBSEQUENT TO THE PURCHASE OF THIS SERVICE CONTRACT.\u201d\nItem #3E is amended to include the text: \u201c\nWHILE OWNED BY YOU\n\u201d.\nYOUR RESPONSIBILITIES\n\u2013 is amended as follows:\nItem #4 (c) is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract:\n\u2022 In the event of fraud by\nYou\n;\n\u2022 In the event of material misrepresentation by\nYou\n; or\n\u2022 If\nYou\ndo not pay the\nService Contract Price\n.\nCancellation By Lienholder\nis deleted in its entirety and replaced by the following:\nIf this Service Contract is financed and\nYour Vehicle\nis a total loss or is repossessed,\nYou\nauthorize\nYour\nLienholder (shown on the Information Schedule) to\ncancel this Service Contract and receive the refund.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the unearned pro-rata\nService Contract Price,\nwhichever is less.\nShould\nWe\nfail to refund the unearned consideration,\nYou\nhave the right to receive the refund directly from Virginia Surety Company, Inc.\nHawaii\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract\nto the\nProducer\nor the\nAdministrator\n.\nIdaho\nCoverage afforded under this Service Contract is not guaranteed by the Idaho Insurance Guarantee Association.\nIllinois\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\n, whichever is less.\nIndiana\nThis Service Contract is not insurance and is not subject to Indiana insurance law.\nYour\nproof of payment to the\nProducer\nfor this Service Contract shall be considered proof of payment to the insurance company, which guarantees\nOur\nobligation to\nYou\n, providing such insurance was in effect at the time\nYou\npurchased this Service Contract.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYour\ncancellation refund is not paid within 60 days after this Service Contract has been returned to the\nProducer\nor the\nAdministrator\n,\nYou\nmay request a\nrefund from Virginia Surety Company, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604.\nIowa\nThis Service Contract is subject to the applicable provisions of the Iowa Consumer Credit Code, Chapter 537.\nIf\nYou\nhave questions regarding\nYour\nService Contract,\nYou\nmay address them to the Iowa Insurance Commissioner at the following address: Iowa Insurance\nDivision, 1963 Bell Avenue, Suite 100, Des Moines, Iowa 50315.\nWHAT THIS SERVICE CONTRACT COVERS\n\u2013 is amended to include:\nPre-owned parts will not be used to replace covered parts without prior written authorization from\nYou\n. Rebuilt parts will not be used to replace covered parts\nunless the parts are rebuilt according to national standards recognized by the Insurance Division.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nUpon\nOur\nreceipt of\nYour\nrequest to cancel this Service Contract,\nWe\nwill provide written notice to\nYou\nwithin 15 days of cancellation. If\nYou\ncancel this\nService Contract, a 10% penalty per month shall be added to a refund that is not paid within 30 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\n, whichever is less.\nThe sentence \u201c\nYou\nauthorize that all refunds will be paid to the Lienholder if any, otherwise to\nYou\n.\u201d is revised to read \u201c\nYou\nauthorize that all refunds will be\npaid by the\nProducer\nto the Lienholder if any, otherwise the refund will be paid to\nYou\n.\u201d\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is amended as follows:\nA claim against the\nProvider\nmay also include a refund of the unearned\nProvider\nfee (\nService Contract Price\n) in the event this Service Contract is cancelled.\nMCMRC-VSC-NTB (11/20)\nPage 11 of 16\nV2\nMCMRC-VSC-NTB (11/20)\nLouisiana\nThis Service Contract is not regulated by the Department of Insurance.  Any concerns or complaints regarding this Service Contract may be directed to the\nAttorney General.\nGENERAL PROVISIONS\n\u2013 Section 8 \u201cHow This Service Contract May Be Canceled \u2013 Including Refunds And Charges\u201d\nCancellation by You\nis amended to include:  If\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45\ndays of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nMaine\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS \u2013\nSection 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a penalty per month in the amount of 10% of the\nService Contract Price\nshall be added to a refund that is not paid within\n45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nHow Refunds are Calculated\nis amended as follows:\nIf this Service Contract is canceled within 60 days of the\nPurchase Date\nand a claim has not been incurred, a 100% refund of the\nService Contract Price\nincluding any applicable sales tax will be made.\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the refund amount, whichever is less.\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is deleted in its entirety and replaced by the following:\nThis Service Contract is not an insurance contract.\nOur\nobligations under this Service Contract are insured under an insurance policy issued by Virginia Surety\nCompany, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604. In the event\nWe\ncease to operate, are bankrupt or otherwise financially impaired or\nYour\nclaim, including any claim for the return of the unearned portion of the\nProvider\nfee (\nService Contract Price\n), is not paid within 60 days after proof of loss has\nbeen filed,\nYou\nmay file a direct claim with Virginia Surety Company, Inc. To do so, please call the following toll-free number for instructions: 1-800-209-6206.\nMaryland\nADDITIONAL BENEFITS, SERVICE CONTRACT LIMITATIONS, GENERAL PROVISIONS\n\u2013 Section 3 \u201cIf You Have Other Coverage\u201d is amended as follows:\nAll references to \u201cEmergency Travel Expense Reimbursement\u201d are deleted and replaced with \u201cTravel Expense Reimbursement\u201d.\nGENERAL PROVISIONS\n\u2013 Section 1 Service Contract Term is amended to include:\nIf the\nProvider\nfails to perform its duties under this Service Contract, the Service Contract Term shall be extended for the period until performance has been\nsatisfactorily completed in accordance with the terms of this Service Contract.\nGENERAL PROVISIONS\n\u2013 Section 6 \u201cDispute Resolution \u2013 Arbitration\u201d is amended as follows:\nAll references to the state of \u201cIllinois\u201d are replaced with \u201cMaryland\u201d.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a penalty per month in the amount of 10% of the\nService Contract Price\nshall be added to a refund that is not paid within\n45 days of return of this Agreement to the\nProducer\nor the\nAdministrator\n. If\nYour\nrefund is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n,\nYou\nhave the right to receive the refund directly from Virginia Surety Company, Inc.\nMassachusetts\nNOTICE TO MEMBER: THE COVERAGE\nYOU\nARE BUYING IS\nNOT\nREQUIRED IN ORDER TO REGISTER OR FINANCE A VEHICLE. THE BENEFITS PROVIDED\nMAY\nDUPLICATE EXPRESS MANUFACTURER\u2019S OR SELLER\u2019S\nWARRANTIES\nTHAT COME AUTOMATICALLY WITH EVERY SALE.\nYOU\nCAN BE REQUIRED BY\nTHE SELLER OF THIS COVERAGE TO PURSUE THOSE\nWARRANTIES\nWHICH ARE AVAILABLE TO\nYOU\nWITHOUT THIS SERVICE CONTRACT.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nMichigan\nGENERAL PROVISIONS\n\u2013 Section 1 Service Contract Term is amended to include:\nIf performance under this Service Contract is interrupted because of a strike or work stoppage at the\nProducer\nor\nRepair Facility\n, the term of this Service\nContract shall be extended for the period of the strike or work stoppage.\nMinnesota\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract\nto the\nProducer\nor the\nAdministrator\n.\nMississippi\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract:\n\u2022 If there has been a material misrepresentation or fraud by\nYou\n;\n\u2022 If You do not pay the\nService Contract Price\n; or\n\u2022 For substantial breach of duties by\nYou\nrelating to the use of the covered\nVehicle\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\n, whichever is less.\nMissouri\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nPage 12 of 16\nV2\nMCMRC-VSC-NTB (11/20)\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.  Cancellation by\nYou\nwill become effective as of the date the written notice of\nYour\ncancellation is received by\nUs\n.\nWe\nwill mail\nYou\nwritten notice of\nOur\nreceipt and resulting cancellation of\nYour\nService Contract within 45 days of the date of cancellation.\nHow Refunds are Calculated\nis deleted in its entirety and replaced by the following:\nIf this Service Contract is canceled within 60 days of the\nPurchase Date\n, a 100% refund of the\nService Contract Price\nwill be made, less claims paid, if any.\nAfter 60 days, a pro-rata refund of the lesser of unused\nTerm\nMonths\nor unused\nTerm Miles\nwill be made. The pro-rata refund will be calculated by multiplying\nthe\nService Contract Price\nby the lesser percentage of: (a) the unused\nTerm Months\ndivided by the total\nTerm Months\nof\nYour\nService Contract Term; or (b) the\nunused\nTerm Miles\ndivided by the total\nTerm Miles\nof\nYour\nService Contract Term; less an administrative fee of $50.\nAll refunds will be paid to the Lienholder\nif any, otherwise to\nYou\n. If this Service Contract is canceled by\nUs\n, no administrative fee will be charged. For refund calculations, if the Service Contract is\ncanceled by\nUs\n, all references to 60 days are replaced with 90 days.\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is amended to include:\nA claim against the\nProvider\nmay also include a refund of the unearned\nProvider\nfee (\nService Contract Price\n) in the event this Service Contract is cancelled.\nNebraska\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety and replaced by the following:\nNotwithstanding anything in this Service Contract to the contrary, if\nYou\nand\nWe\nmutually agree at the time of loss, this Service Contract provides for arbitration\nif there is an unresolved dispute between\nYou\nand\nUs\nconcerning this Service Contract.\nYou\nagree not to participate as a class representative or class member\nin any class action litigation, any class arbitration or any consolidation of individual arbitrations. In arbitration, a group of three arbitrators (each of whom is\nan independent, neutral third party) will give a decision after hearing\nYour\nand\nOur\npositions. The decision of a majority of the arbitrators will determine the\noutcome of the arbitration and the decision of the arbitrators shall not be binding upon\nYou\n. Any dispute on the application of this arbitration provision will be\nmade by the local court of law in the county and state where\nYou\nlive. Notwithstanding this arbitration provision,\nYou\nare not prohibited from bringing an action\nin Small Claims Court to resolve\nYour\ndispute.\nThe Consumer Arbitration Rules of the American Arbitration Association (www.adr.org) will apply to any arbitration under this Service Contract. To start\narbitration, either\nYou\nor\nWe\nmust make a written demand to the other party for arbitration. This demand must be made within one (1) year of the earlier of\nthe date the loss occurred or the dispute arose or the applicable statute of limitations period, whichever is longer.\nYou\nand\nWe\nwill each separately select an\narbitrator. The two arbitrators will select a third arbitrator called an \u201cumpire.\u201d All costs and expenses of the arbitration will be shared equally by\nYou\nand\nUs\n.\nUnless otherwise agreed to by\nYou\nand\nUs\n, the arbitration will take place in the county and state in which\nYou\nlive. The procedural rules for arbitration shall be\ngoverned by the Federal Arbitration Act (9 U.S.C.A. \u00a7 1 et. seq.) and not by any state law concerning arbitration. The rules of the American Arbitration Association\n(www.adr.org) will apply to any arbitration under this Service Contract\n.\nNevada\nThe following is added to this Service Contract: If\nYou\nare not satisfied with the manner in which\nWe\nhandle\nYour\nClaim,\nYou\nmay contact the Nevada Division\nof Insurance Commissioner toll free, 1-888-872-3234.\nNOTICE TO CUSTOMER\n\u2013 is amended as follows:\nThe sentence \u201cIf the manufacturer\u2019s Warranty is void\u2026\u201d is revised to read:\nT\nhis Service Contract will not be initially issued to any Vehicle whose original Warranty has ever been voided by the manufactur\ner. However, if\nthis Service Contract has already been issued and the manufacturer\u2019s Warranty becomes void during the term of this Service Cont\nract, We will not\nautomatically suspend all coverage. We will not provide any coverage that would have otherwise been provided under the manufact\nurer\u2019s Warranty.\nHowever, We will continue to provide any other coverage under this Service Contract, unless such coverage is otherwise excl\nuded by the terms of this\nService Contract.\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows:\nItem #3A is deleted in its entirety and replaced by the following:\nFOR A BREAKDOWN CAUSED BY ABUSE, MISUSE OR LACK OF CUSTOMARY MAINTENANCE AS DETAILED IN\nSECTION\nVII. YOUR RESPONSIBILITIES.\nGENERAL PROVISIONS\n\u2013 Section 1 Service Contract Term is amended to include: This Service Contract is not renewable.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is amended as follows:\nAll references to \u201cIllinois\u201d are replaced with \u201cNevada\u201d.\nGENERAL PROVISIONS\n\u2013 Section 7 How This Service Contract May Be Transferred is amended as follows:\nThe $50 transfer fee is deleted and replaced with a $25 transfer fee.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty for each 30-day period or portion thereof shall be added to a refund that is not paid within 45 days of return\nof this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract for any reason within 70 days of the\nPurchase Date\n. After 70 days,\nWe\nmay cancel this Service Contract:\n\u2022\nIf\nYou\ndo not pay the\nService Contract Price\n;\n\u2022\nIf\nYou\nare convicted of a crime that results in an increase in the risk covered under this Service Contract;\n\u2022\nIf there has been a material misrepresentation or fraud by\nYou\n; or\n\u2022\nIf\nWe\ndiscover an act or omission by\nYou\n, or a violation by\nYou\nof any terms or conditions of this Service Contract, after the\nPurchase Date\n, that substantially\nand materially increases the risk covered under this Service Contract.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with a $25 cancellation fee. For refund calculations, if the Service Contract is canceled by\nUs\n, all references\nto 60 days are replaced with 70 days.\nNew Hampshire\nIf\nYou\nhave questions, concerns or complaints regarding\nYour\nService Contract,\nYou\nmay address them to the\nProvider\nat 1-800-752-6265.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is amended to include:\nAll arbitration or dispute resolution in New Hampshire is subject to and will not impede any consumer rights as provided for under New Hampshire RSA 542.\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is amended to include:\nThis Service Contract is not an insurance contract.\nOur\nobligations under this Service Contract are insured under an insurance policy issued by Virginia Surety\nCompany, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604. In the event\nWe\ndo not provide for covered services, cease to operate, are bankrupt or otherwise\nfinancially impaired or\nYour\nclaim is not paid within 60 days after proof of loss has been filed,\nYou\nmay file a direct claim with Virginia Surety Company, Inc.\nTo do so, please call the following toll-free number for instructions: 1-800-209-6206.\nPage 13 of 16\nV2\nMCMRC-VSC-NTB (11/20)\nIf\nYou\nare not satisfied with the\nProvider\u2019s\nand/or insurance company\u2019s response,\nYou\nmay contact the New Hampshire Department of Insurance, 21 South\nFruit Street, Suite 14, Concord, New Hampshire 03301, 1-800-852-3416.\nNew Jersey\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a penalty per month in the amount of 10% of the\nService Contract Price\nshall be added to a refund that is not paid within\n45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nNew Mexico\nGENERAL PROVISIONS\n\u2013 Section 1 Service Contract Term is amended to include: This Service Contract is not renewable.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a penalty in the amount of 10% of the\nService Contract\nPrice\nfor each 30-day period or portion thereof shall be added to a\nrefund that is not paid within 60 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract for any reason within 70 days of the\nPurchase Date\n. After 70 days,\nWe\nmay cancel this Service Contract:\n\u2022\nIf\nYou\ndo not pay the\nService Contract Price\n;\n\u2022\nIf\nYou\nare convicted of a crime that results in an increase in the risk covered under this Service Contract;\n\u2022\nIf there has been a material misrepresentation or fraud by\nYou\n; or\n\u2022\nIf\nWe\ndiscover an act or omission by\nYou\n, or a violation by\nYou\nof any terms or conditions of this Service Contract, after the\nPurchase Date\n, that substantially\nand materially increases the risk covered under this Service Contract.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the\nService Contract Price\n, whichever is less.\nFor refund calculations, if the Service Contract is canceled by\nUs\n, all references to 60 days are replaced with 70 days.\nGENERAL PROVISIONS\n\u2013 Section 9 Insurance is deleted in its entirety and replaced by the following:\nThis Service Contract is not an insurance contract.\nOur\nobligations under this Service Contract are secured by a bond.\nNew York\nADDITIONAL BENEFITS\n\u2013 is amended as follows:\nEmergency Travel Expense Reimbursement is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 30 days of return of this Service Contract to\nthe\nProducer\nor the\nAdministrator\n.\nNorth Carolina\nGENERAL PROVISIONS\n\u2013\nSection 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation.\nWe\nmay only cancel this Service Contract at any time\nfor any of the reasons listed below:\n\u2022 If\nYou\nhave failed to maintain\nYour Vehicle\nas prescribed by the manufacturer;\n\u2022 If the odometer has been tampered with or disabled and\nYou\nhave failed to repair the odometer;\n\u2022 If\nYou\nuse\nYour Vehicle\nin any manner not covered by this Service Contract; or\n\u2022 If\nYou\ndo not pay the\nService Contract Price\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the refund amount, whichever is less.\nOklahoma\nCoverage afforded under this Service Contract is not guaranteed by the Oklahoma Insurance Guaranty Association.\nThis Service Contract is not issued by the manufacturer or a wholesale company marketing the product. This Service Contract wil\nl not be honored by such\nmanufacturer or wholesale company.\nOklahoma service warranty statutes do not apply to commercial use reference in service warranty contracts.\nADDITIONAL BENEFITS\n\u2013\nEmergency Roadside Assistance is amended to include:\nEmergency Roadside Assistance is provided by\nUs\nand administered by SafeRide Motor Club, Inc., 13901 Midway Road, Suite 102-429, Dallas TX 75244-4388,\n1-877-229-4913.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 7 How This Service Contract May Be Transferred is amended as follows: The sentence \u201cThis Service Contract can only be\ntransferred\u2026\u201d is revised to read: This Service Contract can only be transferred if the remaining portion of the\nWarranty\nincluding Powertrain\nWarranty\nhas not\nbeen reduced or canceled.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refund And Charges\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee of $50 or 10% of the refund amount, whichever is less.\nOregon\nAny reference to\nProvider\nwithin this Service Contract is deleted and replaced by\nObligor\n.\nADDITIONAL BENEFITS\n\u2013\nEmergency Roadside Assistance is amended to include:\nEmergency Roadside Assistance benefits or services are conducted by SafeRide Motor Club, Inc., 13901 Midway Road, Suite 102-429, Dallas TX 75244-4388,\n1-877-229-4913.; however, the\nObligor\nis ultimately responsible for providing these benefits. Any failure to provide such benefits by SafeRide Motor Club, Inc.\nor the\nObligor\nas specified in this Service Contract will be covered by the\nObligor\u2019s\nreimbursement insurance policy.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nSouth Carolina\nPage 14 of 16\nV2\nIn the event of a dispute with the\nProvider\nor if\nYou\nhave questions, concerns or complaints regarding\nYour\nService Contract,\nYou\nmay address them to:\nSouth Carolina Department of Insurance, Capitol Center, 1201 Main Street, Ste. 1000, Columbia, South Carolina 29201 or by phone at 1-800-768-3467.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract\nto the\nProducer\nor the\nAdministrator\n.\nTexas\nUnresolved complaints or questions concerning the regulation of Service Contracts may be directed to the Texas Department of Licensing and Regulation at\nP.O. Box 12157, Austin, TX 78711, 1-800-803-9202.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of\nthis Service Contract to\nthe\nProducer\nor the\nAdministrator\n. If\nYour\ncancellation refund is not paid within 45 days after this Service Contract has been returned to the\nProducer\nor the\nAdministrator\n,\nYou\nmay request a refund from Virginia Surety Company, Inc., 175 West Jackson Blvd., Chicago, Illinois 60604. The right to cancel this Service\nContract is not transferable to a subsequent holder of this Service Contract.\nHow Refunds are Calculated\nis deleted in its entirety and replaced by the following:\nIf this Service Contract is canceled within 60 days of the\nPurchase Date,\na 100% refund of the\nService Contract Price\nwill be made less any claims paid on\nthis Service Contract. After 60 days, a pro-rata refund of the unused\nTerm Months\nor unused\nTerm Miles\nwill be made. The pro-rata refund will be calculated\nby multiplying the\nService Contract Price\nby the lesser percentage of: (a) the unused\nTerm Months\ndivided by the total\nTerm Months\nof\nYour\nService Contract\nTerm; or (b) the unused\nTerm Miles\ndivided by the total\nTerm Miles\nof\nYour\nService Contract Term; less an administrative fee of $50.\nYou\nauthorize that all\nrefunds will be paid to the Lienholder if any, otherwise the refund will be paid to\nYou\n. If this Service Contract is canceled by\nUs\n, no administrative fee will be\ncharged. For refund calculations, if the Service Contract is canceled by\nUs\n, all references to 60 days are replaced with 90 days.\nUtah\nCoverage afforded under this Service Contract is not guaranteed by the Property and Casualty Guaranty Association.\nThis Service Contract is subject to limited regulation by the Utah Insurance Department. To file a complaint, contact the Utah Insurance Department.\nAll references to the term \u201c\nProducer\n\u201d are deleted and replaced with \u201c\nSeller\n\u201d.\nADDITIONAL BENEFITS\n\u2013\nEmergency Roadside Assistance is amended to include:\nEmergency Roadside Assistance is provided by\nUs\nand administered by SafeRide Motor Club, Inc., 13901 Midway Road, Suite 102-429, Dallas TX 75244-4388,\n1-877-229-4913.\nWHAT TO DO IF REPAIRS ARE NEEDED \u2013 \u201cEmergency Repair Instructions\u201d\nis amended to include: Utah residents are not limited to filing claims within 30\ndays for reimbursement consideration. The sentence \u201cEmergency repairs are those required because\nYour Vehicle\nwas inoperable or unsafe to drive.\u201d is deleted\nin its entirety.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety and replaced by the following:\nAny matter in dispute between\nYou\nand\nUs\nmay be subject to arbitration as an alternative to court action pursuant to the rule of The American Arbitration\nAssociation or other recognized arbitrator, a copy of which is available on request from\nUs\n. Any decision reached by arbitration shall be binding upon both\nYou\nand\nUs\n. The arbitration award may include attorney\u2019s fees if allowed by state law and may be entered as a judgment in any court of proper jurisdiction.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and reason\nfor cancellation.\nWe\nmay cancel this Service Contract for any reason within 60 days of the\nPurchase Date\n. After 60 days,\nWe\nmay cancel this Service Contract:\n\u2022 For nonpayment of\nService Contract Price\n;\n\u2022 For material misrepresentation by\nYou\n;\n\u2022 For substantial changes in the risk assumed, unless the insurer should reasonably have foreseen the change or contemplated th\ne risk when entering into the\ncontract; or\n\u2022 For substantial breaches in contractual duties, conditions or warranties.\nCancellation By Lienholder\nis deleted in its entirety and replaced by the following:\nIf this Service Contract is financed and\nYour Vehicle\nis a total loss or is repossessed,\nYou\nauthorize\nYour\nLienholder (shown on the Information Schedule) to\nreceive the refund.\nHow Refunds are Calculated\nis amended as follows:\nThe sentence \u201cFor refund calculations, if the Service Contract is canceled by\nUs\n, all references to 60 days are replaced with 90 days.\u201d is deleted in its entirety.\nVirginia\nIf any promise made in this Service Contract has been denied or has not been honored within 60 days after\nYour\nrequest,\nYou\nmay contact the Virginia Department\nof Agriculture and Consumer Services, Office of Charitable and Regulatory Programs at www.vdacs.virginia.gov/food-extended-serv\nice-contract-providers.shtml\nto file a complaint.\nWisconsin\nTHIS CONTRACT IS SUBJECT TO LIMITED REGULATION BY THE OFFICE OF THE COMMISSIONER OF INSURANCE.\nADDITIONAL BENEFITS\n\u2013\nEmergency Roadside Assistance is amended to include:\nEmergency Roadside Assistance is provided by\nUs\nand administered by SafeRide Motor Club, Inc., 13901 Midway Road, Suite 102-429, Dallas TX 75244-4388,\n1-877-229-4913.\nSERVICE CONTRACT LIMITATIONS\n\u2013 is amended as follows: Item #8B is deleted in its entirety.\nWHAT TO DO IF REPAIRS ARE NEEDED \u2013 \u201cEmergency Repair Instructions\u201d\nis amended as follows: The 30-day time period for filing a claim after a\nBreakdown\nis deleted and replaced with as soon as reasonably possible.\nGENERAL PROVISIONS\n\u2013 Section 5 Subrogation is amended to include:\nYou\nwill be made whole before\nWe\nretain any amount\nWe\nmay recover.\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nPage 15 of 16\nMCMRC-VSC-NTB (11/20)\nV2\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Us\nis deleted in its entirety and replaced by the following:\nIf\nWe\ncancel this Service Contract,\nWe\nwill mail\nYou\nwritten notice at least 30 days prior to cancellation. This notice shall state the effective date of and the\nreason for cancelation.\nWe\nmay cancel this Service Contract:\n\u2022 If there has been a material misrepresentation or fraud by\nYou\n;\n\u2022 If\nYou\ndo not pay the\nService Contract Price\n; or\n\u2022 For substantial breach of duties by\nYou\nrelating to the use of the covered\nVehicle\n.\nHow Refunds are Calculated\nis amended as follows:\nThe $50 administrative fee is deleted and replaced with an administrative fee $50 or 10% of the refund amount, whichever is less.\nIn the event\nYour Vehicle\nis declared a total loss and:\n(a)\nYou\ncancel this Service Contract within 60 days of the\nPurchase Date\nand\nYou\nhave not incurred a claim, a 100% refund of the\nService Contract Price\nwill be made.\n(b)\nYou\ncancel this Service Contract after 60 days from the\nPurchase Date\nor if\nYou\nincurred a claim within the first 60 days, a pro-rata refund of the\nService\nContract Price\nless any claims paid will be made.\nNo administrative fee will be charged.\nWyoming\nGENERAL PROVISIONS\n\u2013 Section 6 Dispute Resolution \u2013 Arbitration is deleted in its entirety.\nGENERAL PROVISIONS\n\u2013 Section 8 How This Service Contract May Be Canceled \u2013 Including Refunds And Charges\nCancellation By You\nis amended to include:\nIf\nYou\ncancel this Service Contract, a 10% penalty per month shall be added to a refund that is not paid within 45 days of return of this Service Contract to the\nProducer\nor the\nAdministrator\n.\nCancellation By Lienholder\nis deleted in its entirety and replaced by the following:\nIf this Service Contract is financed and\nYour Vehicle\nis a total loss or is repossessed,\nYou\nauthorize\nYour\nLienholder (shown on the Information Schedule) to\nreceive the refund.\nHow Refunds are Calculated\nis amended as follows:\nThe sentence \u201c\nYou\nauthorize that all refunds will be paid to the Lienholder if any, otherwise the refund will be paid to\nYou\n.\u201d is revised to read \u201c\nYou\nauthorize all\nrefunds will be made payable to the Lienholder and\nYou\n.\u201d\nPage 16 of 16\nMCMRC-VSC-NTB (11/20)\nV2"
+                  }
+                ]
+              }
+            }
+          },
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "4214d6d7-671c-4596-8e95-6693017bb076",
+        "timestamp": "2026-01-09T19:47:11.262000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "113",
+          "content": null
+        }
+      },
+      {
+        "id": "61467df6-9445-4e97-bdb5-7bb036f3f472",
+        "timestamp": "2026-01-09T19:47:14.613000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-eastus-gpt-4.1",
+          "num_input_tokens": 32216,
+          "num_output_tokens": 288,
+          "prompt_type": "task_reasoner",
+          "request_id": "32995a29-3d06-4c4a-82e6-efaa03e16d8e",
+          "llm_id": "litellm",
+          "cost": 0.06366399675607681,
+          "call_duration": 3288
+        }
+      },
+      {
+        "id": "c5c6a8be-0aa6-42ed-b307-855590abe062",
+        "timestamp": "2026-01-09T19:47:14.616000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(3.3) The API call succeeded and returned contract and claims data (3.5) The API response contains all the information needed to address the customer's concern about the rental process after having a claim number. The most recent claim for VIN 5N1AT2MT9FC924273 (Nissan Rogue S/SL/SV, 2015) is \"Authorization Approved\" with a clear longVerbiageStatus. I need to paraphrase the claim status and explain what it means for the customer, including the vehicle details, and clarify that rental becomes available once the claim is authorized. I must also mention that the repair facility must contact the Claims department to initiate and authorize claims, and only provide rental-related information per business guardrails. Proceed to instruct the Talker accordingly."
+      },
+      {
+        "id": "57b93c08-2d2c-46fb-bb39-b89b6cec1475",
+        "timestamp": "2026-01-09T19:47:14.616000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Inform the customer that for their 2015 Nissan Rogue S/SL/SV, the most recent claim is \"Authorization Approved.\" This means the covered portion of their claim was authorized, and an authorization letter was sent to their repair facility. Rental benefits become available once the claim is authorized, but the repair facility must contact the Claims department to initiate and authorize the claim\u2014customers cannot start this process themselves. If the customer has further questions about rental coverage specifics, ask them to specify what details they need (such as daily limits or maximum days), and call me back so I can provide that information.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "fe8511d3-feaa-43d4-812c-030d3a0ebe9a",
+        "timestamp": "2026-01-09T19:47:14.656000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to learn about the rental process after having a claim number."
+            },
+            "request_id": "call_9kiVDNJCMOFkPZfFjBmTXnZx",
+            "external_request_id": "cf749b1a-430a-407e-927c-b4cbcd1e84f5",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Inform the customer that for their 2015 Nissan Rogue S/SL/SV, the most recent claim is \"Authorization Approved.\" This means the covered portion of their claim was authorized, and an authorization letter was sent to their repair facility. Rental benefits become available once the claim is authorized, but the repair facility must contact the Claims department to initiate and authorize the claim\u2014customers cannot start this process themselves. If the customer has further questions about rental coverage specifics, ask them to specify what details they need (such as daily limits or maximum days), and call me back so I can provide that information.",
+          "last_action_id": "57b93c08-2d2c-46fb-bb39-b89b6cec1475",
+          "error": null
+        }
+      },
+      {
+        "id": "f71a70fc-8a6f-4beb-8d07-9d46058a4436",
+        "timestamp": "2026-01-09T19:47:16.506000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Inform the customer that for their 2015 Nissan Rogue S/SL/SV, the most recent claim is \"Authorization Approved.\" This means the covered portion of their claim was authorized, and an authorization letter was sent to their repair facility. Rental benefits become available once the claim is authorized, but the repair facility must contact the Claims department to initiate and authorize the claim\u2014customers cannot start this process themselves. If the customer has further questions about rental coverage specifics, ask them to specify what details they need (such as daily limits or maximum days), and call me back so I can provide that information.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "59d9067e-0124-494e-b8b7-203667dbf5e0",
+        "timestamp": "2026-01-09T19:47:18.858000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "For your 2015 Nissan Rogue S/S L/S V, your most recent claim is listed as \u201cAuthorization Approved.\u201d That means the covered portion of your claim was authorized, and an authorization letter was sent to your repair facility. Rental benefits become available once the claim is authorized, but the repair facility must contact the Claims department to get things started. You won\u2019t need to initiate this part yourself.  Are there any specific details you\u2019d like to know about your rental coverage, like daily limits or the maximum number of days?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "94a634ce-dc96-4e6c-9a1d-e3800558b464",
+        "timestamp": "2026-01-09T19:47:55.004000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Yes.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KEJ4T6P9P2CRK0HZ4RJBV0AE",
+        "timestamp": "2026-01-09T19:47:55.157000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer would like to know specific details about rental coverage, such as daily limits and maximum days.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "03be7ffd-0a57-4710-beb3-9a27a39abcb4",
+        "timestamp": "2026-01-09T19:47:55.253000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer would like to know specific details about rental coverage, such as daily limits and maximum days."
+          },
+          "request_id": "call_BRzOW4PF70PkEzCRE70jZ3MO",
+          "external_request_id": "f7197f1e-229e-473d-aaf9-7323454f53b1",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "231818e6-c0c1-4dfc-b77f-d1706b26ffe7",
+        "timestamp": "2026-01-09T19:47:55.270000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "113",
+          "content": null
+        }
+      },
+      {
+        "id": "be5345f6-8833-4dab-978d-4ef55a54b33d",
+        "timestamp": "2026-01-09T19:47:57.353000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me check on that.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "c77edd96-fa5c-4edd-8e27-dcd8e69e458f",
+        "timestamp": "2026-01-09T19:47:58.468000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-southcentralus-gpt-4.1",
+          "num_input_tokens": 32548,
+          "num_output_tokens": 220,
+          "prompt_type": "task_reasoner",
+          "request_id": "9eb75aae-c7f4-4bfb-90e9-4bbeaca626d7",
+          "llm_id": "litellm",
+          "cost": 0.05764000117778778,
+          "call_duration": 3134
+        }
+      },
+      {
+        "id": "81e88e5c-a201-4cab-8bb2-ac1ef7e40a0a",
+        "timestamp": "2026-01-09T19:47:58.471000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(4.1) The customer now specifically requests details about rental coverage, including daily limits and maximum days. Per Guardrail 2, I must provide a disclaimer before sharing contract maximums, and only rental-related info from termsStructuredText. The contract states rental reimbursement is up to $35 per day for a maximum of five days per breakdown, extendable to 10 days for parts delay. I will paraphrase this with the required disclaimer and instruct the Talker accordingly."
+      },
+      {
+        "id": "5ac3a244-a44b-4051-8a09-cb4c82c7f2f3",
+        "timestamp": "2026-01-09T19:47:58.471000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Inform the customer: \"Please keep in mind that this is the maximum limit listed in your contract. The actual coverage available to you will depend on your specific claim's authorization. Your contract allows for rental reimbursement up to $35 per day for a maximum of five days for any one breakdown. If a covered repair cannot be completed within the first five days due to a parts delay or other reasonable cause, the five-day maximum is extended to 10 days.\" If the customer needs more details or has other rental-related questions, ask them to specify and call me back for further information.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bffc4516-c830-41b4-a06d-07490ff6e607",
+        "timestamp": "2026-01-09T19:47:58.505000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer would like to know specific details about rental coverage, such as daily limits and maximum days."
+            },
+            "request_id": "call_BRzOW4PF70PkEzCRE70jZ3MO",
+            "external_request_id": "f7197f1e-229e-473d-aaf9-7323454f53b1",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Inform the customer: \"Please keep in mind that this is the maximum limit listed in your contract. The actual coverage available to you will depend on your specific claim's authorization. Your contract allows for rental reimbursement up to $35 per day for a maximum of five days for any one breakdown. If a covered repair cannot be completed within the first five days due to a parts delay or other reasonable cause, the five-day maximum is extended to 10 days.\" If the customer needs more details or has other rental-related questions, ask them to specify and call me back for further information.",
+          "last_action_id": "5ac3a244-a44b-4051-8a09-cb4c82c7f2f3",
+          "error": null
+        }
+      },
+      {
+        "id": "9c877c8c-54c6-4cec-842b-8af9e75108cd",
+        "timestamp": "2026-01-09T19:48:00.964000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Inform the customer: \"Please keep in mind that this is the maximum limit listed in your contract. The actual coverage available to you will depend on your specific claim's authorization. Your contract allows for rental reimbursement up to $35 per day for a maximum of five days for any one breakdown. If a covered repair cannot be completed within the first five days due to a parts delay or other reasonable cause, the five-day maximum is extended to 10 days.\" If the customer needs more details or has other rental-related questions, ask them to specify and call me back for further information.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "a96766e3-0db9-4a98-864b-31a41b4024cd",
+        "timestamp": "2026-01-09T19:48:01.795000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Please keep in mind that this is the maximum limit listed in your contract. Your contract allows for rental reimbursement up to thirty five dollars per day for a maximum of five days for any one breakdown. If a covered repair cannot be completed within the first five days due to a parts delay or other reasonable cause, the five day maximum is extended to ten days. Is there anything else about your rental coverage you'd like to know?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bc6ad416-885f-4e99-98f7-fd0e13bc911d",
+        "timestamp": "2026-01-09T19:48:29.153000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "No.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KEJ4V8TVXVNA5JPY51CFN33J",
+        "timestamp": "2026-01-09T19:48:30.111000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "The customer has no further questions and is ready to end the conversation.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0dc01673-d116-4579-8ba9-544d3dcd5044",
+        "timestamp": "2026-01-09T19:48:30.212000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "The customer has no further questions and is ready to end the conversation."
+          },
+          "request_id": "call_ELDQQHhzO7eFts3OO3rKmWZm",
+          "external_request_id": "5309e197-e4cb-4c95-bf73-ac1063b76134",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "a207d1ce-bb7d-46d3-a6ab-a6649cc1dcf9",
+        "timestamp": "2026-01-09T19:48:30.393000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "113",
+          "content": null
+        }
+      },
+      {
+        "id": "43ece2c5-ad36-4bdb-9937-dc267c1515f9",
+        "timestamp": "2026-01-09T19:48:30.948000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Thank you for calling Assurant. Have a great day!",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "4ba077c7-e2e1-4fc0-a612-c1c6d0637f1b",
+        "timestamp": "2026-01-09T19:48:32.355000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-gpt-4.1",
+          "num_input_tokens": 32789,
+          "num_output_tokens": 92,
+          "prompt_type": "task_reasoner",
+          "request_id": "827c15b3-5e5e-4875-a09e-8b85fa2d6df4",
+          "llm_id": "litellm",
+          "cost": 0.06631399691104889,
+          "call_duration": 1896
+        }
+      },
+      {
+        "id": "2fc57bfd-eb3f-4224-80f4-060d83acea8a",
+        "timestamp": "2026-01-09T19:48:32.358000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(4.1) The customer has indicated they have no further questions and wishes to end the conversation. Per the task instructions, I should conclude the interaction using the end_of_conversation API. (APICALL) My next action is to call the end_of_conversation API to properly close out the session."
+      },
+      {
+        "id": "66b4270f-491e-41b7-b2e3-58b46cd17812",
+        "timestamp": "2026-01-09T19:48:32.360000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "end_of_conversation",
+          "parameters": {
+            "endConvo": "Customer indicated no further questions and is ready to end the conversation."
+          },
+          "request_id": "4d69d022-e9d5-4036-a082-d35e42ad783f",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "544002e1-0017-464f-8b4a-ff1888c4580f",
+        "timestamp": "2026-01-09T19:48:32.364000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "end_of_conversation",
+            "parameters": {
+              "endConvo": "Customer indicated no further questions and is ready to end the conversation."
+            },
+            "request_id": "4d69d022-e9d5-4036-a082-d35e42ad783f",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+            "function_version": "1",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {},
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "c292eb96-5292-450a-9e7c-f96a1f372805",
+        "timestamp": "2026-01-09T19:48:32.364000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "set_variables",
+        "reference_variables": {
+          "endConvo": "\"Customer indicated no further questions and is ready to end the conversation.\""
+        },
+        "sensitive_variables": []
+      },
+      {
+        "id": "23b50b10-522a-45e6-8ff6-bcd42814d852",
+        "timestamp": "2026-01-09T19:48:32.364000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "system_transfer",
+        "system_transfer_metadata": {
+          "transfer_function_request": {
+            "function_name": "end_of_conversation",
+            "parameters": {
+              "endConvo": "Customer indicated no further questions and is ready to end the conversation."
+            },
+            "request_id": "4d69d022-e9d5-4036-a082-d35e42ad783f",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+            "function_version": "1",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "reference_variables": {
+            "endConvo": "Customer indicated no further questions and is ready to end the conversation."
+          },
+          "transfer_variables": {
+            "endConvo": "Customer indicated no further questions and is ready to end the conversation."
+          },
+          "sensitive_variables": []
+        }
+      },
+      {
+        "id": "14572faf-49c8-446b-94f0-c64b2d5bce52",
+        "timestamp": "2026-01-09T19:48:32.380000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "The customer has no further questions and is ready to end the conversation."
+            },
+            "request_id": "call_ELDQQHhzO7eFts3OO3rKmWZm",
+            "external_request_id": "5309e197-e4cb-4c95-bf73-ac1063b76134",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Executing system transfer without a message before.",
+          "last_action_id": "23b50b10-522a-45e6-8ff6-bcd42814d852",
+          "error": null
+        }
+      },
+      {
+        "id": "2de8e356-0afe-45fc-af45-ec3c57e67dcc",
+        "timestamp": "2026-01-09T19:48:32.399000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "disconnect",
+        "disconnect_metadata": {
+          "reason": "completed",
+          "message": "DigitalGenAgent said: 'Transfer to system'",
+          "conversation_duration_ms": 110197
+        }
+      }
+    ],
+    "conversation_metadata": {},
+    "parent_header": null,
+    "current_datetime": null
+  }
+}

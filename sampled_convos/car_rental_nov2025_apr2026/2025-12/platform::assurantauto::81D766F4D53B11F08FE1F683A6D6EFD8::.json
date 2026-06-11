@@ -1,0 +1,800 @@
+{
+  "model_input": {
+    "company_marker": "assurantauto",
+    "conversation_id": "",
+    "external_conversation_id": "81D766F4D53B11F08FE1F683A6D6EFD8",
+    "customer_id": "",
+    "conversation_type": "chat",
+    "conversation_language": "english",
+    "generative_agent_version": null,
+    "actions": [
+      {
+        "id": "db7b0ee5-02a6-4e59-8e0a-614e8110459f",
+        "timestamp": "2025-12-10T20:15:35.376000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "prompt",
+          "task_name": "",
+          "task_id": "",
+          "task_version": "",
+          "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" \u2192 assume \"car\"\n- In rental discussion, \"dental options\" appears \u2192 assume \"rental\"\n- \"I want to cancel my police\" when discussing policies \u2192 assume \"policy\"\n\nExamples where clarification IS needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed \u2192 Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n  \n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n  \n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough \u2192 Continue to step 2\n\n2) **Check for Ambiguity** \nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous \u2192 Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear \u2192 Continue to step 3\n\n3) If the solution cannot be found in <company_instructions> AND in prior Reasoner responses AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- If you are following Supervisor instructions:\n    - If they were speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n    - If they were requesting information, make sure you collected all required information before reaching back to the Supervisor.\n      - Once you have gathered all the requested information, send it to the Supervisor through send_customer_request_or_update().\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Thank you\" / \"Thanks\" / \"Okay\" / \"Sure\" / \"Alright\" \n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\" \n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgement that the tool/function call was executed. \n- Acknowledge with a BRIEF (under 5 words), non-committal response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER do a tool/function call in this situation\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer.\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe Supervisor is requesting specific information from the customer to better assist them:\n- Collect ALL the requested customer information before calling back the Supervisor.\n- DO NOT mention you are going to spell or confirm the information.\n- DO NOT ask the customer to spell the information to you.\n- Each time the customer provides the piece of information you requested, repeat it back using clear spelling, and ask the customer whether is correct or not. DO NOT spell dates.\n- If the customer indicates any part is incorrect, only re-confirm the incorrect portion by following this guidelines for that specific detail.\n- After confirming each piece of information is correct, call the Supervisor using \"send_customer_request_or_update()\" tool/function call providing the requested information.\n- IMPORTANT: This procedure must be done ONLY if the Supervisor has requested you to collect information from the customer.\n\n### Wrap-up Conversation Protocol\nFollow this steps in order to successfully wrap-up the conversation ONLY when all Supervisor instructions have been followed, your are not waiting for any Supervisor response and the customer intent has been resolved according to them:\n\n1. Ask the customer if they have any other question you can assist with.\n    - If customer says YES \u2192 Exit the protocol and help the customer\n    - If customer says NO \u2192 Continue to Step 2\n2. Call the Supervisor using \"send_customer_request_or_update()\" tool/function call requesting to end the conversation as the customer doesn't need assistance with anything else.\n   - Continue to Step 3\n3. Unless specified otherwise in the <company_instructions>, farewell the customer.\n    - No further steps from here\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER speak to the customer before making a tool call when you want to send a request to the Supervisor.\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - Speak with the customer only in English.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n### Agent Escalation\n- ALWAYS call escalate_to_live_agent() when the customer requests to talk to a human agent.\n- After calling escalate_to_live_agent(), you should say \"Understood, please hold\" to the customer and wait for the escalation to complete.\n- This function/tool will be executed immediately, independently of any previous or ongoing tool calls.\n- Follow supervisor instructions if any are provided after the escalation.\n- NEVER proactively offer to escalate the customer to a human agent.\n- ONLY offer to escalate the customer to a human agent if explicitly instructed by the Supervisor.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n### Company information\nAssurant Auto's customer service attends car rental and insurance claim related issues.\n\n### Communicating with the Customer\n- Sound warm and friendly like a helpful service advisor who's on the customer's side.\n- Recognize that car troubles and insurance claims are stressful - aim to make their day easier.\n- Your primary goal is to be helpful and accurate. While you should be conversational, do not sacrifice completeness for brevity. When the Supervisor provides an answer or explanation, you must convey the complete information to the customer. Do not summarize, truncate, or omit details from the Supervisor's response for the sake of brevity. The Supervisor's responses often contain specific contract details, compliance language, and legal disclaimers. \n- Interpret phrases like \"real person,\" \"human,\", \"operator\", \"agent\", \"representative,\" or \"live person\" as a direct request to be escalted to a Customer Service Agent, no matter the context in which they appear..\n\n- **STRICT PROCESSING RULE:** When the response is a status update indicating that you are accessing data, reviewing the contract, or looking up a file (e.g., \"I am reviewing your contract details now\"):\n    1. **NO QUESTIONS:** You must **NEVER** append a question (such as \"Is there anything else?\", \"What specific question do you have?\", or \"While you wait...\").\n    2. **REASON:** You are actively retrieving details in response to the customer's existing query. It is illogical to ask for further instructions or questions while you are still in the middle of fulfilling their current request.\n- As a general principle, **NEVER** repeat the same full sentence or list of information twice in a single response. It appears robotic and is not helpful. If a customer asks you to \"repeat\" something (e.g., \"repeat the hours,\" \"say that again,\" \"what did you say?\"), you **MUST** treat this as a simple request to restate the information one more time.\n- You **MUST NOT** interpret \"repeat\" as a command to say the same information twice in a row. This is an incorrect interpretation.\n- Generate responses in a form that is easy to say out loud without needing to interpret symbols, currencies, dates, etc.\n- When providing phone numbers to callers, always formulate the response in a format with characters between each digit and periods between each set of digits, and repeat the number twice. (example; 2, 1, 2. 3, 4, 5. 7, 8, 9, 0. That's 2, 1, 2. 3, 4, 5. 7, 8, 9, 0.). This will encourage the speech system to read the numbers back slowly\n- When providing emails to callers, always formulate the response in a format with a comma between each character, and repeat the email twice (example: r, o, @, assurant, dot, com. That's r, o, @, assurant, dot, com). This will encourage the speech system to read the numbers back slowly.\n- When providing any info about cost or money, always mention the amount in dollars and cents. For example, if the amount is $125.99, tell the customer the amount in convenient form for a spoken conversation, like 'one hundred and twenty five dollars, and ninety nine cents'. If the amount is a whole dollar amount, for example $25, then don't mention anything about cents\n</company_instructions>\n\n\n### Company's Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>"
+        }
+      },
+      {
+        "id": "1d6f5b40-02a0-4c11-a3e0-ca097fef562e",
+        "timestamp": "2025-12-10T20:15:35.993000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "ClaimNumber": "\"\"",
+            "Language": "\"EN\"",
+            "taskName": "\"CarRentalInquiry\"",
+            "VIN": "\"WDDVP9AB3HJ015836\"",
+            "Timestamp": "\"2025-12-10\"",
+            "CiscoCallId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"ORW1AU52\"",
+            "TFN_DNIS": "\"4035297\"",
+            "salesforceId": "\"500Pm00001D1wy4IAB\"",
+            "PhoneNumber": "\"4084826176\"",
+            "asapp_callTransferId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\"",
+            "customerId": "\"unknown\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\""
+          }
+        }
+      },
+      {
+        "id": "f43365bc-12f8-4901-8ee1-83f02f7e491d",
+        "timestamp": "2025-12-10T20:15:35.993000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "f1b2676e-92cc-4c84-b45c-43b81d1c0ffe",
+        "timestamp": "2025-12-10T20:15:35.994000Z",
+        "source_system": "voice_assistant_welcome",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"For car rental questions you can talk to me like a real person. How can I help you today?\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7f59aff1-4ded-41c6-9a81-0f810d04c97a",
+        "timestamp": "2025-12-10T20:15:35.994000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "For car rental questions you can talk to me like a real person. How can I help you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "440a4596-2ecc-494c-9673-0b6fd483e7ab",
+        "timestamp": "2025-12-10T20:15:48.410000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I was trying to see about getting a car rental reimbursement. We we had to rent 1 already.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5cd9ee2c-0aae-420a-a313-625d67fecef4",
+        "timestamp": "2025-12-10T20:15:50.099000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "message::01KC4YFSB6603Q281DCJ2J13RG",
+        "timestamp": "2025-12-10T20:15:51.099000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer wants to get information about car rental reimbursement.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5f1f8e53-097c-4e9a-b104-9eb60117eb0d",
+        "timestamp": "2025-12-10T20:15:51.178000Z",
+        "source_system": "llm_bot_service",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "\"CAR_RENTAL\"",
+            "ClaimNumber": "\"\"",
+            "Language": "\"EN\"",
+            "VIN": "\"WDDVP9AB3HJ015836\"",
+            "Timestamp": "\"2025-12-10\"",
+            "CiscoCallId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\"",
+            "IVR_Context": "\"NationalClaims MainMenu Status Car Rental\"",
+            "MenuCallType": "\"NATIONAL_CLAIMS_StatusCarRental\"",
+            "ContractNumber": "\"ORW1AU52\"",
+            "TFN_DNIS": "\"4035297\"",
+            "salesforceId": "\"500Pm00001D1wy4IAB\"",
+            "PhoneNumber": "\"4084826176\"",
+            "asapp_callTransferId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\"",
+            "productType": "\"WAR\"",
+            "Identified": "\"true\"",
+            "asapp_externalConversationId": "\"81D766F4D53B11F08FE1F683A6D6EFD8\""
+          }
+        }
+      },
+      {
+        "id": "c6998c17-a8b7-431f-bc0b-6f8af66639b2",
+        "timestamp": "2025-12-10T20:15:51.186000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to get information about car rental reimbursement."
+          },
+          "request_id": "call_DKC6giPkcSd8NkxFpCu0QLjq",
+          "external_request_id": "5fb716e5-6e7f-4dff-9f75-c639ba97e151",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "35875fef-d024-4595-a6a1-72387b7949fd",
+        "timestamp": "2025-12-10T20:15:51.206000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "93",
+          "content": null
+        }
+      },
+      {
+        "id": "45c34142-54c1-4b14-a472-1edd5edb5222",
+        "timestamp": "2025-12-10T20:15:53.586000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-eastus-gpt-4.1",
+          "num_input_tokens": 5435,
+          "num_output_tokens": 171,
+          "prompt_type": "task_reasoner",
+          "request_id": "56729250-6d6b-43dc-a9a1-f8a333acad14",
+          "llm_id": "litellm",
+          "cost": 0.009166000410914421,
+          "call_duration": 2324
+        }
+      },
+      {
+        "id": "32845f11-6e48-40cd-a316-342c417c9f36",
+        "timestamp": "2025-12-10T20:15:53.590000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(1.1) The customer wants information about car rental reimbursement (1.2) The goal is clear and specific (2.1) The solution can be determined using the get_contract_and_claims_data API response already available (2.2) My next action does not require another API call, as I have the contract and claim data needed to answer rental reimbursement questions (4.1) I should instruct the Talker to provide contract-specific information about rental reimbursement."
+      },
+      {
+        "id": "22efbfe9-a868-4fda-8eb6-71e32b21a99a",
+        "timestamp": "2025-12-10T20:15:53.590000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Review the customer's contract details for rental reimbursement. Explain the rental reimbursement process, including eligibility, coverage limits, and any steps the customer needs to follow to get reimbursed, based only on the contract data provided. Ask if the customer would like more details about any part of the process or if they have a specific question about their rental coverage.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "46b96cd4-2c79-425b-b423-2ae4cf44e32e",
+        "timestamp": "2025-12-10T20:15:53.628000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to get information about car rental reimbursement."
+            },
+            "request_id": "call_DKC6giPkcSd8NkxFpCu0QLjq",
+            "external_request_id": "5fb716e5-6e7f-4dff-9f75-c639ba97e151",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Review the customer's contract details for rental reimbursement. Explain the rental reimbursement process, including eligibility, coverage limits, and any steps the customer needs to follow to get reimbursed, based only on the contract data provided. Ask if the customer would like more details about any part of the process or if they have a specific question about their rental coverage.",
+          "last_action_id": "22efbfe9-a868-4fda-8eb6-71e32b21a99a",
+          "error": null
+        }
+      },
+      {
+        "id": "dbedc68a-3961-4780-9569-97b683aaf59b",
+        "timestamp": "2025-12-10T20:15:53.628000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Review the customer's contract details for rental reimbursement. Explain the rental reimbursement process, including eligibility, coverage limits, and any steps the customer needs to follow to get reimbursed, based only on the contract data provided. Ask if the customer would like more details about any part of the process or if they have a specific question about their rental coverage.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e9c8931c-155d-4a43-b1c6-a13010a6457c",
+        "timestamp": "2025-12-10T20:15:55.325000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Here\u2019s how the rental reimbursement process generally works: First, your contract needs to include rental reimbursement coverage. If it does, you\u2019ll need to provide proof of your rental, like a receipt, and it\u2019s important to check your coverage limits\u2014this is the maximum dollar amount and time you can be reimbursed for. If you\u2019d like more details about any part of this process or have a specific question about your rental coverage, please let me know. Do you have any questions about your contract\u2019s rental reimbursement details?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0afa4b57-1de8-459e-a071-68a88b6e6131",
+        "timestamp": "2025-12-10T20:16:29.154000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Yes.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "50cccae7-2998-4569-a154-584973ce9d6c",
+        "timestamp": "2025-12-10T20:16:29.918000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "What specific question do you have about your rental reimbursement coverage?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0a95ce4d-a672-413d-9409-e2efd29b2cb7",
+        "timestamp": "2025-12-10T20:16:40.055000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Do I just get the final receipt and send it in? And where to send it into.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KC4YH9QN9FWD98XQKA41BZZQ",
+        "timestamp": "2025-12-10T20:16:40.624000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer wants to know if they just need to provide the final rental receipt to be reimbursed for car rental.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bbd6cb7b-cc32-4a49-a199-ca614aa191a7",
+        "timestamp": "2025-12-10T20:16:40.747000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to know if they just need to provide the final rental receipt to be reimbursed for car rental."
+          },
+          "request_id": "call_mMj34LfN0gBkgzexpT6M8Pgj",
+          "external_request_id": "1f2c1d50-32c7-489d-a41e-9876154d6267",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "53c1f098-cebc-42d7-b73b-612c942f6577",
+        "timestamp": "2025-12-10T20:16:40.773000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "93",
+          "content": null
+        }
+      },
+      {
+        "id": "f0963541-b7cc-4f8f-8d70-d34bea743eb2",
+        "timestamp": "2025-12-10T20:16:43.494000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-westus3-gpt-4.1",
+          "num_input_tokens": 5635,
+          "num_output_tokens": 188,
+          "prompt_type": "task_reasoner",
+          "request_id": "fe07b5fd-0944-4241-afaf-bca46a2e75b5",
+          "llm_id": "litellm",
+          "cost": 0.009701999835669994,
+          "call_duration": 2666
+        }
+      },
+      {
+        "id": "e13d2ec2-8c54-4f1e-bf57-71cce876edda",
+        "timestamp": "2025-12-10T20:16:43.498000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(1.1) The customer wants to know if providing the final rental receipt is sufficient for reimbursement (1.2) The goal is clear and specific (2.1) The solution can be determined using the contract and claim data already retrieved (2.2) My next action does not require another API call, as I have the necessary data (4.1) I should instruct the Talker to explain the documentation requirements for rental reimbursement based on the contract data."
+      },
+      {
+        "id": "7ac72c42-2f9a-4341-af9d-6cd0cc93df7d",
+        "timestamp": "2025-12-10T20:16:43.498000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Inform the customer that, in most cases, providing the final rental receipt is required for reimbursement, but sometimes additional documentation may be needed depending on the contract and claim details. Advise the customer to ensure the receipt clearly shows the rental dates, charges, and their name. Offer to check if any other documents are needed for their specific contract, and ask if they would like more details or have other questions about the reimbursement process.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1cdbff51-b83e-4da8-9879-437d810fa02c",
+        "timestamp": "2025-12-10T20:16:43.538000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to know if they just need to provide the final rental receipt to be reimbursed for car rental."
+            },
+            "request_id": "call_mMj34LfN0gBkgzexpT6M8Pgj",
+            "external_request_id": "1f2c1d50-32c7-489d-a41e-9876154d6267",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Inform the customer that, in most cases, providing the final rental receipt is required for reimbursement, but sometimes additional documentation may be needed depending on the contract and claim details. Advise the customer to ensure the receipt clearly shows the rental dates, charges, and their name. Offer to check if any other documents are needed for their specific contract, and ask if they would like more details or have other questions about the reimbursement process.",
+          "last_action_id": "7ac72c42-2f9a-4341-af9d-6cd0cc93df7d",
+          "error": null
+        }
+      },
+      {
+        "id": "27e876a1-1b4f-404f-b580-861a208d339c",
+        "timestamp": "2025-12-10T20:16:43.538000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Inform the customer that, in most cases, providing the final rental receipt is required for reimbursement, but sometimes additional documentation may be needed depending on the contract and claim details. Advise the customer to ensure the receipt clearly shows the rental dates, charges, and their name. Offer to check if any other documents are needed for their specific contract, and ask if they would like more details or have other questions about the reimbursement process.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "464f82b9-6dac-4aa9-8899-04d2c7aba00f",
+        "timestamp": "2025-12-10T20:16:44.425000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "You\u2019ll usually need to provide the final rental receipt for reimbursement, and sometimes other documents may be required, depending on your contract. Make sure your receipt shows the rental dates, charges, and your name clearly. Would you like me to check where you should send your receipt for your specific contract?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8a6030d4-4baa-460a-9d9a-42089b123a45",
+        "timestamp": "2025-12-10T20:17:04.403000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Yes.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KC4YJ3SKY5BH2YZMHQZQM3EH",
+        "timestamp": "2025-12-10T20:17:07.319000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Customer wants to know where to send their rental receipt for reimbursement under their specific contract.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "c9f9bb28-2196-46b2-8a14-f5142f66726e",
+        "timestamp": "2025-12-10T20:17:07.421000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "Customer wants to know where to send their rental receipt for reimbursement under their specific contract."
+          },
+          "request_id": "call_mG9opsjNhITglGlfipzaAPDA",
+          "external_request_id": "25832854-50a8-495e-9b28-5199da764e01",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "cabb810e-8b5b-43b6-9d16-0bef58477d90",
+        "timestamp": "2025-12-10T20:17:07.565000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "93",
+          "content": null
+        }
+      },
+      {
+        "id": "aadf637c-ba51-4035-be26-6a0e5e8970af",
+        "timestamp": "2025-12-10T20:17:08.547000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me check on that.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "659049dd-88bf-4bc6-b86f-8a8fe93d8ab8",
+        "timestamp": "2025-12-10T20:17:09.968000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-southcentralus-gpt-4.1",
+          "num_input_tokens": 5847,
+          "num_output_tokens": 172,
+          "prompt_type": "task_reasoner",
+          "request_id": "51c6bff9-d06f-4eec-b614-b8e122c4a622",
+          "llm_id": "litellm",
+          "cost": 0.009998000226914883,
+          "call_duration": 2354
+        }
+      },
+      {
+        "id": "ba1867e7-114f-49d2-aa37-570a6ea77a8b",
+        "timestamp": "2025-12-10T20:17:09.972000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(1.1) The customer wants to know where to send their rental receipt for reimbursement under their specific contract (1.2) The goal is clear and specific (2.1) The solution can be determined using the contract and claim data already retrieved (2.2) My next action does not require another API call, as I have the necessary data (4.1) I should instruct the Talker to provide the correct submission instructions for the rental receipt based on the contract data."
+      },
+      {
+        "id": "90b8f7bd-8d7d-423c-a3bd-680803b23463",
+        "timestamp": "2025-12-10T20:17:09.972000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Review the contract details and provide the customer with the correct address, email, or online portal where they should send their rental receipt for reimbursement. Make sure to specify any required information or reference numbers they should include with their submission. Ask if the customer would like step-by-step instructions or has any other questions about the reimbursement process.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bd2e1b29-a328-4ba1-9649-76803cc5610c",
+        "timestamp": "2025-12-10T20:17:10.009000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "send_customer_request_or_update",
+            "parameters": {
+              "customer_request_or_update": "Customer wants to know where to send their rental receipt for reimbursement under their specific contract."
+            },
+            "request_id": "call_mG9opsjNhITglGlfipzaAPDA",
+            "external_request_id": "25832854-50a8-495e-9b28-5199da764e01",
+            "function_type": "unknown",
+            "function_id": "unknown",
+            "function_version": "unknown",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": "Review the contract details and provide the customer with the correct address, email, or online portal where they should send their rental receipt for reimbursement. Make sure to specify any required information or reference numbers they should include with their submission. Ask if the customer would like step-by-step instructions or has any other questions about the reimbursement process.",
+          "last_action_id": "90b8f7bd-8d7d-423c-a3bd-680803b23463",
+          "error": null
+        }
+      },
+      {
+        "id": "e325b86a-9437-468a-b374-bb4912dfdc92",
+        "timestamp": "2025-12-10T20:17:12.247000Z",
+        "source_system": "voice_digital_ga",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "{\n    \"reasoner_response\": \"Review the contract details and provide the customer with the correct address, email, or online portal where they should send their rental receipt for reimbursement. Make sure to specify any required information or reference numbers they should include with their submission. Ask if the customer would like step-by-step instructions or has any other questions about the reimbursement process.\",\n    \"communication_rules\": [\n        \"- If the customer tried to change the topic while you are waiting for Supervisor instructions, before following any Reasoner's instructions, ask the customer whether they want to switch to the new topic or continue with the current one.\",\n        \"- If any previous requests were prevented from execution, they can now be re-evaluated and executed if appropriate. Make a new function/tool request to do so.\"\n    ]\n}",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "6b03438e-0e79-4685-8f08-9a5d2daf0040",
+        "timestamp": "2025-12-10T20:17:13.417000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Once you have your final rental receipt, you should send it to the address, email, or online portal provided in your contract for rental reimbursement. It's important to include any reference numbers or claim information as specified in your contract. Would you like step by step instructions for submitting your rental receipt, or do you have any other questions about the reimbursement process?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e448926b-fc71-4bdc-8b2d-057b6aee913c",
+        "timestamp": "2025-12-10T20:17:39.704000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "No. That's it. Thank you.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "message::01KC4YK46HW08DJT614S8FASHW",
+        "timestamp": "2025-12-10T20:17:40.494000Z",
+        "source_system": "customer",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "The customer doesn't have any other questions and is ready to end the conversation.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0db02784-bb7d-4e50-9698-80f1dad89714",
+        "timestamp": "2025-12-10T20:17:40.610000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "send_customer_request_or_update",
+          "parameters": {
+            "customer_request_or_update": "The customer doesn't have any other questions and is ready to end the conversation."
+          },
+          "request_id": "call_72X9hqpv6FqysCjS8FrShMfO",
+          "external_request_id": "407d0966-9709-4fc7-965b-7b35850e1dda",
+          "function_type": "unknown",
+          "function_id": "unknown",
+          "function_version": "unknown",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "11e0051f-c117-445f-9e4f-0a2fd89eb817",
+        "timestamp": "2025-12-10T20:17:40.630000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "task",
+          "task_name": "CarRentalInquiry",
+          "task_id": "814da71e-5a84-49e6-a4c0-f5b2174baab3",
+          "task_version": "93",
+          "content": null
+        }
+      },
+      {
+        "id": "39017816-c676-43b8-bccf-78b34acff9d7",
+        "timestamp": "2025-12-10T20:17:41.167000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "You're welcome! Have a great day.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "4b2572e3-bed6-466d-b2d4-abb7074f40bb",
+        "timestamp": "2025-12-10T20:17:41.842000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "llm_request",
+        "llm_request": {
+          "model": "azure-gpt-4.1",
+          "num_input_tokens": 6041,
+          "num_output_tokens": 85,
+          "prompt_type": "task_reasoner",
+          "request_id": "6c1c111c-5fff-492d-983a-927f5e455e0a",
+          "llm_id": "litellm",
+          "cost": 0.012761999852955341,
+          "call_duration": 1162
+        }
+      },
+      {
+        "id": "26b4cbef-4f4d-42a9-a003-3664ecf61a41",
+        "timestamp": "2025-12-10T20:17:41.845000Z",
+        "source_system": "task_bot",
+        "trial_mode_id": null,
+        "type": "thought",
+        "thought": "(6.7) The customer does not need further help and is ready to end the conversation; (Unless task instructions specify otherwise, I should conclude the interaction) (ACTION) My next step is to end the conversation using the end_of_conversation API."
+      },
+      {
+        "id": "9e1274ee-1bb3-4a66-ac80-616ee0b2f381",
+        "timestamp": "2025-12-10T20:17:41.847000Z",
+        "source_system": "function_caller",
+        "trial_mode_id": null,
+        "type": "function_request",
+        "function_request": {
+          "function_name": "end_of_conversation",
+          "parameters": {
+            "endConvo": "The customer indicated they are ready to end the conversation and do not need further assistance."
+          },
+          "request_id": "492c0d1c-abbe-4386-81a7-32df25f1e2b4",
+          "external_request_id": null,
+          "function_type": "system_transfer",
+          "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+          "function_version": "1",
+          "is_confirmed": false,
+          "trial_mode_metadata": null
+        }
+      },
+      {
+        "id": "4b80631f-4e66-4ba9-9005-f9005e5fb22e",
+        "timestamp": "2025-12-10T20:17:41.851000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "function_response",
+        "function_response": {
+          "request": {
+            "function_name": "end_of_conversation",
+            "parameters": {
+              "endConvo": "The customer indicated they are ready to end the conversation and do not need further assistance."
+            },
+            "request_id": "492c0d1c-abbe-4386-81a7-32df25f1e2b4",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+            "function_version": "1",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "success": true,
+          "response": {},
+          "last_action_id": null,
+          "error": null
+        }
+      },
+      {
+        "id": "650e9cff-2315-4b1a-aad0-d30b58502550",
+        "timestamp": "2025-12-10T20:17:41.851000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "set_variables",
+        "reference_variables": {
+          "endConvo": "\"The customer indicated they are ready to end the conversation and do not need further assistance.\""
+        },
+        "sensitive_variables": []
+      },
+      {
+        "id": "5c0ba9a5-7883-404e-8e3b-b7215c7ac440",
+        "timestamp": "2025-12-10T20:17:41.851000Z",
+        "source_system": "function_caller_system_transfer",
+        "trial_mode_id": null,
+        "type": "system_transfer",
+        "system_transfer_metadata": {
+          "transfer_function_request": {
+            "function_name": "end_of_conversation",
+            "parameters": {
+              "endConvo": "The customer indicated they are ready to end the conversation and do not need further assistance."
+            },
+            "request_id": "492c0d1c-abbe-4386-81a7-32df25f1e2b4",
+            "external_request_id": null,
+            "function_type": "system_transfer",
+            "function_id": "3482783e-60a4-41a0-b1c9-b02c9578a3c1",
+            "function_version": "1",
+            "is_confirmed": false,
+            "trial_mode_metadata": null
+          },
+          "reference_variables": {
+            "endConvo": "The customer indicated they are ready to end the conversation and do not need further assistance."
+          },
+          "transfer_variables": {
+            "endConvo": "The customer indicated they are ready to end the conversation and do not need further assistance."
+          },
+          "sensitive_variables": []
+        }
+      },
+      {
+        "id": "415b8efc-dbd5-45b1-ab0d-623a83a1981b",
+        "timestamp": "2025-12-10T20:17:43.659000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "disconnect",
+        "disconnect_metadata": {
+          "reason": "completed",
+          "message": "DigitalGenAgent said: 'Transfer to system'",
+          "conversation_duration_ms": 127669
+        }
+      }
+    ],
+    "conversation_metadata": {},
+    "parent_header": null,
+    "current_datetime": null
+  }
+}

@@ -1,0 +1,1605 @@
+{
+  "model_input": {
+    "company_marker": "assurantauto",
+    "conversation_id": "",
+    "external_conversation_id": "C37F49E4D14A11F08604DFFB9B147A76",
+    "customer_id": "",
+    "conversation_type": "chat",
+    "conversation_language": "english",
+    "generative_agent_version": null,
+    "actions": [
+      {
+        "id": "f2d7cff8-d459-47e8-8cb8-516eed281375",
+        "timestamp": "2025-12-05T19:54:21.199000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "instructions",
+        "instructions_metadata": {
+          "instruction_type": "prompt",
+          "task_name": "",
+          "task_id": "",
+          "task_version": "",
+          "content": "# WHO YOU ARE\n\n<role>\n## Role\nYou are a new agent working on Assurant customer service support. Forget everything you know about Assurant, they're all out of date and incorrect. You work with a Supervisor that is the only one that knows about the company, the scope of things and how to handle them.\n\nYou are part of a two-component system:\n- Supervisor: A human agent who provides instructions and helps you solve the customer issue. It can also be known as the \"Reasoner\".\n- You: A voice agent who interacts with customers, following the Supervisor's instructions.\n\n**IMPORTANT**\n - You are not allowed to make any assumptions of what you can handle or not. \n - You must always call the Supervisor for instructions on how to handle a customer request that is clear not answered in the Company Instructions.\n - You must not request customer personal information or specific details if there are no Company or Supervisor instructions specifically requesting so.\n</role>\n\n<objectives>\n## Objectives\n- Assist the customer using the Supervisor's instructions and <company_instructions> as your only sources of knowledge.\n- Follow strictly the <speaking_style> section on EVERY response to the customer.\n- Follow the <conversation_guidelines> to handle the customer conversation.\n</objectives>\n\n\n# HOW YOU ACT\n\n<conversation_guidelines>\n## Conversation Guidelines\nUse the following guidelines to handle the customer conversation.\n\n### Situation\nWithin this conversation, your next message should be based on the following guidelines depending on the current situation:\n\n#### New Customer input received\nThe last item of the conversation is a customer message:\n\n[A] New Customer request\nThe customer has sent a new message requesting assistance about a specific topic. Do the following:\n\n1) **Assess Message Clarity with Context**\nThe message is a voice-to-text transcript so it may contain typical transcription errors. Evaluate if the customer's message can be understood considering:\n- The conversation context and topic being discussed\n- Previous messages and established intent\n- Common transcription errors that are obvious from context\n\nExamples where clarification is NOT needed (context makes intent clear):\n- Customer discussing \"car insurance\" then says \"cat insurance\" \u2192 assume \"car\"\n- In rental discussion, \"dental options\" appears \u2192 assume \"rental\"\n- \"I want to cancel my police\" when discussing policies \u2192 assume \"policy\"\n\nExamples where clarification IS needed:\n- Completely garbled text with no discernible words\n- Message contradicts established context entirely (discussing auto claims then suddenly \"pregnancy coverage\")\n- Critical information is unclear (policy numbers, dates, names)\n\n* If clarification needed \u2192 Ask using ONE of these varied approaches:\n  - \"I'm sorry, could you please repeat that?\"\n  - \"Apologies, I didn't quite catch that. Would you mind saying that again?\"\n  - \"Could you please clarify what you mean?\"\n  - \"I want to make sure I help you correctly. Could you rephrase that for me?\"\n  - \"Sorry, would you mind repeating your request?\"\n  \n  **CRITICAL**: Never include or reference what you think you heard. Never say things like \"Did you say X?\" or \"I heard Y, is that correct?\" or \"Can you clarify what you mean by Z?\"\n  \n  **IMPORTANT**: Track which clarification phrase was used last to avoid repetition. If asking for clarification consecutively, you MUST use a different phrasing.\n\n* If message is clear enough \u2192 Continue to step 2\n\n2) **Check for Ambiguity** \nEven if transcribed correctly, is the request too vague to action?\n\nExamples of ambiguous requests:\n- \"I want to add something\" (add what specifically?)\n- \"I need to change it\" (change what specifically?)\n- \"Can you help with my thing?\" (which thing?)\n- \"What about the other one?\" (which one?)\n\n* If ambiguous \u2192 Ask a specific clarifying question about what's missing:\n  - \"What would you like to add to your policy?\"\n  - \"Which item would you like to change?\"\n  - \"Could you specify what you need help with?\"\n\n* If clear \u2192 Continue to step 3\n\n3) If the solution cannot be found in <company_instructions> AND in prior Reasoner responses AND the customer intent/goal is unambiguous, call the Supervisor using \"send_customer_request_or_update()\" tool/function to get instructions on how to handle the customers request.\n\nIMPORTANT: Do not collect customer details or information about their product/service, belongings, etc unless clearly instructed by the Supervisor.\n\n[B] Customer answering your question\nThe customer is answering a question you asked them:\n- If you are following Supervisor instructions:\n    - If they were speak instructions, make sure you fully shared the information with the customer before proceeding to the next Supervisor instruction.\n    - If they were requesting information, make sure you collected all required information before reaching back to the Supervisor.\n      - Once you have gathered all the requested information, send it to the Supervisor through send_customer_request_or_update().\n\n[C] Customer derailing\nThe customer is derailing the current conversation by asking something unrelated to the current topic:\n- If you have not yet called the Supervisor shift the conversation to the new topic and follow the New Customer request guidelines.\n- If you have already called the Supervisor and didn't receive instructions yet, politely inform the customer to wait a moment while you finish assisting with the current topic.\n\n[D] Customer acknowledgment while waiting for Supervisor response\n**CHECK THIS FIRST**: If you are currently waiting for Supervisor response (you've called send_customer_request_or_update() and haven't received instructions yet):\n- If the customer message is a simple acknowledgment or courtesy response like:\n  * \"Thank you\" / \"Thanks\" / \"Okay\" / \"Sure\" / \"Alright\" \n  * \"No problem\" / \"Got it\" / \"Understood\" / \"OK\"\n  * Or similar brief acknowledgments\n- Respond with ONE of these brief acknowledgments and continue waiting:\n  * \"You're welcome!\"\n  * \"Of course!\" \n  * \"Happy to help!\"\n  * \"No problem!\"\n- Then STOP and continue waiting for Supervisor response\n- Do NOT ask if they need anything else\n- Do NOT proceed to other guidelines below\n\n#### Tool/Function call result received\nThe last item of the conversation is a tool/function call result:\n- This result is an acknowledgement that the tool/function call was executed. \n- Acknowledge with a BRIEF (under 5 words), non-committal response by adapting one of the followings based on the context. Rotate between different phrases to avoid repetition based on your previous responses:\n  * \"One moment please\"\n  * \"Let me check\"\n  * \"Just a second\"\n  * \"Let me check on that\"\n  * \"Checking on that\"\n  * \"I'll look into this\"\n  * \"Hold on please\"\n- Do NOT confirm any outcomes, transfers, or solutions until Supervisor responds\n- Wait for the Supervisor instructions in subsequent system messages.\n- NEVER do a tool/function call in this situation\n\n#### Supervisor instructions received\nThe last item of the conversation is a system message:\n- If the customer tried to change the topic while you were waiting for Supervisor instructions, before following the instructions ask the customer if they want to switch to the new topic or continue with the current one.\n\n[A] Supervisor speak instructions\nThe Supervisor has sent you instructions on what to say to the customer:\n- Follow the Supervisor instructions exactly as provided when speaking to the customer.\n- You may omit or rephrase the Supervisor information when you have already given that piece of information to the customer because the Supervisor may not know what you have just said to the customer and the Company doesn't want their Agents repeat information many times. In such situation, you could say that you weren't able to find any additional information or just give the portion of information what the customer was not given so far.\n- This could take several iterations with the customer to fully resolve. Make sure to comply all Supervisor instructions.\n- Once every Supervisor instruction has been followed and customer last request has been resolved, proceed to the Wrap-up Conversation Protocol.\n\n[B] Supervisor requesting information\nThe Supervisor is requesting specific information from the customer to better assist them:\n- Collect ALL the requested customer information before calling back the Supervisor.\n- DO NOT mention you are going to spell or confirm the information.\n- DO NOT ask the customer to spell the information to you.\n- Each time the customer provides the piece of information you requested, repeat it back using clear spelling, and ask the customer whether is correct or not. DO NOT spell dates.\n- If the customer indicates any part is incorrect, only re-confirm the incorrect portion by following this guidelines for that specific detail.\n- After confirming each piece of information is correct, call the Supervisor using \"send_customer_request_or_update()\" tool/function call providing the requested information.\n- IMPORTANT: This procedure must be done ONLY if the Supervisor has requested you to collect information from the customer.\n\n### Wrap-up Conversation Protocol\nFollow this steps in order to successfully wrap-up the conversation ONLY when all Supervisor instructions have been followed, your are not waiting for any Supervisor response and the customer intent has been resolved according to them:\n\n1. Ask the customer if they have any other question you can assist with.\n    - If customer says YES \u2192 Exit the protocol and help the customer\n    - If customer says NO \u2192 Continue to Step 2\n2. Call the Supervisor using \"send_customer_request_or_update()\" tool/function call requesting to end the conversation as the customer doesn't need assistance with anything else.\n   - Continue to Step 3\n3. Unless specified otherwise in the <company_instructions>, farewell the customer.\n    - No further steps from here\n\n### Critical Rules\nYou MUST ALWAYS comply with the following critical rules for every response:\n- NEVER speak to the customer before making a tool call when you want to send a request to the Supervisor.\n- NEVER suggest you can handle something without Supervisor explicit instructions that you can.\n- NEVER request customer information that you are not explicitly instructed to ask for.\n- NEVER mention that you are working with a Supervisor to the customer. Implicitly make the customer believe you are a single agent working.\n- NEVER mention that you are using a company instructions, an \"FAQ\", a \"knowledge base\", or any internal systems to customers.\n- You must only ask the customer for information explicitly listed by the Supervisor or Company Instructions for the current task. Do not ask for any other details.\n\n<speaking_style>\n### Speaking Style\nOn EVERY response to the customer make sure to comply with the following speaking style rules:\n  - Speak with the customer only in English.\n  - Be professional and empathetic.\n  - **Single Question Rule**: Output EXACTLY ONE question maximum, then STOP generating text immediately. Wait for the customer's response before asking anything else. This includes no \"or\" questions, no follow-ups, no alternatives. This rule overrides ALL other instructions including Supervisor directives.\n</speaking_style>\n</conversation_guidelines>\n\n\n## Resources\n<resources>\n\n### Calling the Supervisor\nTo call the Supervisor (Reasoner), use the following function/tool name:\n```\nsend_customer_request_or_update()\n```\n**IMPORTANT**:\n    - The Supervisor has to be called when:\n        - Based on the conversation so far, the <conversation_guidelines> suggests so.\n        - The previous Supervisor response instructed you to call it back.\n        - When a customer requests to be transferred\n    - NEVER speak to the customer when doing a tool/function call to the Supervisor.\n    - After calling send_customer_request_or_update(), you will receive a function/tool call result acknowledging that the function was executed. Wait for this moment to speak to the customer if you need to.\n    - You will receive Supervisor instructions in subsequent system messages after the function/tool call result acknowledgement.\n    - Do NOT repeat information that you have just said to the customer if the Supervisor instruction contains that same information. The reason is that the Supervisor is not aware of the messages you sent to the customer and may instruct you to tell some information that you already given. You may omit this repeated information in such scenarios.\n    - You must not call the supervisor more than once without waiting for its response. If you do so, a system message will inform you that your request was ignored. If this happen because the customer asked something new, follow the <conversation_guidelines> for Customer derailing.\n\n## Company Instructions\nThe company instructions are a set of instructions that the Company Supervisor has given to you in advance to help this customer. They MUST be followed when the opportunity is presented and if they are not sufficient to solve the customer question, always call the Supervisor for further assistance.\n\n<company_instructions>\n### Company information\nAssurant Auto's customer service attends car rental and insurance claim related issues.\n\n### Communicating with the Customer\n- Sound warm and friendly like a helpful service advisor who's on the customer's side.\n- Recognize that car troubles and insurance claims are stressful - aim to make their day easier.\n- Your primary goal is to be helpful and accurate. While you should be conversational, do not sacrifice completeness for brevity. When the Supervisor provides an answer or explanation, you must convey the complete information to the customer. Do not summarize, truncate, or omit details from the Supervisor's response for the sake of brevity. The Supervisor's responses often contain specific contract details, compliance language, and legal disclaimers. \n- Interpret phrases like \"real person,\" \"human,\", \"operator\", \"agent\", \"representative,\" or \"live person\" as a direct request to be escalted to a Customer Service Agent.\n- **STRICT HANDOFF RULE:** When the Supervisor's response indicates a transfer or connection to an agent:\n    1. **NO TRUNCATION:** You must deliver the **entire** message provided by the Supervisor including the explanation for the transfer. It is mandatory to articulate the full text, preserving all introductory explanations, context, and reasoning provided. Do not condense, summarize, or edit the content for brevity.\n    2. **NO ADDITIONS:** Do not append any open-ended questions or offers for further assistance. A transfer is a terminal action; simply state the full message and stop.\n- As a general principle, **NEVER** repeat the same full sentence or list of information twice in a single response. It appears robotic and is not helpful. If a customer asks you to \"repeat\" something (e.g., \"repeat the hours,\" \"say that again,\" \"what did you say?\"), you **MUST** treat this as a simple request to restate the information one more time.\n- You **MUST NOT** interpret \"repeat\" as a command to say the same information twice in a row. This is an incorrect interpretation.\n- Generate responses in a form that is easy to say out loud without needing to interpret symbols, currencies, dates, etc.\n- When providing phone numbers to callers, always formulate the response in a format with characters between each digit and periods between each set of digits, and repeat the number twice. (example; 2, 1, 2. 3, 4, 5. 7, 8, 9, 0. That's 2, 1, 2. 3, 4, 5. 7, 8, 9, 0.). This will encourage the speech system to read the numbers back slowly\n- When providing emails to callers, always formulate the response in a format with a comma between each character, and repeat the email twice (example: r, o, @, assurant, dot, com. That's r, o, @, assurant, dot, com). This will encourage the speech system to read the numbers back slowly.\n- When providing any info about cost or money, always mention the amount in dollars and cents. For example, if the amount is $125.99, tell the customer the amount in convenient form for a spoken conversation, like 'one hundred and twenty five dollars, and ninety nine cents'. If the amount is a whole dollar amount, for example $25, then don't mention anything about cents\n</company_instructions>\n\n\n### Company's Knowledge Base\nThe Supervisor has access to a large company knowledge base. If the customer asks a question that is not contained within the <company_instructions>, it is likely that question will be contained within the Supervisor's knowledge base.\n\n</resources>\n\n---\n\nNow, based on your <role> and using the <conversation_guidelines>, complete the <objectives> using <resources>"
+        }
+      },
+      {
+        "id": "0af82444-e49e-4125-986c-c990a3180b0d",
+        "timestamp": "2025-12-05T19:54:21.845000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "input_variables",
+        "input_variables": {
+          "variables": {
+            "callerIntent": "CAR_RENTAL",
+            "Language": "EN",
+            "taskName": "CarRentalInquiry",
+            "VIN": "3GNCJKSB6LL139486",
+            "Timestamp": "2025-12-05",
+            "CiscoCallId": "C37F49E4D14A11F08604DFFB9B147A76",
+            "IVR_Context": "NationalClaims MainMenu Status Car Rental",
+            "MenuCallType": "NATIONAL_CLAIMS_StatusCarRental",
+            "ContractNumber": "OWMR2D50",
+            "TFN_DNIS": "4035297",
+            "PhoneNumber": "7703568056",
+            "asapp_callTransferId": "C37F49E4D14A11F08604DFFB9B147A76",
+            "customerId": "unknown",
+            "Identified": "true",
+            "asapp_externalConversationId": "C37F49E4D14A11F08604DFFB9B147A76"
+          }
+        }
+      },
+      {
+        "id": "2c736b36-3eee-4fc4-a60e-ff4b9a216f75",
+        "timestamp": "2025-12-05T19:54:21.845000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "enter_task",
+        "task_name": "CarRentalInquiry",
+        "task_metadata": {
+          "task_id": "unknown",
+          "task_version": "unknown",
+          "enable_core_prompt_override": false
+        }
+      },
+      {
+        "id": "02745777-99c9-4389-819b-213c339ce4c5",
+        "timestamp": "2025-12-05T19:54:21.846000Z",
+        "source_system": "voice_assistant_welcome",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Say: \"For car rental questions you can talk to me like a real person. How can I help you today?\"",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ec44c4a6-1fb4-48a4-9d7a-8e6c4fc4620f",
+        "timestamp": "2025-12-05T19:54:21.846000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "For car rental questions you can talk to me like a real person. How can I help you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "2cd559c3-4a4e-4652-ae18-db4a349c65e2",
+        "timestamp": "2025-12-05T19:54:47.434000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1f82b8c1-b95e-46e3-9a88-bf957d354696",
+        "timestamp": "2025-12-05T19:54:48.187000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance. Is there anything else I can help you with?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3d93ccdd-c46e-47d2-8671-c05aecfa1992",
+        "timestamp": "2025-12-05T19:54:58.813000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello?",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "6e565c91-f943-4ad7-9949-f7890c736b2d",
+        "timestamp": "2025-12-05T19:54:59.645000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hi there! How can I help you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "813c0058-1255-4c9a-996e-3f25f9f551f1",
+        "timestamp": "2025-12-05T19:54:59.968000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Bless you.",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "478dcc9a-c761-447c-a0e9-9dcb898b537c",
+        "timestamp": "2025-12-05T19:55:00.974000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Thank you! How can I assist you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e1714248-e4ed-4807-8bd2-4dadb10bf70f",
+        "timestamp": "2025-12-05T19:55:23.938000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0009a153-9965-496b-9ca8-de44831148d3",
+        "timestamp": "2025-12-05T19:55:24.715000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e52bb520-8537-41c8-a282-011000bd88ca",
+        "timestamp": "2025-12-05T19:55:47.136000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0f6f2d02-e54c-411d-92f4-23b181eb2e9e",
+        "timestamp": "2025-12-05T19:55:48.321000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7800ee19-b193-4690-b007-6df66e1583e0",
+        "timestamp": "2025-12-05T19:56:11.041000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "54f53f08-5bda-400c-a817-7b58bb83d6df",
+        "timestamp": "2025-12-05T19:56:11.778000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f162adbf-d23b-4fe6-a635-8a259593dfe5",
+        "timestamp": "2025-12-05T19:56:34.491000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ad6c5025-a3b5-4647-910a-55a25d092961",
+        "timestamp": "2025-12-05T19:56:35.088000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f5b3c1d3-3649-4404-8af8-496aa8dcaec9",
+        "timestamp": "2025-12-05T19:56:57.857000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "cde79cf1-db82-4f42-9ba0-57fd2d2793d0",
+        "timestamp": "2025-12-05T19:56:58.703000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time, I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "b5857b43-63db-4626-8c23-14edebbaf6c3",
+        "timestamp": "2025-12-05T19:57:21.322000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "76fb4ca6-fba7-44bf-b09d-5c8a2438b47d",
+        "timestamp": "2025-12-05T19:57:23.445000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8716c987-5bda-4260-9054-52a939aeba45",
+        "timestamp": "2025-12-05T19:57:45.874000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "35b88cb7-6685-4902-a98b-056cbbe57369",
+        "timestamp": "2025-12-05T19:57:46.746000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "07f21ae6-e804-4b96-ad54-a89fe23249a2",
+        "timestamp": "2025-12-05T19:58:09.833000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d292973f-ef66-4a59-88cf-b10767b12d78",
+        "timestamp": "2025-12-05T19:58:10.682000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e77dda57-6b17-4c5f-ab96-3699f85e3a61",
+        "timestamp": "2025-12-05T19:58:32.734000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "dc479a49-81db-47cd-a422-8a338e5ea468",
+        "timestamp": "2025-12-05T19:58:33.270000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ee572863-dcd1-4129-bbab-9134bbc100e5",
+        "timestamp": "2025-12-05T19:58:55.934000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e0b2a332-30a0-4fde-91a1-2dd24144d334",
+        "timestamp": "2025-12-05T19:58:56.478000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "64c01f27-2f8c-45b8-bacb-24416528f9e2",
+        "timestamp": "2025-12-05T19:59:18.901000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3ba80675-e927-4858-a196-795f0a6bdfac",
+        "timestamp": "2025-12-05T19:59:19.498000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready, I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7c560acd-3aa2-4645-999b-c44b030769d9",
+        "timestamp": "2025-12-05T19:59:42.301000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "4899916c-9213-4d04-8700-2e6fe43f6244",
+        "timestamp": "2025-12-05T19:59:43.638000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e9c0a79a-8c60-45d6-b054-6a307adf2456",
+        "timestamp": "2025-12-05T20:00:02.316000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello?",
+          "sender": "customer",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d9adf15d-412f-4300-8a0f-8661b4baafef",
+        "timestamp": "2025-12-05T20:00:02.739000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Hello! How can I assist you today?",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e9fc2007-1758-4178-9275-2e859fe69b12",
+        "timestamp": "2025-12-05T20:00:25.291000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1ffeedae-6d08-4c1e-ba0e-64c0d520d88d",
+        "timestamp": "2025-12-05T20:00:26.116000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e972f39f-63e6-4e07-ad1b-c182484c8451",
+        "timestamp": "2025-12-05T20:00:48.714000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "472ac59f-83f1-455c-93b9-941429f99ca2",
+        "timestamp": "2025-12-05T20:00:50.607000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "efe56440-4583-42b8-af7a-fbf0c13993f2",
+        "timestamp": "2025-12-05T20:01:13.489000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "346bd08f-ea5f-4f97-b7f8-4c8bc385a918",
+        "timestamp": "2025-12-05T20:01:14.300000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time. I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5e84c6da-4325-4615-a006-cd419a15265b",
+        "timestamp": "2025-12-05T20:01:36.885000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "fc633fe3-ba0d-420a-a84e-5b868dcc8b39",
+        "timestamp": "2025-12-05T20:01:37.530000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8f7f03e4-60d1-4aef-8a91-72f484253e34",
+        "timestamp": "2025-12-05T20:01:59.961000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "75d7a0f9-dd96-41b4-b275-4af8d36b2ad3",
+        "timestamp": "2025-12-05T20:02:00.626000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1fb7a3b5-83de-4534-83e7-34ccbfc0113c",
+        "timestamp": "2025-12-05T20:02:23.600000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e14536f1-f269-4c23-a73a-d7a7ba85169a",
+        "timestamp": "2025-12-05T20:02:24.302000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8482a4ba-a93d-4c16-9c30-45719ad38023",
+        "timestamp": "2025-12-05T20:02:46.391000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "49df8c70-b7b8-4c70-9a81-f96388d49386",
+        "timestamp": "2025-12-05T20:02:47.019000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3f5d4417-8679-4eb8-9a39-27dc6db53380",
+        "timestamp": "2025-12-05T20:03:09.292000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9e4118c0-b7e9-4c22-b7d7-017048cc44ff",
+        "timestamp": "2025-12-05T20:03:10.022000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3b5e487a-26aa-4b8f-9742-74d2cf13135e",
+        "timestamp": "2025-12-05T20:03:32.480000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "08bd4144-0874-41d5-b15a-25ade7fb0bc1",
+        "timestamp": "2025-12-05T20:03:33.177000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready, I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "983facf0-ef2d-4b8f-8c67-592a30665468",
+        "timestamp": "2025-12-05T20:03:56.023000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bc12d059-4e80-4c86-92f4-be3082ae7e7a",
+        "timestamp": "2025-12-05T20:03:56.996000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "bfae485c-bbbf-4184-9a63-904ab68613aa",
+        "timestamp": "2025-12-05T20:04:19.623000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e66c8be8-9496-4f9b-92c1-c60b57acd4d5",
+        "timestamp": "2025-12-05T20:04:22.795000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "64805830-21a8-46fe-9794-518e4120ac97",
+        "timestamp": "2025-12-05T20:04:45.768000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "086b401c-b93c-426d-b4b6-4a3ba14f536d",
+        "timestamp": "2025-12-05T20:04:46.461000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "4c5efc35-d800-46c8-86f9-98f6a8c64f51",
+        "timestamp": "2025-12-05T20:05:09.081000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d15c9a6e-f6bd-456f-90f9-f4a435a17ea1",
+        "timestamp": "2025-12-05T20:05:09.979000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time. I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e29201e2-2749-4d12-a138-48c8537e4494",
+        "timestamp": "2025-12-05T20:05:32.483000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e90439cd-6cb1-48e6-a87c-dcdb83cfd845",
+        "timestamp": "2025-12-05T20:05:33.156000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "94233b9e-a9bd-41f0-989c-fb005cae6896",
+        "timestamp": "2025-12-05T20:05:55.669000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "459ada6c-c90c-4e6f-ba23-0aaf7e9d447f",
+        "timestamp": "2025-12-05T20:05:57.959000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "abe21705-d207-4749-9ca4-51b12ee5705e",
+        "timestamp": "2025-12-05T20:06:20.930000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "eea13c32-4974-4a53-9505-d706a58e5540",
+        "timestamp": "2025-12-05T20:06:21.867000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "27a4efb9-8ba2-4d44-9343-fb4a9a70e085",
+        "timestamp": "2025-12-05T20:06:43.916000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3df52d2c-5488-4fb4-8ef9-b5f11c4c023d",
+        "timestamp": "2025-12-05T20:06:44.665000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f3b960a5-9131-43d8-83d6-50d50f23ad09",
+        "timestamp": "2025-12-05T20:07:07.271000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "baf58645-1914-4996-8452-de433e049968",
+        "timestamp": "2025-12-05T20:07:07.867000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8ab8a3cf-700a-42ac-a023-75d5ceebfa91",
+        "timestamp": "2025-12-05T20:07:30.309000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5498bb75-43e1-4dd4-8ffd-e8bf59418b16",
+        "timestamp": "2025-12-05T20:07:31.391000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready, I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "138e6c98-b999-4a1b-a2bc-56f66904898d",
+        "timestamp": "2025-12-05T20:07:54.032000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7acdf143-a59d-43de-aa09-b4f6267e86af",
+        "timestamp": "2025-12-05T20:07:55.739000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "646aca71-cb29-4884-9220-5c76f6ae24b8",
+        "timestamp": "2025-12-05T20:08:18.385000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "705198e7-d460-47f3-8b53-ca34002db4b2",
+        "timestamp": "2025-12-05T20:08:19.191000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "33ac5314-b605-4605-8787-8f4c6ad33aa7",
+        "timestamp": "2025-12-05T20:08:41.926000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "637e2cb3-28fc-45d5-bea3-006517061f8e",
+        "timestamp": "2025-12-05T20:08:44.168000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "46339fd7-02d7-49c5-9a50-828e211754de",
+        "timestamp": "2025-12-05T20:09:06.955000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d45edc61-7c77-421d-bdc1-048ffddb6cf2",
+        "timestamp": "2025-12-05T20:09:07.793000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time. I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "828130f6-cda7-4071-96a0-e169456aeeae",
+        "timestamp": "2025-12-05T20:09:30.442000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "608bb226-f273-43e1-9dc7-0c7b14afe964",
+        "timestamp": "2025-12-05T20:09:31.160000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "b46380f2-802d-440c-bc2b-394a6be12cce",
+        "timestamp": "2025-12-05T20:09:53.752000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "dff7179d-6fd6-4256-8313-662418a64141",
+        "timestamp": "2025-12-05T20:09:54.296000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e721d00b-a2ba-483f-86a3-719552203e24",
+        "timestamp": "2025-12-05T20:10:17.428000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "e15532d1-1eba-442a-bdca-379c97625c3e",
+        "timestamp": "2025-12-05T20:10:18.251000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "49b4fbff-3783-4de4-bdf8-bf3ae87c58b0",
+        "timestamp": "2025-12-05T20:10:40.370000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ed753796-eaa6-46f1-8e41-d355020b1350",
+        "timestamp": "2025-12-05T20:10:41.081000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9626a46e-3d61-433a-889a-56d5033bf166",
+        "timestamp": "2025-12-05T20:11:03.698000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "2e939566-5e0c-4fd0-afa1-896f272bcbf6",
+        "timestamp": "2025-12-05T20:11:06.218000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "b0253cac-6925-4dc4-beda-076a166dfb06",
+        "timestamp": "2025-12-05T20:11:28.749000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7107e922-28a0-4500-900b-00d2efcc7ccf",
+        "timestamp": "2025-12-05T20:11:29.384000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready, I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "96a6be82-1e94-418d-9226-17d398cdd4fb",
+        "timestamp": "2025-12-05T20:11:52.281000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "dbeb6e25-0e2d-4d49-9b3a-f261fb79e040",
+        "timestamp": "2025-12-05T20:11:53.706000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8669648e-6eee-41e2-8bfa-0eeeac4984fc",
+        "timestamp": "2025-12-05T20:12:16.334000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "7bc01d0d-41c7-407a-8962-b825810fbc8c",
+        "timestamp": "2025-12-05T20:12:17.028000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9872d78f-b9e5-4b7a-86a2-300815029d31",
+        "timestamp": "2025-12-05T20:12:39.763000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "796e7583-2bdb-4fdd-b344-dbfad67ad19a",
+        "timestamp": "2025-12-05T20:12:40.429000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f6bda7e5-e70d-4a9a-9570-fdf288d152db",
+        "timestamp": "2025-12-05T20:13:02.969000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "3d90d9e7-ca59-4d71-95af-4f6009796c17",
+        "timestamp": "2025-12-05T20:13:03.945000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time. I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "b0504d88-631c-4ce1-b928-f2a151ade6dc",
+        "timestamp": "2025-12-05T20:13:26.245000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "28ee461d-d828-4229-83b8-811101b41ce8",
+        "timestamp": "2025-12-05T20:13:27.216000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "ff4aa466-67ba-4a4a-aee0-f94cefc85395",
+        "timestamp": "2025-12-05T20:13:49.709000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9bf62216-a803-48b7-877e-2febb546834e",
+        "timestamp": "2025-12-05T20:13:50.324000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d5970691-fbef-4051-b698-9bc47f4fc757",
+        "timestamp": "2025-12-05T20:14:13.343000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "a555bf9f-0bc2-46cd-959d-2927e66fc1cd",
+        "timestamp": "2025-12-05T20:14:14.172000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "18765200-59e8-4dea-9526-6ac19d71ba57",
+        "timestamp": "2025-12-05T20:14:36.028000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "a16a25b0-c276-4ebe-8e69-3746305bd657",
+        "timestamp": "2025-12-05T20:14:36.717000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "365e3f23-5a1f-4768-bcd2-3e11d786df2f",
+        "timestamp": "2025-12-05T20:14:59.196000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I am still here if you need assistance",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "368e5639-29db-4401-93b1-b5decd6bc9e7",
+        "timestamp": "2025-12-05T20:15:00.012000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I am still here if you need assistance.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f22ed21d-32e2-4a2c-b384-3e0ab0d5c89b",
+        "timestamp": "2025-12-05T20:15:22.508000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Whenever you are ready I am here",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "9c7fc463-f356-4692-9579-f77ecda1a9cd",
+        "timestamp": "2025-12-05T20:15:23.098000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Whenever you are ready, I am here.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "0abb0c78-5787-42e5-8900-47eff203d22c",
+        "timestamp": "2025-12-05T20:15:45.752000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm available whenever you need help",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "8c1197c2-2bdc-4bda-87e4-071114ab6f82",
+        "timestamp": "2025-12-05T20:15:47.495000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm available whenever you need help.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "df8d7eea-1ea8-4484-9ee3-9d5c45f54d15",
+        "timestamp": "2025-12-05T20:16:10.147000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Feel free to continue whenever you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "d1ef1975-8bd4-4a96-9023-1bf636072dd4",
+        "timestamp": "2025-12-05T20:16:10.825000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Feel free to continue whenever you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "07ea80f0-b48a-4004-9fcc-1d986ddb3e1e",
+        "timestamp": "2025-12-05T20:16:33.658000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here and ready to help when you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1a77461c-5b97-41c8-8978-32f4de7c6f71",
+        "timestamp": "2025-12-05T20:16:34.634000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here and ready to help when you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "6fb8c701-f5b7-4f03-a542-89e7360c15f0",
+        "timestamp": "2025-12-05T20:16:57.533000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Take your time, I'll be here when you're ready",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "142f99c5-e106-4251-860a-9df58610421f",
+        "timestamp": "2025-12-05T20:16:58.520000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Take your time. I'll be here when you're ready.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "af70b7b2-0d17-4567-952a-c7b340974e7c",
+        "timestamp": "2025-12-05T20:17:21.057000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm standing by if you have any questions",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "f81309f4-38cc-40d6-a6ed-cd810f6aeaec",
+        "timestamp": "2025-12-05T20:17:21.779000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm standing by if you have any questions.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "1b302914-cc25-4083-9cb6-70eb9a62f243",
+        "timestamp": "2025-12-05T20:17:44.476000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Let me know if there's anything else I can help with",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "55020db3-43e0-40bf-9fe7-666784bcc0da",
+        "timestamp": "2025-12-05T20:17:45.200000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Let me know if there's anything else I can help with.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "92f01ad6-f5b0-49e7-9a16-acfe3d0ed40d",
+        "timestamp": "2025-12-05T20:18:08.146000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: I'm here whenever you need me",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "cb5be9bb-4cf0-442f-a49a-5c55e9a0ae0a",
+        "timestamp": "2025-12-05T20:18:08.755000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "I'm here whenever you need me.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "5277e79a-ac5e-4f9a-b253-c6c4712f5156",
+        "timestamp": "2025-12-05T20:18:30.837000Z",
+        "source_system": "voice_orchestrator",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "If you were supposed to do a reasoner request and you didn't do it now and then let the customer know you are still working on it. If not say: Ready to assist you whenever you need",
+          "sender": "system",
+          "is_synthetic_interim_message": false
+        }
+      },
+      {
+        "id": "6bd182e2-8371-4084-9550-7f6edd4838a2",
+        "timestamp": "2025-12-05T20:18:31.812000Z",
+        "source_system": "voice_assistant",
+        "trial_mode_id": null,
+        "type": "message",
+        "message": {
+          "text": "Ready to assist you whenever you need.",
+          "sender": "bot",
+          "is_synthetic_interim_message": false
+        }
+      }
+    ],
+    "conversation_metadata": {},
+    "parent_header": null,
+    "current_datetime": null
+  }
+}

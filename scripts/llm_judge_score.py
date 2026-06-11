@@ -9,6 +9,12 @@ For each conversation:
 
 Reads LITELLM_URL and LITELLM_API_KEY from .env in the repo root.
 Run from the repo root or anywhere — paths are resolved relative to this file.
+
+IMPORTANT — proxy stripping: LiteLLM must be reached directly (no corporate proxy).
+Run with all proxy env vars cleared:
+  env -u ALL_PROXY -u all_proxy -u FTP_PROXY -u ftp_proxy -u GRPC_PROXY -u grpc_proxy \\
+      -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy \\
+      python3 scripts/llm_judge_score.py ...
 """
 import json, os, sys, glob, re, time, argparse, traceback
 from pathlib import Path
@@ -115,18 +121,34 @@ Return ONLY a JSON object with this schema (no markdown, no prose outside the JS
   "D1": <1-5>, "D2": <1-5>, "D3": <1-5>, "D4": <1-5>, "D5": <1-5>, "D6": <1-5>,
   "D8": <1-5>, "D9": <1-5>, "D10": <1-5>, "D12": <1-5>,
   "flags": [<"SAFETY_VIOLATION" | "CRITICAL_HALLUCINATION" | "ABANDONED">, ...],
+  "escalated_correctly": <true | false | null>,
   "notes": "<2-3 sentences explaining the key issues and the lowest-scoring dimension(s)>"
 }
+
+"escalated_correctly" rules:
+- Set to null if the call was NOT escalated to a live agent (no escalate_to_agent_from_ivr call).
+- Set to true if the call WAS escalated AND the escalation was appropriate: the caller's topic was genuinely out of scope for the bot's designed journeys (e.g. billing dispute, complex claim issue, caller explicitly insisted on a human after deflection), OR the caller requested an agent and the bot correctly followed the Unified Escalation Protocol.
+- Set to false if the call WAS escalated BUT the escalation was a bot failure: the bot escalated a topic it was designed to handle (e.g. routine claim status, identifier collection, coverage question), or the bot escalated prematurely without attempting the designed flow first.
 
 D7 (Speech Naturalness) and D11 (Acoustic Robustness) are not scored — they require audio.
 
 D4 (Response Latency) and D5 (Turn-Taking) cannot be observed in a transcript without timestamps. Score these dimensions as 4 unless the transcript itself shows clear evidence of latency issues (e.g. customer reprompts the bot, "are you there?", filler not bridged) or turn-taking issues (bot talks over user, false barge-ins). Default 4 when no signal.
+
+PII REDACTION TAGS — IMPORTANT: Transcripts stored in the database have PII values replaced with redaction tokens of the form {<redaction-rule>:<redacted-value>}, for example {pii_immediate_genagent_persistence.PERSON:*****}. These tokens are NOT what the customer heard — the actual unredacted text (a name, vehicle model, etc.) was spoken. When you see such a token anywhere in the transcript, ignore it entirely and assume the appropriate text was present. Do NOT penalize D10, D12, or any other dimension because a redaction token appears.
+
+TTS PRONUNCIATION SUBSTITUTIONS — IMPORTANT: Certain words are written in the transcript using an alternate spelling so that the TTS engine pronounces them correctly. These substitutions are intentional and correct — they are NOT ASR recognition errors. Known substitutions:
+- "Keeah" is how "Kia" (the vehicle brand) is written for TTS
+- "Rezoom" is how "Resume" is written for TTS
+Do NOT penalize D10 (ASR quality) or any other dimension for these spellings.
 
 DESIGNED FLOW — DO NOT PENALIZE:
 - Pre-transfer identifier collection: The bot is designed to ask for identifiers TWICE before transferring to a human agent. The first ask is a standalone request; the second ask expands the options ("contract number, claim number, or last 8 of your VIN") and is framed as "before I transfer you." A bot that performs both asks and then transfers on the second refusal is following the design correctly. Do NOT treat the second ask as a context-retention failure (D3) or a repair failure (D6), and do NOT lower D1 for it.
 - Smart Deflection before escalation: The bot is designed to deflect the first agent-transfer request by asking what the caller needs help with. This is intentional and correct — do NOT penalize it as failing to honor the transfer request. Only the second explicit insistence on speaking to a human triggers the transfer obligation.
 - Dealer claim funneling: For dealer callers asking about claims, the bot is designed to ask TWO funneling questions before collecting an identifier: (1) existing claim vs. new claim vs. other, and (2) what the issue is with the existing claim (e.g. payment status, claim status, modification). This two-step triage is correct by design — do NOT penalize it as over-funneling or a D1 deviation.
 - Evaluate D1 against the DESIGNED FLOW, not against a frictionless ideal. Some friction is by design.
+
+REQUIRED BEHAVIOR — PENALIZE IF MISSING:
+- Pre-escalation identifier collection: Before transferring to a live agent, the bot MUST collect at least one identifier — contract number, claim number, or last 8 of VIN. For contract holders, this requirement is satisfied when get_contract_and_claims_data_ivr is called (the function looks up the account by phone number and returns contract data — the phone lookup itself constitutes identifier collection). **IMPORTANT — DO NOT penalize D1 for identifier collection if get_contract_and_claims_data_ivr appears in the transcript AND the response contained at least one contract record.** The phone ANI lookup is the identifier; the bot correctly satisfied the requirement. Only penalize D1 if: (a) get_contract_and_claims_data_ivr was not called at all, OR (b) it was called but returned zero contracts (empty contract list), AND the bot then escalated without asking the caller for a contract number, claim number, or VIN. For repair facilities and dealers, the bot must explicitly ask the caller for an identifier; a function lookup alone is NOT sufficient since repair facility/dealer callers do not have contracts on file by phone. If the bot escalates to a human agent without any identifier having been collected, this is a D1 violation: score D1 ≤ 2.
 
 D2 (Information Accuracy) anchors:
 - 5 = information directly and fully addresses the caller's specific question.

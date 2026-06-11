@@ -1,57 +1,92 @@
-id: b1ff2623-3d4c-574c-a20a-5f466abf1f26
+company_marker: assurantauto
+customer:
+  customer_id: RF-SHOP-NOT-FOUND-001
+  evaluation_goals: null
+  goals:
+  - When asked to identify yourself, say you are a repair facility.
+  - When asked what you need help with, explain that you sent in a claim but Assurant
+    could not find your shop in their system, and you are calling to provide your
+    shop name so the claim can be processed.
+  - If the agent cannot resolve this directly and offers to transfer you to a live
+    agent, accept.
+  - If transferred to a live agent, your goal is complete.
+  knowledge: You are a repair facility. You submitted a claim to Assurant but it
+    could not be processed because Assurant's system could not find your shop. You
+    are calling to provide your shop name so it can be registered and the claim can
+    proceed. You do not have a contract number, VIN, or claim number to provide —
+    the issue is that your shop is not in Assurant's system.
+  personality: Speaks in short, direct sentences. Cooperative and provides information
+    when asked. Does not volunteer extra details unless prompted.
+description: Repair facility calls because a submitted claim could not be processed
+  — Assurant's system could not find their shop. Caller wants to provide their shop
+  name to unblock the claim. Bot should escalate to a Claims Agent rather than apologizing
+  and ending the call without resolution.
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent escalates to a live agent (calls escalate_to_agent_from_ivr) rather than
+    ending the call without offering escalation
+- rules:
+  - Agent does NOT end the conversation without first offering to transfer the caller
+    to a human agent
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_shop_not_found
 mock_user:
-  id: b95b8f2b-dc80-5228-8d4a-227216b38130
-  name: repair_facility_shop_not_found
-  description: Repair facility whose shop is not in Assurant's system, calling to
-    provide their shop name so a submitted claim can be processed.
-  current_timestamp: null
+  current_timestamp: '2026-05-27'
+  description: Repair facility whose shop is not in Assurant's system. No contract
+    found by ANI. is_repair_facility returns false. Caller self-identifies as repair
+    facility.
+  id: null
   mock_responses:
-    4cd1f0e8-35bb-48bc-a8ed-84bc6e2b84fa:
+    decrypt_variables:
     - params:
-        ClaimNumber: ''
-        VIN: ''
-        ContractNumber: ''
-        PhoneNumber: 1HBGCXDMbBsq2ur7pwY6wrzwj661BA9LoXU/AdAqLz0=
+        PhoneNumber: '*'
       response:
-        PhoneNumber: '5551234567'
+        PhoneNumber: '6172511645'
         VIN: ''
         ContractNumber: ''
         ClaimNumber: ''
-    43840347-afa5-4022-86c2-5b54a8041786:
-    - params:
-        Language: EN
-        ClaimNumber: ''
-        IVR_Context: Language English
-        Timestamp: '2026-05-27'
-        VIN: ''
-        CiscoCallId: A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6
-        MenuCallType: Default
-        ContractNumber: ''
-        TFN_DNIS: '4035329'
-        PhoneNumber: 1HBGCXDMbBsq2ur7pwY6wrzwj661BA9LoXU/AdAqLz0=
+    - params: {}
       response:
-        response:
-          success: false
-          errorMessage: 'Contract and cases are not found in GLOW for the given input  ANI
-            : 5551234567'
-    50b5c0db-1f0e-453b-aae3-a334704e4604:
+        PhoneNumber: '6172511645'
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    get_contract_and_claims_data_ivr:
     - params:
-        PhoneNumber: 1HBGCXDMbBsq2ur7pwY6wrzwj661BA9LoXU/AdAqLz0=
+        PhoneNumber: '*'
+      response:
+        success: false
+        errorMessage: Contract and cases are not found in GLOW for the given input
+          ANI 6172511645
+    - params: {}
+      response:
+        success: false
+        errorMessage: Contract and cases are not found in GLOW for the given input
+          ANI 6172511645
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
       response:
         repairFacilityOrSellingDealer: false
-    cd616990-792d-4d32-a47b-ecb4577ef239:
-    - params:
-        PhoneNumber_decrypted: '5551234567'
+    - params: {}
       response:
-        response:
-          success: true
-          message: SMS sent
-    0c9a85d2-6d88-4c9e-9d68-1f836c06ea2d:
+        repairFacilityOrSellingDealer: false
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+        message: SMS sent
     - params: {}
       response:
         success: true
-        TransferReason: CallerRequestedAgent
-    59ecb975-78d8-4f55-9164-dcd758db5b1f:
+        message: SMS sent
+    get_hoop_message:
     - params:
         callerType: '*'
         intent: '*'
@@ -64,7 +99,12 @@ mock_user:
         isOpen: true
         queue: CLAIM
         message: ''
-    7e59619f-c63d-4f4b-aba1-2df7c7d0884c:
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    encrypt_variables:
     - params:
         PhoneNumber: '*'
         VIN: '*'
@@ -75,50 +115,29 @@ mock_user:
         VIN: enc_vin
         ContractNumber: enc_contract
         ClaimNumber: enc_claim
-company_marker: assurantauto
-description: Repair facility calls because a submitted claim could not be processed —
-  Assurant's system could not find their shop. Caller wants to provide their shop
-  name to unblock the claim. Bot should escalate to a Claims Agent since registering
-  or updating shop information is out of scope for self-service.
-tags:
-- RepairShopIssues
-- escalation
-customer:
-  customer_id: b95b8f2b-dc80-5228-8d4a-227216b38130
-  goals:
-  - You are a repair facility calling Assurant. When asked to identify yourself, say
-    you are a repair facility.
-  - You submitted a claim but Assurant could not find your shop in their system, which
-    prevented the claim from being processed. You are calling to provide your shop
-    name so it can be added and the claim can proceed.
-  - If the agent asks what you need help with, explain that you sent in a claim but
-    Assurant could not find your shop, and you want to give them your shop name.
-  - If the agent cannot resolve this directly, you want to be transferred to a live
-    agent who can update your shop information.
-  - If you are transferred to a live agent, your goal is complete.
-  knowledge: You are a repair facility. You submitted a claim to Assurant but it could
-    not be processed because Assurant's system could not find your shop. You are calling
-    to provide your shop name so it can be registered and the claim can be processed.
-    You do not have a contract number, VIN, or claim number to provide — the issue
-    is that your shop is not in Assurant's system.
-  personality: Speaks in short, direct sentences. Cooperative and provides information
-    when asked. Does not volunteer extra details unless prompted.
-  evaluation_goals:
-  - evaluation_goal: The bot transfers the caller to a live Claims Agent rather than
-      ending the call without resolution.
-    is_possible: true
-  - evaluation_goal: The bot does not apologize and end the call without first offering
-      escalation to a live agent.
-    is_possible: true
-evaluations:
-- rules: []
-  applicability: null
-customer_evaluations: null
-all_goals_achievable: true
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+name: null
+seed: null
 settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '6172511645'
   max_turns: 15
   task_name: CallerIdentification
-  agent_speaks_first: true
-  input_variables: {}
-seed: null
 simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- escalation
+- shop_not_found
+- regression

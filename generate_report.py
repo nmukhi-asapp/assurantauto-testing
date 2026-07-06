@@ -413,22 +413,22 @@ def extract_transcript(state: dict) -> list:
         return []
     start_ts = parse_ts(first_msg["timestamp"])
 
-    # Identify real customer turns
-    all_customer = [
-        a for a in actions
-        if a.get("type") == "message"
-        and a.get("source_system") == "customer"
-        and a.get("message", {}).get("sender") == "customer"
-    ]
-    real_customer_ids = set()
-    last_real_ts = None
-    for msg in all_customer:
-        ts = parse_ts(msg["timestamp"])
-        if last_real_ts is None or ts_diff_ms(last_real_ts, ts) > 3000:
-            real_customer_ids.add(msg["id"])
-            last_real_ts = ts
-        else:
-            last_real_ts = ts
+    # The talker's internal paraphrase (e.g. "Caller identified themselves as…") is
+    # always the customer/customer message immediately after send_customer_request_or_update.
+    # Build a set of those IDs to exclude from the transcript.
+    summary_ids = set()
+    for idx, a in enumerate(actions):
+        if (a.get("type") == "function_request"
+                and (a.get("function_request") or {}).get("function_name") == "send_customer_request_or_update"):
+            # Walk forwards to find the next customer message
+            for nxt in actions[idx + 1:]:
+                if nxt.get("type") == "message_audio_completed":
+                    continue
+                if (nxt.get("type") == "message"
+                        and nxt.get("source_system") == "customer"
+                        and nxt.get("message", {}).get("sender") == "customer"):
+                    summary_ids.add(nxt.get("id"))
+                break
 
     transcript = []
     seen_bot_texts = set()
@@ -454,7 +454,9 @@ def extract_transcript(state: dict) -> list:
             seen_bot_texts.add(key)
             transcript.append({"time": time_str, "speaker": "agent", "text": text})
 
-        elif src == "customer" and sender == "customer" and a["id"] in real_customer_ids:
+        elif sender == "customer" and a.get("id") not in summary_ids:
+            # Real customer speech (works for both prod voice_assistant/customer
+            # and scenario-runner customer/customer messages)
             transcript.append({"time": time_str, "speaker": "customer",
                                 "text": _dedupe_text(text)})
 

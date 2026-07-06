@@ -34,6 +34,7 @@ mcp__data-sampling__fetch_conversations_by_id(
   conversation_ids=["<conversation-id>"],
   save_conversations=True,
   is_voice=True,
+  include_human_agent_utterances=True,
   output_dir="<absolute-path-to-this-repo>/fetched_conversations"
 )
 ```

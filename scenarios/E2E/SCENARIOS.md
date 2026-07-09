@@ -13,6 +13,8 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_journey1_mechanical_basic_repair` | contract_holder/journey1_mechanical/scenario_1_basic_mechanical_repair.yaml | Car needs transmission repair — agent explains process and directs to repair facility | ✅ run |
 | `e2e_journey1_mechanical_escalation` | contract_holder/journey1_mechanical/scenario_2_escalation_to_mechrepair.yaml | Customer requests agent to help repair facility with claim authorization | ✅ run |
 | `e2e_journey1_selling_dealer_first_recommendation` | contract_holder/journey1_mechanical/selling_dealer_first_CAa1325513170d0fc38b6d22e8fd5ed4c8.yaml | Customer asking where to take car — agent must recommend returning to selling dealer first | ✅ run |
+| `e2e_journey1_mechanical_claim_filing_language` | contract_holder/journey1_mechanical/scenario_3_claim_filing_language.yaml | CH opens call saying they need to file a claim — agent probes for underlying issue then guides through repair authorization | |
+| `e2e_ch_tieback_requirement` | contract_holder/journey1_mechanical/scenario_tieback_requirement.yaml | CH wants to start a repair claim — contract has a 40-mile tieback clause requiring return to selling dealer | |
 
 ### Journey 2 — Claim Status
 
@@ -31,7 +33,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 |---|---|---|---|
 | `e2e_journey3_rental_inquiry` | contract_holder/journey3_car_rental/scenario_1_rental_inquiry.yaml | Customer inquires about rental coverage while vehicle is being repaired | ✅ run |
 | `e2e_ch_rental_coverage_followup` | contract_holder/journey3_car_rental/scenario_rental_coverage_followup.yaml | CH asks general coverage question then follows up specifically about rental | ✅ run |
-| `e2e_ch_car_rental_spanish_escalation` | contract_holder/journey3_car_rental/scenario_car_rental_spanish_escalation.yaml | Spanish-speaking customer asks if agent speaks Spanish — agent should escalate immediately without deflecting | ✅ run |
+| `e2e_ch_rental_roadside_inline` | contract_holder/journey3_car_rental/scenario_ch_rental_roadside_inline.yaml | CH with active claim and rentalIndicator=Y asks about deductible, rental, and roadside in one call — all handled inline | |
 
 ### Journey 4 — Contract Questions
 
@@ -45,6 +47,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_journey4_contract_status_mileage_check` | contract_holder/journey4_contract_questions/contract_expiry_mileage_CA219bd29d3672b24df1fc2cba9476f414.yaml | Customer asks if contract is still active — agent must ask for current odometer reading | ✅ run |
 | `e2e_journey4_signed_copy_of_contract` | contract_holder/journey4_contract_questions/signed_copy_contract_CA5c5d985d2659d2769a552bc061d2ca3a.yaml | Customer requests signed copy — agent directs to VCP portal | ✅ run |
 | `e2e_journey4_vcp_link_offer` | contract_holder/journey4_contract_questions/vcp_link_offer_CAa1325513170d0fc38b6d22e8fd5ed4c8.yaml | Agent must proactively offer VCP portal link (vehiclecareplan.com) during contract question | ✅ run |
+| `e2e_ch_dual_contract_type_disambiguation` | contract_holder/journey4_contract_questions/e2e_ch_dual_contract_type_disambiguation.yaml | CH with two contracts on same vehicle (Service Contract + Limited Warranty) — agent disambiguates by type and answers coverage question | |
 
 ### Journey 5 — Coverage Questions
 
@@ -53,6 +56,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_journey5_coverage_general` | contract_holder/journey5_coverage/scenario_1_general_coverage_question.yaml | Customer asks if alternator repair may be covered | ✅ run |
 | `e2e_journey5_coverage_definitive` | contract_holder/journey5_coverage/scenario_2_definitive_coverage_request.yaml | Customer demands a definitive yes/no on turbocharger coverage | ✅ run |
 | `e2e_journey5_coverage_where_to_repair` | contract_holder/journey5_coverage/scenario_3_where_to_repair.yaml | Customer asks whether they can use any shop or must go to a specific dealer | ✅ run |
+| `e2e_journey5_ppm_engine_coverage_claim_initiation` | contract_holder/journey5_coverage/scenario_4_ppm_engine_coverage_claim_initiation.yaml | CH with PPM plan asks if engine repair is covered, then how to file — resolves self-service with no escalation | |
 
 ### Journey 6 — Roadside Assistance
 
@@ -80,6 +84,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_edge_case_lookup_failure_full_vin_then_claim` | contract_holder/edge_cases/scenario_13_lookup_failure_full_vin_then_claim.yaml | ANI lookup fails → full 17-char VIN (extract last 8, fails) → claim number (fails) → escalate | ✅ run |
 | `e2e_edge_case_full_vin_lookup` | contract_holder/edge_cases/full_vin_lookup_row14.yaml | Customer provides full 17-char VIN — agent extracts last 8 without asking customer to repeat | ✅ run |
 | `e2e_edge_case_no_identifier` | contract_holder/edge_cases/scenario_5_no_identifier_provided.yaml | Customer cannot provide any identifier for lookup | ✅ run |
+| `e2e_ch_ani_failure_asks_for_identifier` | contract_holder/edge_cases/scenario_ani_failure_asks_for_identifier.yaml | Regression: ANI lookup fails → CH identifies as Contract Holder without stating need → agent must ask for an identifier (Step 1A skip bug) | |
 
 ### Edge Cases — PII / Identifier Disclosure
 
@@ -109,6 +114,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_edge_case_ch_human_request_portal_login` | contract_holder/edge_cases/scenario_15_ch_human_request_portal_login.yaml | CH says "I need a human" with no reason → agent asks why → portal login issue → escalate | ✅ run |
 | `e2e_edge_case_ch_human_request_steered_to_resolution` | contract_holder/edge_cases/scenario_16_ch_human_request_steered_to_resolution.yaml | CH opens with human request but actual need is claim status → agent handles it without escalating | ✅ run |
 | `e2e_ch_mid_journey_human_request` | contract_holder/edge_cases/scenario_ch_mid_journey_human_request.yaml | CH checks claim status then mid-conversation asks for human without reason → agent probes → rental coverage question is in-scope → answered without escalating | |
+| `e2e_ch_spanish_language_request` | contract_holder/edge_cases/scenario_ch_spanish_language_request.yaml | CH immediately requests Spanish-language support — agent escalates to live agent without attempting English resolution | |
 
 ---
 
@@ -119,6 +125,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | ID | File | Description | Run |
 |---|---|---|---|
 | `e2e_rf_ani_routing` | repair_facility/scenario_6_ani_routing_direct.yaml | Recognized ANI — caller type confirmed as RF, agent routes directly | ✅ run |
+| `e2e_rf_shop_not_found` | repair_facility/repair_facility_shop_not_found.yaml | RF calls because submitted claim couldn't be processed — Assurant couldn't find their shop; caller wants to provide shop name to unblock claim | |
 
 ### Existing Claims
 
@@ -130,6 +137,8 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_rf_claim_not_found_fallback` | repair_facility/claim_not_found_fallback_CA444e80d0a1a60aebc7ec9a4b365faf5c.yaml | Claim number lookup fails — agent informs RF and provides fallback guidance | ✅ run |
 | `e2e_rf_multi_issue_claim_status_and_new_claim` | repair_facility/scenario_multi_issue_claim_status_and_new_claim.yaml | RF asks about existing claim status, then asks about filing a new claim | ✅ run |
 | `e2e_rf_terminology_and_extended_status` | repair_facility/rf_terminology_CA707224c792b458256a5838fa064e1222.yaml | Agent must use "independent repair facilities" (not "repair shops") and provide extended status | ✅ run |
+| `e2e_rf_identifier_type_not_repeated` | repair_facility/scenario_identifier_type_not_repeated.yaml | Regression: RF states identifier type when providing claim/contract/VIN — agent must not re-ask for type after number is given | |
+| `e2e_rf_identifier_loop_agent_transfer` | repair_facility/scenario_rf_identifier_loop_agent_transfer.yaml | RF requests agent — two consecutive identifier lookups fail (VIN then claim number) — agent transfers rather than ending call | |
 
 ### New Claims / RO Submission
 
@@ -160,6 +169,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_rf_immediate_human_request_dispute` | repair_facility/scenario_rf_immediate_human_request.yaml | RF immediately requests live agent to dispute a denied claim → escalate | ✅ run |
 | `e2e_rf_mid_journey_human_request` | repair_facility/scenario_rf_mid_journey_human_request.yaml | RF checks authorization status then mid-conversation asks for human without reason → agent probes → authorization dispute is out-of-scope → escalate | |
 | `e2e_rf_new_claim_immediate_agent_hoop_failure` | repair_facility/rf_immediate_agent_hoop_failure.yaml | Regression: RF asks for agent immediately after portal offer, declines chat, `get_hoop_message` fails on first call (schema error) then succeeds on retry — agent must NOT ask customer about queue hours and must eventually transfer | |
+| `e2e_rf_spanish_language_request` | repair_facility/scenario_rf_spanish_language_request.yaml | RF immediately requests Spanish-language support — agent escalates to live agent without attempting English resolution | |
 
 ---
 
@@ -174,6 +184,9 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_dealership_payment_inquiry` | dealership/scenario_3_payment_inquiry.yaml | Dealership inquires about payment timeline — escalates to payment specialist | ✅ run |
 | `e2e_dealership_claim_modification` | dealership/scenario_4_claim_modification.yaml | Dealership needs to add parts to existing claim — escalates to claims team | ✅ run |
 | `e2e_dealership_multi_issue_claim_status_and_new_claim` | dealership/scenario_multi_issue_claim_status_and_new_claim.yaml | Dealership asks about payment on existing claim, then asks about filing a new one | ✅ run |
+| `e2e_dealership_case_number_lookup` | dealership/scenario_case_number_lookup.yaml | Dealer provides case number as identifier — agent calls getClaims API directly without asking caller to clarify identifier type | |
+| `e2e_dealer_adjuster_caller_multi_claim_loop` | dealership/scenario_dealer_adjuster_caller_multi_claim_loop.yaml | Dealer initially identifies as "Adjuster" causing identification loop — eventually resolves and follows up on a submitted claim | |
+| `e2e_dealer_new_claim_submitted_multi_claim_adjuster_request` | dealership/scenario_dealer_new_claim_submitted_multi_claim_adjuster_request.yaml | Regression: dealer follows up on new claim submitted online; ANI fails; tests multi-claim adjuster request handling | |
 
 ### New Claims / Portal
 
@@ -188,6 +201,8 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | ID | File | Description | Run |
 |---|---|---|---|
 | `e2e_dealership_contract_modification` | dealership/scenario_6_contract_modification.yaml | Dealership requests contract modification (adding GAP) — escalates | ✅ run |
+| `e2e_dealer_coverage_question_engine_mounts` | dealership/scenario_coverage_question_engine_mounts.yaml | Dealer asks pre-claim coverage question about engine mounts — agent reads termsStructuredText and describes coverage | |
+| `e2e_dealer_last8_vin_sufficient_for_transfer` | dealership/scenario_last8_vin_sufficient_for_transfer.yaml | Dealer starts new claim with last 8 VIN — agent uses it for transfer without requiring full VIN | |
 
 ### Human Request
 
@@ -196,6 +211,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_dealer_human_request_steered_to_resolution` | dealership/scenario_dealer_human_request_steered_to_resolution.yaml | Dealer opens with human request, actual need is claim auth → agent handles it without escalating | ✅ run |
 | `e2e_dealer_immediate_human_request_contract_mod` | dealership/scenario_dealer_immediate_human_request.yaml | Dealer immediately requests live agent for contract modification → escalate | ✅ run |
 | `e2e_dealer_mid_journey_human_request` | dealership/scenario_dealer_mid_journey_human_request.yaml | Dealer checks payment status then mid-conversation asks for human without reason → agent probes → address redirect is out-of-scope → escalate | |
+| `e2e_dealer_human_request_phone_transfer` | dealership/scenario_dealer_chat_deflection_declined_phone_transfer.yaml | Dealer immediately requests phone agent — agent collects identifier then transfers via escalate_to_agent_from_ivr | |
 
 ---
 
@@ -209,6 +225,8 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_routing_ani_mismatch` | routing/scenario_4_ani_mismatch_caller_says_contract_holder.yaml | ANI says RF but caller says CH — agent trusts the caller | ✅ run |
 | `e2e_routing_caller_id_wording` | routing/caller_id_wording_CAd789bf025f5c6b445548986b2d0f5281.yaml | Welcome message must use correct professional caller-type identification wording | ✅ run |
 | `e2e_routing_department_names_approved_only` | routing/department_names_row61.yaml | Agent must only refer to the four approved department names (Claims, Customer Care, Payments, Premiums) | ✅ run |
+| `e2e_routing_ai_disclosure` | routing/scenario_ai_disclosure.yaml | Caller asks if agent is a real person — agent discloses it is AI and continues helping | |
+| `e2e_routing_lender_caller` | routing/scenario_lender_caller.yaml | Lender caller (bank employee) — agent recognizes out-of-scope caller type and handles gracefully without looping on identification | |
 
 ---
 
@@ -224,11 +242,11 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 
 | Caller Type | Scenarios |
 |---|---|
-| Contract Holder | 49 |
-| Repair Facility | 22 |
-| Dealership | 12 |
-| Routing | 6 |
+| Contract Holder | 55 |
+| Repair Facility | 26 |
+| Dealership | 18 |
+| Routing | 8 |
 | Employee | 1 |
-| **Total** | **90** |
+| **Total** | **108** |
 
 > Target scenarios (`target/`) are for a separate client and are excluded from this index.

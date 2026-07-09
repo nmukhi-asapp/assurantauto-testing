@@ -32,18 +32,24 @@ MODEL = os.environ.get('JUDGE_MODEL', 'vertex-claude-4.7-opus')
 
 
 def load_env():
-    url, key = None, None
-    with open(ENV_PATH) as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith('#') or '=' not in line:
-                continue
-            k, v = line.split('=', 1)
-            v = v.strip().strip('"').strip("'")
-            if k.strip() == 'LITELLM_URL':
-                url = v
-            elif k.strip() == 'LITELLM_API_KEY':
-                key = v
+    url = os.environ.get('LITELLM_URL')
+    key = os.environ.get('LITELLM_API_KEY')
+
+    if url and key:
+        return url, key
+
+    if ENV_PATH.exists():
+        with open(ENV_PATH) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('#') or '=' not in line:
+                    continue
+                k, v = line.split('=', 1)
+                v = v.strip().strip('"').strip("'")
+                if k.strip() == 'LITELLM_URL':
+                    url = url or v
+                elif k.strip() == 'LITELLM_API_KEY':
+                    key = key or v
     return url, key
 
 
@@ -149,6 +155,20 @@ DESIGNED FLOW — DO NOT PENALIZE:
 
 REQUIRED BEHAVIOR — PENALIZE IF MISSING:
 - Pre-escalation identifier collection: Before transferring to a live agent, the bot MUST collect at least one identifier — contract number, claim number, or last 8 of VIN. For contract holders, this requirement is satisfied when get_contract_and_claims_data_ivr is called (the function looks up the account by phone number and returns contract data — the phone lookup itself constitutes identifier collection). **IMPORTANT — DO NOT penalize D1 for identifier collection if get_contract_and_claims_data_ivr appears in the transcript AND the response contained at least one contract record.** The phone ANI lookup is the identifier; the bot correctly satisfied the requirement. Only penalize D1 if: (a) get_contract_and_claims_data_ivr was not called at all, OR (b) it was called but returned zero contracts (empty contract list), AND the bot then escalated without asking the caller for a contract number, claim number, or VIN. For repair facilities and dealers, the bot must explicitly ask the caller for an identifier; a function lookup alone is NOT sufficient since repair facility/dealer callers do not have contracts on file by phone. If the bot escalates to a human agent without any identifier having been collected, this is a D1 violation: score D1 ≤ 2.
+
+**EXCEPTION — NEW CLAIMS (REPAIR FACILITIES & DEALERS):** For new claim intake calls from repair facilities or dealers, NOT collecting an identifier before escalation is the currently designed behavior. Do NOT penalize D1 or D12 if the bot escalates a new claim without collecting an identifier. The receiving agent will create the claim and gather details separately. If the call is clearly a new claim request (language like "I'd like to file a claim" or "I want to get a claim started"), do NOT dock points for missing identifier collection.
+
+CALLER REFUSAL & ESCALATION:
+- When a caller insists on speaking to an agent and explicitly refuses to engage with the bot (e.g. "I just want to talk to a human," "I'm not giving you that info," "transfer me now"), the bot should attempt to collect an identifier but is not required to succeed. If the caller persists in demanding an escalation and refuses to provide any identifier, escalating without one is acceptable behavior — do NOT penalize D1 or D12 in this case. The key is that the bot made a good-faith attempt. If the bot never asks for an identifier at all (zero attempts) before a caller who is clearly insisting, that IS a D1 violation.
+
+ASR SIDE CONVERSATIONS:
+- When ASR transcribes obvious side conversations (e.g. "Did you hear that from...?" or "Tell them..."), this can cause misunderstandings in the bot's flow. Do NOT penalize the bot for misinterpreting speech that is clearly not directed at the bot itself. Mark this as an ASR quality issue (D10) if it impacts understanding, but do NOT fault D1 (design adherence) or D6 (recovery) if the bot's confusion results from third-party speech. If the bot could reasonably have detected that the speech was a side conversation (context clues), then penalize D6 recovery.
+
+CALL DISCONNECTION RECOVERY:
+- When the bot says the call cut out and asks "Are you still there?" this indicates the bot received a momentary disconnection signal from the network or phone system. This is a legitimate event and a reasonable recovery mechanism — do NOT penalize D6 (repair & recovery) for this behavior. Minor ASR issues that follow (e.g. one garbled word after reconnection) should not be penalized heavily under D10, as they are a natural artifact of network recovery.
+
+FILING "OVER THE PHONE":
+- For new claim filing, "over the phone" does NOT mean the bot collects repair order (RO) details verbally. Instead, the designed flow is: (1) bot instructs caller to EMAIL the RO to GenAgent, (2) bot checks for an email reply / case number, (3) bot escalates with the case number in the transfer variables. The caller must still follow the email path; "over the phone" refers to the bot guiding this process by voice, not collecting RO details directly. Do NOT penalize D1 if the bot asks the caller to email the RO even though they initially said they prefer handling it "over the phone" — this is the designed behavior. If the caller resists the email instruction and insists on verbal collection, escalation without the RO is acceptable.
 
 D2 (Information Accuracy) anchors:
 - 5 = information directly and fully addresses the caller's specific question.

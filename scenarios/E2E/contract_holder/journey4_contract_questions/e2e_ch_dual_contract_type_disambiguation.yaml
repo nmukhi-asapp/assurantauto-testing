@@ -1,0 +1,421 @@
+company_marker: assurantauto
+customer:
+  customer_id: CH-DC-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant Employee, say you are a Contract Holder
+  - When the agent says you have two contracts, ask what the difference is between them (what does each one cover)
+  - After the agent explains both contracts, tell them you want to ask about the service contract
+  - Ask whether airbag replacement is covered under that contract
+  knowledge: You are ROSS MCFATE, calling about your 2018 Kia Stinger. You have two
+    contracts with Assurant and want to understand what each covers before asking a
+    specific coverage question. Once the agent explains them, you will focus on the
+    service contract and ask about airbag replacement coverage. If asked your caller
+    type, say Contract Holder.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Contract Holder.", "Service contract.", "Yeah."). Confirmations are single words
+    or short phrases only ("Yes.", "That's right."). For open-ended questions, gives
+    a direct fragment of 5-8 words — never full sentences, never explanations. Never
+    volunteers context or reasons. Occasional natural fillers before a response ("Uh,",
+    "Yeah,").
+description: Contract holder with two active contracts on the same vehicle (a Service
+  Contract and a Limited Warranty) is disambiguated by contract type, gets a clear
+  explanation of what each covers, selects the service contract, and asks about airbag
+  coverage
+evaluations:
+- rules:
+  - Agent routes to the Contract Holder service flow after customer identifies as a
+    Contract Holder
+- rules:
+  - Agent calls get_contract_and_claims_data_ivr to retrieve contract data before
+    responding
+- rules:
+  - When presenting two contracts for the same 2018 Kia Stinger, the agent disambiguates
+    by contract type (e.g. "Service Contract" vs "Limited Warranty") rather than repeating
+    the vehicle name twice
+- rules:
+  - When the customer asks what each contract covers, the agent clearly explains that
+    the Service Contract has broad coverage (all factory-installed components except
+    exclusions) while the Limited Warranty covers powertrain components only
+- rules:
+  - After the customer indicates interest in the service contract, the agent answers
+    the airbag coverage question using the terms of the Service Contract (contractNumber
+    AM6RA1222HH), not the Limited Warranty
+- rules:
+  - Agent answers that airbag components are covered under the Service Contract when
+    failure is due to a mechanical or electrical defect (not a collision or deployment
+    event)
+- rules:
+  - Agent does NOT call escalate_to_agent_from_ivr or escalate_to_live_agent to answer
+    the contract explanation or airbag coverage questions
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of
+    the valid values for Contract Holder: CANCELLATION, CARRENTAL, CLAIMS, CLAIMSTATUS,
+    NEWCLAIM, CONTRACTCHANGES, COVERAGEINFO, GAP, LOCATE_RF, PAYMENT, ROADSIDE_ASSISTANCE,
+    RV, GA_ERROR, PREMIUMS, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_ch_dual_contract_type_disambiguation
+mock_user:
+  current_timestamp: '2026-02-20'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5306044495'
+    - params: {}
+      response:
+        PhoneNumber: '5306044495'
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_contract_holder:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+        message: SMS sent successfully.
+    - params: {}
+      response:
+        success: true
+        message: SMS sent successfully.
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: KNAE55LC6J6018332
+              contractNumber: AM6RA1222HH
+              customerFirstName: ROSS
+              customerLastName: MCFATE
+              customerEmail: danamcfate@gmail.com
+              customerAddress1: 3320 WINDING WAY
+              customerCity: REDDING
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '96003'
+              customerHomePhone: '5306044495'
+              expirationDate: '2028-03-13'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              expirationMiles: 100000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2018-03-13'
+              sellingDealerName: REDDING KIA (CR MOTORS INC.)
+              sellingDealerAddress: 418 E Cypress Ave, Redding, CA, 96002-0108
+              sellingDealerPhone: '5302260418'
+              model: STINGER
+              make: KIA
+              vehicleYear: 2018
+              isFE: false
+              formNumber: AM6R0814
+              accountTypeNumber: PGM1
+              tieBackDistance: 40
+              classificationCode: GRP27478
+              specCoveragePlanCode: Wrap Exclusionary
+              effectiveDate: '2021-03-15'
+              productCode: PGM AUTO SERVICE CONTRACT
+              dealerType: Primary
+              expirationType: ISDTCM
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-800-270-8447
+              rentalIndicator: 'Y'
+              claims: []
+              termsStructuredText: "Vehicle Service Contract - Wrap Exclusionary Coverage\n\
+                \nDEDUCTIBLE\n$100 per repair visit (in-network and out-of-network).\n\
+                \nCOVERED COMPONENTS\nCovers all factory-installed original mechanical\
+                \ and electrical components on your vehicle, EXCEPT items listed under\
+                \ Exclusions. Covered systems include: engine and all internally lubricated\
+                \ parts; transmission and drive axle; steering; brakes; air conditioning\
+                \ and heating; electrical systems (alternator, starter, wiring harnesses,\
+                \ window motors); electronic high-tech components (ABS, fuel injection\
+                \ sensors and modules, instrument cluster, combination entry system);\
+                \ supplemental restraint system components (airbag modules, sensors,\
+                \ clock spring, and supplemental restraint control modules when failure\
+                \ is due to a mechanical or electrical defect — not from a collision\
+                \ or airbag deployment event).\n\nEXCLUSIONS — WHAT IS NOT COVERED\n\
+                - Routine maintenance items: oil changes, filters, spark plugs, tire\
+                \ rotations, wiper blades, belts and hoses from normal wear\n- Cosmetic\
+                \ items: paint, trim, upholstery, glass\n- Damage from accidents, collisions,\
+                \ flooding, fire, theft, or vandalism\n- Pre-existing conditions\n\
+                - Tires, wheels, and battery/battery cables\n- Shock absorbers and\
+                \ strut inserts\n\nRENTAL COVERAGE\nRental car reimbursement up to\
+                \ $35/day, maximum 5 days per breakdown, while vehicle is at a repair\
+                \ facility for a covered repair.\n\nROADSIDE ASSISTANCE\n24-hour emergency\
+                \ roadside assistance: 1-800-270-8447\n\nYOUR RESPONSIBILITIES\nMaintain\
+                \ the manufacturer's recommended maintenance schedule. Obtain pre-authorization\
+                \ from Assurant BEFORE any covered repairs begin."
+            - VIN: KNAE55LC6J6018332
+              contractNumber: PLW6A10BBG5
+              customerFirstName: ROSS
+              customerLastName: MCFATE
+              customerEmail: danamcfate@gmail.com
+              customerAddress1: 3320 WINDING WAY
+              customerCity: REDDING
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '96003'
+              customerHomePhone: '5306044495'
+              expirationDate: '2028-03-13'
+              status: Active
+              productName: Limited Warranty
+              productType: LW
+              expirationMiles: 100000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2018-03-13'
+              sellingDealerName: REDDING KIA (CPO)
+              sellingDealerAddress: 418 E Cypress Ave, Redding, CA, 96002-0108
+              sellingDealerPhone: '5302260418'
+              model: STINGER
+              make: KIA
+              vehicleYear: 2018
+              isFE: false
+              formNumber: PLW61016
+              accountTypeNumber: PGM1
+              tieBackDistance: 40
+              classificationCode: GRP27478
+              specCoveragePlanCode: Powertrain
+              effectiveDate: '2021-03-15'
+              productCode: PGM LIMITED WARRANTY
+              dealerType: Primary
+              expirationType: ISDTCM
+              rentalIndicator: 'Y'
+              towAmount: 50
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-800-270-8447
+              claims: []
+              termsStructuredText: "Limited Warranty - Powertrain Coverage\n\nDEDUCTIBLE\n\
+                $100 per repair visit.\n\nCOVERED COMPONENTS\nThis warranty covers\
+                \ powertrain components ONLY:\n- ENGINE: All internally lubricated\
+                \ parts, water pump, engine mounts, exhaust manifold, intake manifold,\
+                \ seals and gaskets\n- TRANSMISSION (AUTOMATIC OR MANUAL): All internally\
+                \ lubricated parts, torque converter, pump, drums, shafts, seals and\
+                \ gaskets\n- TRANSFER CASE: All internally lubricated parts\n- DRIVE\
+                \ AXLE ASSEMBLY: All internally lubricated parts, constant velocity\
+                \ joints, universal joints, axle shafts, seals and gaskets\n\nWHAT\
+                \ IS NOT COVERED\nThis warranty does NOT cover any component outside\
+                \ the powertrain systems listed above, including but not limited to:\n\
+                - Air conditioning and heating systems\n- Electrical and electronic\
+                \ systems, including airbags, supplemental restraint sensors, airbag\
+                \ control modules, ABS, instrument cluster, and all other electronic\
+                \ control modules\n- Suspension and steering components\n- Brakes\n\
+                - Fuel system (other than internally lubricated engine components)\n\
+                - Routine maintenance items (oil changes, filters, spark plugs, belts,\
+                \ hoses)\n- Tires, wheels, and glass\n\nRENTAL COVERAGE\nRental car\
+                \ reimbursement while vehicle is at a repair facility for a covered\
+                \ powertrain repair.\n\nROADSIDE ASSISTANCE\n24-hour emergency roadside\
+                \ assistance: 1-800-270-8447"
+    - params: {}
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: KNAE55LC6J6018332
+              contractNumber: AM6RA1222HH
+              customerFirstName: ROSS
+              customerLastName: MCFATE
+              customerEmail: danamcfate@gmail.com
+              customerAddress1: 3320 WINDING WAY
+              customerCity: REDDING
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '96003'
+              customerHomePhone: '5306044495'
+              expirationDate: '2028-03-13'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              expirationMiles: 100000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2018-03-13'
+              sellingDealerName: REDDING KIA (CR MOTORS INC.)
+              sellingDealerAddress: 418 E Cypress Ave, Redding, CA, 96002-0108
+              sellingDealerPhone: '5302260418'
+              model: STINGER
+              make: KIA
+              vehicleYear: 2018
+              isFE: false
+              formNumber: AM6R0814
+              accountTypeNumber: PGM1
+              tieBackDistance: 40
+              classificationCode: GRP27478
+              specCoveragePlanCode: Wrap Exclusionary
+              effectiveDate: '2021-03-15'
+              productCode: PGM AUTO SERVICE CONTRACT
+              dealerType: Primary
+              expirationType: ISDTCM
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-800-270-8447
+              rentalIndicator: 'Y'
+              claims: []
+              termsStructuredText: "Vehicle Service Contract - Wrap Exclusionary Coverage\n\
+                \nDEDUCTIBLE\n$100 per repair visit (in-network and out-of-network).\n\
+                \nCOVERED COMPONENTS\nCovers all factory-installed original mechanical\
+                \ and electrical components on your vehicle, EXCEPT items listed under\
+                \ Exclusions. Covered systems include: engine and all internally lubricated\
+                \ parts; transmission and drive axle; steering; brakes; air conditioning\
+                \ and heating; electrical systems (alternator, starter, wiring harnesses,\
+                \ window motors); electronic high-tech components (ABS, fuel injection\
+                \ sensors and modules, instrument cluster, combination entry system);\
+                \ supplemental restraint system components (airbag modules, sensors,\
+                \ clock spring, and supplemental restraint control modules when failure\
+                \ is due to a mechanical or electrical defect — not from a collision\
+                \ or airbag deployment event).\n\nEXCLUSIONS — WHAT IS NOT COVERED\n\
+                - Routine maintenance items: oil changes, filters, spark plugs, tire\
+                \ rotations, wiper blades, belts and hoses from normal wear\n- Cosmetic\
+                \ items: paint, trim, upholstery, glass\n- Damage from accidents, collisions,\
+                \ flooding, fire, theft, or vandalism\n- Pre-existing conditions\n\
+                - Tires, wheels, and battery/battery cables\n- Shock absorbers and\
+                \ strut inserts\n\nRENTAL COVERAGE\nRental car reimbursement up to\
+                \ $35/day, maximum 5 days per breakdown, while vehicle is at a repair\
+                \ facility for a covered repair.\n\nROADSIDE ASSISTANCE\n24-hour emergency\
+                \ roadside assistance: 1-800-270-8447\n\nYOUR RESPONSIBILITIES\nMaintain\
+                \ the manufacturer's recommended maintenance schedule. Obtain pre-authorization\
+                \ from Assurant BEFORE any covered repairs begin."
+            - VIN: KNAE55LC6J6018332
+              contractNumber: PLW6A10BBG5
+              customerFirstName: ROSS
+              customerLastName: MCFATE
+              customerEmail: danamcfate@gmail.com
+              customerAddress1: 3320 WINDING WAY
+              customerCity: REDDING
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '96003'
+              customerHomePhone: '5306044495'
+              expirationDate: '2028-03-13'
+              status: Active
+              productName: Limited Warranty
+              productType: LW
+              expirationMiles: 100000
+              deductible: 100
+              deductibleOutOfNetwork: 100
+              inServiceDate: '2018-03-13'
+              sellingDealerName: REDDING KIA (CPO)
+              sellingDealerAddress: 418 E Cypress Ave, Redding, CA, 96002-0108
+              sellingDealerPhone: '5302260418'
+              model: STINGER
+              make: KIA
+              vehicleYear: 2018
+              isFE: false
+              formNumber: PLW61016
+              accountTypeNumber: PGM1
+              tieBackDistance: 40
+              classificationCode: GRP27478
+              specCoveragePlanCode: Powertrain
+              effectiveDate: '2021-03-15'
+              productCode: PGM LIMITED WARRANTY
+              dealerType: Primary
+              expirationType: ISDTCM
+              rentalIndicator: 'Y'
+              towAmount: 50
+              roadsideMaxPerServiceCall: 100
+              roadsideAdministrator: VAS
+              roadsideAdministratorPhoneNumber: 1-800-270-8447
+              claims: []
+              termsStructuredText: "Limited Warranty - Powertrain Coverage\n\nDEDUCTIBLE\n\
+                $100 per repair visit.\n\nCOVERED COMPONENTS\nThis warranty covers\
+                \ powertrain components ONLY:\n- ENGINE: All internally lubricated\
+                \ parts, water pump, engine mounts, exhaust manifold, intake manifold,\
+                \ seals and gaskets\n- TRANSMISSION (AUTOMATIC OR MANUAL): All internally\
+                \ lubricated parts, torque converter, pump, drums, shafts, seals and\
+                \ gaskets\n- TRANSFER CASE: All internally lubricated parts\n- DRIVE\
+                \ AXLE ASSEMBLY: All internally lubricated parts, constant velocity\
+                \ joints, universal joints, axle shafts, seals and gaskets\n\nWHAT\
+                \ IS NOT COVERED\nThis warranty does NOT cover any component outside\
+                \ the powertrain systems listed above, including but not limited to:\n\
+                - Air conditioning and heating systems\n- Electrical and electronic\
+                \ systems, including airbags, supplemental restraint sensors, airbag\
+                \ control modules, ABS, instrument cluster, and all other electronic\
+                \ control modules\n- Suspension and steering components\n- Brakes\n\
+                - Fuel system (other than internally lubricated engine components)\n\
+                - Routine maintenance items (oil changes, filters, spark plugs, belts,\
+                \ hoses)\n- Tires, wheels, and glass\n\nRENTAL COVERAGE\nRental car\
+                \ reimbursement while vehicle is at a repair facility for a covered\
+                \ powertrain repair.\n\nROADSIDE ASSISTANCE\n24-hour emergency roadside\
+                \ assistance: 1-800-270-8447"
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone_dc001
+        VIN: enc_vin_dc001
+        ContractNumber: enc_contract_dc001
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone_dc001
+        VIN: enc_vin_dc001
+        ContractNumber: enc_contract_dc001
+        ClaimNumber: ''
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: Other
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5306044495'
+  max_turns: 30
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- contract_questions
+- multi_contract
+- disambiguation
+- coverage
+- airbag

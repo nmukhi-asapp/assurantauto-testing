@@ -9,6 +9,30 @@ arguments:
 
 Run voice E2E scenarios for a company, monitor completion, generate an HTML report, and classify any failures.
 
+## ADR Reference
+
+When running E2E scenarios, understand the voice architecture being tested (ADR 0006):
+
+**Testing both layers:**
+- **Talker** (conversation quality): Are responses natural, appropriately timed, following single-question rule?
+- **Reasoner** (business logic): Are functions called correctly, sequenced properly (DD-06), escalation conditions met (DD-08)?
+
+**When analyzing scenario failures:**
+1. Identify which layer failed: Talker (what GA said) or Reasoner (what GA did)
+2. Check for **architectural violations**:
+   - DD-01/DD-02: End-of-conversation sequencing
+   - DD-03: Talker/Reasoner boundary respected?
+   - DD-06: Functions called before response, not with?
+   - DD-08: Escalation logic in Procedures, not messaging?
+3. Distinguish between:
+   - **Design violations**: Configurations that violate ADR rules → architectural problem
+   - **Quality issues**: Natural speech, timing, clarity → tuning problem
+   - **Function issues**: Missing or misconfigured APIs → tooling problem
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## Step 1: Parse Arguments
 
 Parse `$ARGUMENTS` to extract:

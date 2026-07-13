@@ -9,6 +9,26 @@ arguments:
 
 Compare what a human agent did in a conversation against what GenAgent has available (instructions + functions), and identify capability gaps.
 
+## ADR Reference
+
+When analyzing gaps, consider:
+
+- **ADR 0006: Voice Configuration Design Decisions** — Understanding the Talker-Reasoner architecture helps identify where capability gaps exist:
+  - **DD-03**: Voice Settings (Talker FAQs) vs. Procedures (Reasoner business logic) — gaps may be in either layer
+  - **DD-06**: Proper API sequencing — human agents follow different patterns than the Reasoner loop design allows
+  - **DD-08**: Escalation responsibility — human agents decide escalation; Procedures must encode those business rules
+  - **DD-10/DD-11**: Function design — human agents use implicit knowledge; functions must make it explicit
+
+**When analyzing capability gaps:**
+1. Distinguish between **Talker gaps** (immediate answers from Voice Settings) vs. **Reasoner gaps** (business logic in Procedures)
+2. Check if task instructions match the Talker-Reasoner model (DD-03 boundary)
+3. Identify if missing functions violate proper sequencing (DD-06)
+4. Assess whether escalation conditions should be in Procedures (DD-08)
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## Step 1: Parse Arguments
 
 Parse `$ARGUMENTS`:

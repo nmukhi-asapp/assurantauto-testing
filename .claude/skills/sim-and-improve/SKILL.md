@@ -4,6 +4,29 @@ description: Iteratively test GA conversations and improve prompts/code
 
 Run iterative test-improve cycles on a GA version. For each cycle, simulate a batch of test conversations using the single-turn simulator, analyze the results, identify issues, apply fixes, and repeat.
 
+## Architecture Context (Voice)
+
+When testing voice conversations, understand the **Talker-Reasoner architecture** (ADR 0006):
+
+**Two testing layers exist:**
+1. **Talker layer** (`voice_assistant`) — Customer-facing speech, message ordering, escalation messaging
+   - Test: Response quality, single question rule, time-buying phrases, tone
+   - Focus on: Voice Settings configuration, speaking style, customer verification
+   
+2. **Reasoner layer** (`task_bot`) — Backend logic, function calls, business rules
+   - Test: API sequencing (DD-06), escalation conditions (DD-08), function naming (DD-10)
+   - Focus on: Procedures, function definitions, error handling
+
+**Critical improvements to prioritize:**
+- **DD-01/DD-02**: End-of-conversation correctness (are Talker + Reasoner ending properly?)
+- **DD-06**: API sequencing (are API calls before SPEAK, never together?)
+- **DD-08**: Escalation logic (is business logic in Procedures, not messaging?)
+- **DD-11**: API response access (using `function_responses` only, not `data`?)
+
+**Reference:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## Parameters
 
 The user should provide (ask if not specified):

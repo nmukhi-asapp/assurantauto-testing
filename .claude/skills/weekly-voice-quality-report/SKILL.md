@@ -2,6 +2,28 @@
 
 Generate the weekly CallerIdentification voice quality report for production conversations from the previous Mon–Sat week. Includes the design-adherence rubric scoring and the binary pass/fail metric.
 
+## ADR Reference
+
+Weekly voice quality reports must assess adherence to voice architecture design decisions (ADR 0006):
+
+**Key design metrics to track:**
+- **DD-01/DD-02**: End-of-conversation correctness — are Talker and Reasoner ending properly?
+- **DD-03**: Talker/Reasoner split — is each layer respecting its boundary?
+- **DD-04**: Terminology — does Talker use "Supervisor"? Does Reasoner use "you"?
+- **DD-06**: API sequencing — are functions called before SPEAK?
+- **DD-08**: Escalation messaging — is escalation logic in Procedures, not speech?
+- **DD-10/DD-11**: Function usage — are function names snake_case? Are responses accessed via `function_responses`?
+
+**When generating reports:**
+1. Score conversations against these architectural principles, not just quality rubric
+2. Track **trends**: Are violations increasing or decreasing?
+3. Identify **systemic issues**: Violations appearing across many conversations suggest config problems
+4. Link violations to **improvement priorities**: Which design rule violations would have the most impact if fixed?
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 All data, scripts, and outputs live within the `assurantauto-testing` repo. Repo root is referred to as `REPO` below.
 
 ## When to use

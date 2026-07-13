@@ -6,6 +6,26 @@ description: Analyze a conversation to determine if GenerativeAgent can automate
 
 Analyzes a single conversation to determine if GenerativeAgent has the necessary tools and knowledge to automate it.
 
+## ADR Reference
+
+When assessing GA capability, consult:
+
+- **ADR 0006: Voice Configuration Design Decisions** — Understanding architecture helps identify capability gaps:
+  - **DD-03**: Voice Settings vs. Procedures boundary — Talker FAQs vs. Reasoner business logic
+  - **DD-06**: API sequencing in Procedures — can the Reasoner handle the required workflow?
+  - **DD-08**: Escalation conditions in Procedures — are all escalation rules captured?
+  - **DD-10/DD-11**: Function design — are required functions named/defined correctly?
+
+**When assessing capability:**
+1. Separate **Talker concerns** (fast answers from Voice Settings) from **Reasoner concerns** (business logic)
+2. Check if required functions are actually configured in GACS (DD-07)
+3. Verify API sequencing matches what Procedures can express (DD-06)
+4. Assess if escalation conditions are fully captured in Procedures (DD-08)
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## Usage Examples
 
 ```bash

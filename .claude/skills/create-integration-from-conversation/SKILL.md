@@ -9,6 +9,29 @@ arguments:
 
 You are creating an integration test case from a real production conversation fetched from Athena.
 
+## Architecture Context (Voice)
+
+When creating integration tests from **voice conversations**, understand the **Talker-Reasoner architecture** (ADR 0006):
+- **Talker** = conversational agent (what the customer hears/interacts with)
+- **Reasoner** = backend logic (functions, KB lookup, decisions)
+- **Separation**: Test **Talker behavior** (response, tone, timing) separately from Reasoner logic
+
+**What to capture in integration tests:**
+- Talker's **response** to customer messages (what did the Talker say?)
+- Talker's **message ordering** and **tone** (empathy, clarity, single question rule)
+- Talker's **identification and verification** (asking for claim#, VIN, etc.)
+- **Escalation messaging** and **wrap-up protocol** (see DD-01, DD-08)
+
+**What NOT to test in Talker tests:**
+- API call results (Reasoner domain)
+- Business logic decision trees (Reasoner domain)
+- Function implementations (mock these)
+
+**Reference:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+- Specifically: DD-04 (Talker terminology), DD-08 (escalation), DD-12 (Talker is text model)
+
+---
+
 ## Step 1: Parse Arguments
 
 Parse `$ARGUMENTS` to extract:

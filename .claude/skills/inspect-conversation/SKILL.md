@@ -9,6 +9,25 @@ arguments:
 
 Interactively fetch a conversation, summarize it, and answer questions about agent behavior.
 
+## ADR Reference
+
+For conversation analysis involving voice/talker-reasoner architecture, task instruction interpretation, or escalation design, consult:
+
+- **ADR 0006: Voice Configuration Design Decisions** — Architecture decisions (DD-01 through DD-12) covering:
+  - Talker-Reasoner model and responsibility split
+  - End-of-conversation protocol (DD-01, DD-02)
+  - Voice Settings vs. Procedures boundary (DD-03)
+  - Escalation architecture (DD-08)
+  - Function naming and API response access (DD-10, DD-11)
+
+**When analyzing conversations:**
+1. Check for violations of DD-01 (end_of_conversation handling), DD-06 (API + SPEAK sequencing), DD-08 (escalation messaging)
+2. Verify Talker vs. Reasoner responsibility split matches actual behavior
+3. Look for missing identifiers before escalation (relates to task design, consult task instructions)
+4. Flag any improper function call sequencing or duplicate messages
+
+See `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/` for full ADR details.
+
 ## Step 1: Gather Parameters
 
 If `$ARGUMENTS` is empty or incomplete, ask the user for the missing values one at a time:

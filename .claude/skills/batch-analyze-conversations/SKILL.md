@@ -2,6 +2,27 @@
 
 Analyze a directory of locally downloaded voice conversation JSON files for conversational quality, scoring each against the ASAPP Voice Quality Rubric and producing an aggregate report.
 
+## ADR Reference
+
+When analyzing voice conversation batches, consult:
+
+- **ADR 0006: Voice Configuration Design Decisions** — Architecture knowledge helps identify quality patterns:
+  - **DD-01/DD-02**: End-of-conversation quality (Talker farewell, Reasoner disconnect)
+  - **DD-03**: Talker vs. Reasoner split — is each layer working correctly?
+  - **DD-04**: Terminology and tone (Talker should sound natural, avoid "Reasoner" mentions)
+  - **DD-06**: Function call sequencing (are API calls properly ordered?)
+  - **DD-08**: Escalation messaging (is escalation appropriately triggered and phrased?)
+
+**When scoring batches:**
+1. Assess **Talker quality** (message tone, clarity, single question rule, time-buying phrases)
+2. Identify **Reasoner issues** (missing escalation conditions, improper API sequencing)
+3. Flag **architectural violations** (Talker speaking out of Voice Settings, Procedures lacking business logic)
+4. Note **systemic patterns** (repeated issues across cohort suggest configuration problem, not one-off bug)
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## When to use
 
 When you have a directory of locally downloaded conversation JSON files (e.g. from `mcp__data-sampling__fetch_random_conversations`) and want to:

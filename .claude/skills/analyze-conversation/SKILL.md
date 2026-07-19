@@ -50,6 +50,14 @@ In each turn GA uses those instructions, plus "ModelActions" as input (the resul
 
 If a message or function request is from GA, the preceding thoughts will include hints as to WHY GA called that function or spoke the message.
 
+### Filler / Time-Buying Phrases
+GA sometimes sends a short acknowledgement/stalling message ("One moment while I check that.", "Let me look into that for you.", "Give me a second.") before it actually does the real work of a turn. This exists in two forms depending on channel:
+- **Voice (Talker/Reasoner architecture)**: the Talker plays one of these while handing off to the Reasoner via the `send_customer_request_or_update` function. Some companies define an exact, closed list of allowed phrases per task in GACS under `voiceCommunicationGuidelines` → a `## Situational Fillers` section (a table of Situation → Example customer turn → Use, or a bullet list). If you have GACS access for the company (e.g. `mcp__gacs__get_branch`, or the task-instructions folder), fetch this list first and match against it exactly (case-insensitive, ignore trailing punctuation). In the action log, `source_system` values like `task_bot` and `function_caller*` belong to the Reasoner; `voice_assistant` and `voice_orchestrator` belong to the Talker.
+- **Chat**: a separate FillerBot may emit an acknowledgement/time-buying message (`source_system` such as `FILLER_BOT`) before the main bot's real response.
+- **No company-specific list available**: fall back to a heuristic — flag any short (roughly under 15 words) bot message that contains no concrete answer or data and matches common time-buying language: "one moment", "give me a second/moment", "let me check/look into/look up/pull up that", "hold on", "just a second", "I'll look into this", "bear with me", etc.
+
+For every filler/time-buying message found, check whether the turn that follows it (up to the next customer-facing bot message) contains **any `function_request` at all**. If it does not — the turn only reasoned and replied without calling any function/API — that is a **delegation opportunity**: the round-trip wasn't needed, and if the Talker/front-end had been given more context (either the specific fact/answer directly, or a scripted sub-flow to run on its own), it could have skipped the filler and handled the exchange in a single turn.
+
 ### Business Objective
 As a product, the objective of GenerativeAgent is to automate customer service. In this vein, a measure of success for GA is how much it is able to contain customer interactions, successfully resolving customer's issues without escalating to a live agent. Escalations should only happen if GA isn't able to solve the customer's issues with the tools and knowledge it has.
 
@@ -88,6 +96,7 @@ Include things like:
 - Time between turns (how long customer took to respond)
 - Specific errors that happened
 - Anything suspicious
+- **Filler / time-buying phrase usage** — every filler GA sent, and whether the turn that followed made an actual function call (see Filler / Time-Buying Phrases in Context)
 - **Potential improvements** - actionable recommendations for making GA more resilient and effective
 
 ### Analysis Approach
@@ -102,6 +111,7 @@ When analyzing conversations, go beyond surface-level observations. For each iss
 2. **GA's Response**: How did GA handle the situation? Was it appropriate?
 3. **Resilience Opportunities**: Could GA have been more intelligent or resilient in handling the situation?
 4. **Latency**: Did any prompt calls (llm_request) take a long time (over 10s)? This is important because if a turn takes over 5 minutes to run, then there could be problems with article cache misses (cahce TTL is 5 mins).
+5. **Filler Round-Trip Waste**: Did GA send a filler/time-buying message and then respond without making any function call in that same turn? If so, this is a missed delegation opportunity — note what specific instruction or context (a direct FAQ answer, or a self-contained scripted sub-flow) would have let the Talker/front-end handle it without the round-trip.
 
 **Example of Deep Analysis:**
 
@@ -131,20 +141,23 @@ For each turn, include a very brief analysis including:
 - **GA's thoughts** (chain-of-thought reasoning)
 - **Function calls** and their results (success/failure)
 - **Bot response(s)**
+- **Filler / time-buying phrase used** (if any), and whether that turn made a function call
 - **Issues or observations** if any.
 
 After all turns, provide:
 - **Summary statistics**: Total turns, average turn duration, any concerning patterns
+- **Filler analysis**: total filler/time-buying messages used, how many were NOT followed by any function call in the same turn (delegation opportunities), and for each opportunity: the customer's question, the filler used, what GA responded with, and a recommended fix — either (a) push the answer/knowledge directly into the Talker/front-end's own instructions so it can self-serve, or (b) delegate the surrounding multi-step flow to the Talker/front-end to run autonomously (e.g. a company-defined "Run Without Supervisor" journey) instead of round-tripping per step
 - **Issue analysis**: Deep dive into problems with root cause, GA's response, and potential improvements
 - **Overall assessment**: Healthy, suspicious, or unhealthy with clear reasoning
 
 ### Final Summary Table
 At the end, provide a very short summary table of each conversation:
-- **Columns:** Conversation ID, Status, Notes
+- **Columns:** Conversation ID, Status, Fillers (Opportunities), Notes
 - **Status values:** Include an emoji:
   - ✅ for HEALTHY
   - ⚠️ for SUSPICIOUS
   - ❌ for UNHEALTHY
+- **Fillers (Opportunities):** format as `total (opportunities)`, e.g. `5 (3)` meaning 5 filler/time-buying messages used, 3 of them with no function call in the same turn
 - **Notes:** Keep them short
 - **Format:** Even-spaced markdown table format
 </output>

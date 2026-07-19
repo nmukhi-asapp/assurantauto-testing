@@ -4,6 +4,29 @@ description: Analyze conversation data and identify issues
 
 # Conversation Analysis Instructions
 
+## ADR Reference — REQUIRED FOR ALL ANALYSES
+
+**For all conversation analyses, consult the Architecture Decision Records (ADRs):**
+
+- **ADR 0006: Voice Configuration Design Decisions** — Key design decisions (DD-01 through DD-12) that govern voice conversations:
+  - **DD-01/DD-02**: End-of-conversation protocol (Talker owns farewell, Reasoner owns disconnect)
+  - **DD-03**: Voice Settings (Talker) vs. Procedures (Reasoner) boundary
+  - **DD-04**: "Supervisor" terminology in Voice Settings, "you" in Procedures
+  - **DD-06**: API calls before SPEAK — never in same step
+  - **DD-08**: Escalation responsibility split (Talker escalation signal vs. Reasoner transfer function)
+  - **DD-10/DD-11**: Function naming (snake_case) and API response access (`function_responses` only)
+
+**When analyzing conversations:**
+1. **Check for DD violations** — end_of_conversation ordering, API+SPEAK sequencing, escalation messaging
+2. **Verify Talker/Reasoner split** — is each component doing its job correctly?
+3. **Identify missing context** — were identifiers collected before escalation? (task design issue)
+4. **Flag improper sequencing** — API calls, function response access, message ordering
+5. **Assess escalation design** — is business logic in Procedures, not in escalation messaging?
+
+**Location:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
+---
+
 ## Initial Setup
 
 When this command is invoked, first check if the user has already provided conversation files to analyze:

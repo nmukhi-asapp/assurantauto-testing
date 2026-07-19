@@ -4,6 +4,21 @@ description: Fetch conversation data from Athena using the data-sampling MCP ser
 
 Fetch conversation data from Athena using the generative-agent-optimization-mcp data-sampling server.
 
+## Architecture Context (Voice)
+
+When fetching **voice conversations**, note that GA uses a **Talker-Reasoner architecture** (see ADR 0006):
+- **Talker** (`voice_assistant`): Customer-facing, fast (~2-4s), speaks to the customer
+- **Reasoner** (`task_bot`): Backend brain (~3-4s), calls functions, makes decisions
+- **Separation**: Talker and Reasoner are separate agents; conversations show both their actions
+
+Key action types to expect:
+- `message` from `voice_assistant` (Talker) = customer-facing speech
+- `thought` + `function_request` from `task_bot` (Reasoner) = backend reasoning
+- `send_customer_request_or_update` = Talker asking Reasoner for help
+- `end_of_conversation` (both Talker tool + Reasoner function) = call ending protocol
+
+**Reference:** `../generative-agent/asapp/generative_agent/tools/workbench/docs/adrs/0006-voice-configuration-design-decisions.md`
+
 ## Context
 
 This skill fetches conversation logs from Athena using the `fetch_conversations_by_id` MCP tool, which provides:

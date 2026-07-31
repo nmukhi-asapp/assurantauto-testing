@@ -139,6 +139,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_rf_terminology_and_extended_status` | repair_facility/rf_terminology_CA707224c792b458256a5838fa064e1222.yaml | Agent must use "independent repair facilities" (not "repair shops") and provide extended status | ✅ run |
 | `e2e_rf_identifier_type_not_repeated` | repair_facility/scenario_identifier_type_not_repeated.yaml | Regression: RF states identifier type when providing claim/contract/VIN — agent must not re-ask for type after number is given | |
 | `e2e_rf_identifier_loop_agent_transfer` | repair_facility/scenario_rf_identifier_loop_agent_transfer.yaml | RF requests agent — two consecutive identifier lookups fail (VIN then claim number) — agent transfers rather than ending call | |
+| `e2e_rf_profanity_claim_status` | repair_facility/scenario_rf_profanity_claim_status.yaml | RF uses mild profanity out of frustration when told claim is under review — agent must not refuse service, must acknowledge frustration and continue, then escalate | |
 
 ### New Claims / RO Submission
 

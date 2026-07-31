@@ -1,0 +1,236 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-PROFANITY-001
+  evaluation_goals: null
+  goals:
+  - Identify as a repair facility calling about an existing claim status
+  - When asked for an identifier, provide claim number 50381200
+  - After the agent reports the claim is under review, express frustration using mild
+    profanity (e.g., "What the hell? It's been two weeks!") before asking for a live
+    agent
+  - Request to be transferred to a claims agent
+  knowledge: You are calling from Highland RV & Auto, an independent repair facility.
+    A customer brought in a 2022 Ford Explorer (VIN 5ZT2CKEC8PZ128784) for transmission
+    slippage. You submitted the claim and received claim number 50381200. The contract
+    number is ARV2X60413. The last 8 characters of the VIN are PZ128784. You want to
+    know the status. The claim has been sitting for two weeks with no update and you
+    are frustrated.
+  personality: Impatient repair facility service advisor. Terse and direct — answers
+    in 1-5 word fragments, not full sentences. Familiar with the claims process. Gets
+    frustrated at delays and vents with mild profanity when annoyed ("What the hell?",
+    "Are you serious?", "What the f—?") — not threatening the agent, just venting.
+    Profanity is incidental, not a demand. After venting, continues the call and cooperates.
+    When told the claim is "under review" after two weeks, responds with something like
+    "What the hell, two weeks and it's still under review?" before asking to speak with
+    someone.
+description: RF caller checks existing claim status, uses mild profanity out of frustration
+  when told the claim is under review. Agent must handle gracefully — acknowledge frustration,
+  continue the flow, and escalate to claims when requested.
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent looks up the claim using claim number, contract number, or VIN last 8
+- rules:
+  - Agent provides the claim status (under review) to the caller
+- rules:
+  - When the caller uses profanity, the agent does NOT respond with a refusal such
+    as "I can't assist with that", "I'm unable to help with that", or any phrase that
+    treats the profanity as an out-of-scope request
+- rules:
+  - When the caller uses profanity, the agent does NOT end the call, suggest the caller
+    call back, or otherwise disengage
+- rules:
+  - When the caller uses profanity, the agent acknowledges the caller's frustration
+    and continues assisting
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - 'If the agent escalated the call, the GAIntent output variable is set to one of
+    the valid values for Repair Facility: CARRENTAL, CLAIMS, CLAIMSTATUS, NEWCLAIM,
+    NEWCLAIM-OCR-EMAIL, NEWCLAIM-OCR-TEXT, UPDATECLAIM, COVERAGEINFO, GAP, PAYMENT,
+    RV, GA_ERROR, ALLOTHER_QUESTIONS, DEFAULT'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_profanity_claim_status
+mock_user:
+  current_timestamp: '2026-07-16'
+  description: null
+  id: null
+  mock_responses:
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: true
+    - params: {}
+      response:
+        success: true
+    getClaimsClaimNumber:
+    - params:
+        channel: '*'
+        claimNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        breakdownMileage: 48200
+        createdOn: '2026-06-28'
+        repairShopName: Highland RV & Auto
+        repairShopId: 000CA202
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+        authorizationAmount: null
+        laborRate: null
+    - params: {}
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        breakdownMileage: 48200
+        createdOn: '2026-06-28'
+        repairShopName: Highland RV & Auto
+        repairShopId: 000CA202
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+        authorizationAmount: null
+        laborRate: null
+    getClaimsContractNumber:
+    - params:
+        contractNumber: '*'
+        userType: '*'
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+    - params: {}
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+    - params: {}
+      response:
+        claimNumber: 50381200
+        VIN: 5ZT2CKEC8PZ128784
+        contractNumber: ARV2X60413
+        status: Under Review
+        claimRecordType: Mechanical
+        repairDescription: Transmission Slippage
+        longVerbiageStatus: This claim is currently under review and will be adjudicated
+          in the order in which it was received.
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CLAIM
+        message: ''
+    escalate_to_live_agent:
+    - params: {}
+      response:
+        success: true
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response:
+        success: true
+        TransferReason: CallerRequestedAgent
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5559870002'
+    - params: {}
+      response:
+        PhoneNumber: '5559870002'
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: '5559870002'
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5559870002'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- existing_claim
+- claim_status
+- profanity

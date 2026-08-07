@@ -1,0 +1,186 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-RV-002
+  evaluation_goals: null
+  goals:
+  - CRITICAL, overrides every other goal below — if the agent EVER asks whether the
+    vehicle is a recreational vehicle, RV, or motorhome, answer that question directly
+    and honestly ("Yes, it's a travel trailer.") before saying anything else, even
+    if you were in the middle of asking for a representative. Never deflect, ignore,
+    or talk past this specific question — always answer it the first time it is asked.
+  - When the agent asks whether you are a dealer or repair facility, say repair facility
+  - When asked what you're calling about, say you want to start a new claim
+  - When asked if you've already emailed the Repair Order, say no
+  - When asked whether you prefer to file online or by phone, ask to speak to a live
+    representative instead
+  - If asked again whether you'd like to speak to a representative, repeat that you
+    want a live representative — but only when that is actually what's being asked;
+    if the agent asks a different, direct question (like the RV question above),
+    answer that question instead of repeating your representative request
+  - Do not volunteer a VIN, claim number, or contract number unless directly asked
+  knowledge: You are calling from a repair facility about a customer's 2026 Forest
+    River EVO T2850 travel trailer. You want to start a new claim but would rather
+    just talk to a person than go through the automated intake. If asked, confirm
+    the vehicle is a recreational vehicle / RV.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Repair facility.", "New claim.", "No.", "Representative."). Confirmations are
+    single words or short phrases only ("Yes.", "Yeah."). For open-ended questions,
+    gives a direct fragment of 5-8 words — never full sentences, never explanations.
+    Impatient, keeps steering back to wanting a live person — but always breaks from
+    that pattern to answer a genuinely new, direct question (such as being asked about
+    RV/motorhome status) the first time it's asked, rather than repeating a previous
+    demand over it.
+description: "Regression test reproducing production conversations 1129718927-2419200497-2385495800-2715840925\
+  \ and 1969790230-2418741745-2947204856-2715840925, both RV claims where the agent\
+  \ never obtained any vehicle lookup data before escalating (in one, the caller was\
+  \ routed via ANI-linked contracts that RepairShopIssues correctly disregards per\
+  \ its own guardrail; in the other, the caller repeatedly asked for an agent before\
+  \ any identifier was ever collected). In both, GAIntent ended up NEWCLAIM (routing\
+  \ to CLAIM) with no chance for the RV Confirmation Check to fire, since it depends\
+  \ entirely on lookup data that never existed. The Unified Escalation Protocol now\
+  \ has a Step 0 that asks the RV question directly whenever no lookup has succeeded\
+  \ in the conversation, before any identifier collection or escalation. This scenario\
+  \ verifies that question fires and that GAIntent is overridden to RV."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent does not use any contract or claim data linked automatically via the caller's
+    phone number to answer questions or skip identifier collection
+- rules:
+  - Before escalating to an agent, the agent asks the caller whether the vehicle is
+    a recreational vehicle or RV, even though no claim or contract lookup ever succeeded
+    in this conversation
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'RV' rather than 'NEWCLAIM', since the caller confirmed the
+    vehicle is a recreational vehicle
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_rv_no_lookup_data_step0_confirmation
+mock_user:
+  current_timestamp: '2026-08-05'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5559514507'
+    - params: {}
+      response:
+        PhoneNumber: '5559514507'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: 4X4TSJE23MC022869
+              contractNumber: CC08A2F4C762
+              customerFirstName: Priya
+              customerLastName: Nathan
+              customerEmail: priya.nathan@test.assurant.com
+              vehicleYear: 2026
+              make: FOREST RIVER
+              model: EVO T2850
+              status: Active
+              productName: Service Contract
+              productType: WAR
+            - VIN: 1FDXE45S15HA00002
+              contractNumber: CC08A2F4C763
+              customerFirstName: Priya
+              customerLastName: Nathan
+              customerEmail: priya.nathan@test.assurant.com
+              vehicleYear: 2025
+              make: JAYCO
+              model: JAY FLIGHT
+              status: Active
+              productName: Service Contract
+              productType: WAR
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        response:
+          success: true
+          message: SMS sent
+    - params: {}
+      response:
+        response:
+          success: true
+          message: SMS sent
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: RV
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: RV
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5559514507'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- rv
+- new_claim
+- human_request
+- escalation
+- regression

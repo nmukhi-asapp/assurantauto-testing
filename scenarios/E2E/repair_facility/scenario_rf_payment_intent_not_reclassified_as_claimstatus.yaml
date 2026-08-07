@@ -1,0 +1,186 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-STALE-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a dealer or repair facility, say repair facility
+  - When asked what you need help with today, say "Payment"
+  - When asked for an identifier, provide the last 8 characters of the VIN 'HU204394'
+  - After the agent shares the claim statuses, say you want to be connected to an
+    agent
+  knowledge: You are calling from a repair facility about payment on a claim (VIN
+    ending HU204394). You specifically want to know about payment — not a general
+    claim status update. If the agent tells you the claim status without directly
+    answering your payment question, ask for an agent.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Repair facility.", "Payment."). Confirmations are single words or short phrases
+    only ("Yes.", "Yeah."). For open-ended questions, gives a direct fragment of 5-8
+    words — never full sentences, never explanations. Professional and a little impatient
+    — wants a clear answer about payment specifically.
+description: "Regression test reproducing production conversation 2498599441-2418479601-2577319672-2715840925,\
+  \ where the caller explicitly said \"Payment\" as their reason for calling, the\
+  \ agent looked up the claim and displayed claim status information (since that's\
+  \ what the API returns), and then re-derived GAIntent as CLAIMSTATUS at escalation\
+  \ time instead of preserving the caller's originally-stated PAYMENT sub-type — routing\
+  \ to CLAIM instead of PAY. RepairShopIssues Step 2.1 now pins GAIntent to the caller's\
+  \ originally-stated sub-type and forbids re-deriving it from what was just displayed.\
+  \ This scenario verifies GAIntent stays PAYMENT even though the claim data shown\
+  \ to the caller is phrased as claim status."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent looks up the claim using the VIN provided and shares the status of the claim(s)
+    found
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'PAYMENT' rather than 'CLAIMSTATUS', since the caller's originally-stated
+    reason for calling was payment
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_payment_intent_not_reclassified_as_claimstatus
+mock_user:
+  current_timestamp: '2026-08-05'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5554124692'
+    - params: {}
+      response:
+        PhoneNumber: '5554124692'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: 'Contract and cases are not found in GLOW for the given input  ANI : 5554124692'
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: true
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: true
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        response:
+          success: true
+          message: SMS sent
+    - params: {}
+      response:
+        response:
+          success: true
+          message: SMS sent
+    getClaimsLast8OfVin:
+    - params:
+        channel: '*'
+        last8OfVin: '*'
+        userType: '*'
+      response:
+        claims:
+        - productType: WAR
+          contractNumber: FAOR653233
+          VIN: KMHGN4JE0HU204394
+          specCoveragePlanCode: Comprehensive
+          claimStatusDescription: For information on your claim, please select 'all
+            other inquiries' in the next prompt.
+          breakdownMileage: 111000
+          claimStatus: Closed
+          createdOn: '2026-06-22'
+          claimNumber: '50007738'
+          formNumber: FAORR0517
+          salesforceID: 500Pm00001fiAGVIA2
+        - productType: WAR
+          contractNumber: FAOR653233
+          VIN: KMHGN4JE0HU204394
+          specCoveragePlanCode: Comprehensive
+          claimStatusDescription: The covered portion of this claim was authorized.
+            An authorization letter was sent to your facility.
+          breakdownMileage: 111318
+          repairShopName: Bowser Chevrolet of Monroeville
+          claimStatus: Authorization Approved
+          repairOrderNumber: '606749'
+          createdOn: '2026-06-22'
+          claimNumber: '50016375'
+          formNumber: FAORR0517
+          salesforceID: 500Pm00001fmYKEIA2
+        model: G80 BASE/PREMIUM/ULTIMATE
+        make: GENESIS
+        productCode: MAO2FE
+        success: true
+        roadsideAdministratorPhoneNumber: 1-800-270-8447
+        numberOfClaims: 2
+    - params: {}
+      response:
+        success: false
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: PAY
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: PAY
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: enc_claim
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5554124692'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- payment
+- claim_status
+- stale_intent
+- escalation
+- regression

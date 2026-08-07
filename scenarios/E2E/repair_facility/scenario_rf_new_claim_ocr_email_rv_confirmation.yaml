@@ -1,0 +1,163 @@
+company_marker: assurantauto
+customer:
+  customer_id: RF-RV-003
+  evaluation_goals: null
+  goals:
+  - CRITICAL, overrides every other goal below — if the agent EVER asks whether the
+    vehicle is a recreational vehicle, RV, or motorhome, answer that question directly
+    and honestly ("Yes, it's a fifth wheel.") before saying anything else, even if
+    you were in the middle of reporting on the confirmation email. Never deflect,
+    ignore, or talk past this specific question — always answer it the first time
+    it is asked.
+  - When the agent asks whether you are a customer, dealer, or repair facility, say
+    repair facility
+  - When asked what you're calling about, say you are filing a new claim
+  - When asked if you've already emailed the Repair Order, say no
+  - When asked whether you prefer to file online or by phone, decline both and say
+    you'll email the Repair Order now
+  - When told to email the Repair Order and confirm once sent, say you sent it
+  - If asked again later whether you've received the confirmation email, keep saying
+    you have not received it yet — but only when that is actually what's being asked;
+    if the agent asks a different, direct question (like the RV question above), answer
+    that question instead of repeating the email status
+  knowledge: You are calling from a repair facility about a customer's 2026 Dutchmen
+    Astoria fifth wheel RV. You are filing a new claim by emailing the Repair Order,
+    but the confirmation email with the case number never arrives during the call.
+    If asked, confirm the vehicle is a recreational vehicle / RV.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Repair facility.", "New claim.", "No.", "Sent it."). Confirmations are single
+    words or short phrases only ("Yes.", "Yeah."). For open-ended questions, gives
+    a direct fragment of 5-8 words — never full sentences, never explanations. Patient
+    but a little confused about why the confirmation email hasn't shown up — but always
+    breaks from that fixation to answer a genuinely new, direct question (such as
+    being asked about RV/motorhome status) the first time it's asked, rather than
+    repeating the email status over it.
+description: "Regression test reproducing production conversation 3711332577-2429948401-2281228024-2715840925,\
+  \ an RV claim filed through the New Claim / OCR-email intake flow. This flow never\
+  \ collects a VIN, contract number, or claim number by design (vehicle identification\
+  \ is deferred to the emailed Repair Order), so the RV Confirmation Check — which\
+  \ depends on lookup data — previously had nothing to evaluate and never fired. The\
+  \ agent escalated with GAIntent=NEWCLAIM-OCR-EMAIL without ever asking about RV\
+  \ status. The OCR-email escalation path now explicitly runs Step 0 (RV Confirmation)\
+  \ before Step 3, even though Step 1/2A are still skipped. This scenario verifies\
+  \ the RV question fires and GAIntent is overridden to RV."
+evaluations:
+- rules:
+  - Agent routes to RepairShopIssues after the caller identifies as a repair facility
+- rules:
+  - Agent directs the caller to email the Repair Order and waits for a case number
+    without ending the call or asking for anything else in the meantime
+- rules:
+  - Before escalating because the confirmation email never arrived, the agent asks
+    the caller whether the vehicle is a recreational vehicle or RV, even though no
+    VIN, contract number, or claim number was ever collected in this conversation
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'RV' rather than 'NEWCLAIM-OCR-EMAIL', since the caller confirmed
+    the vehicle is a recreational vehicle
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Repair Facility'
+id: e2e_rf_new_claim_ocr_email_rv_confirmation
+mock_user:
+  current_timestamp: '2026-08-06'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5557343040'
+    - params: {}
+      response:
+        PhoneNumber: '5557343040'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: 'Contract and cases are not found in GLOW for the given input  ANI : 5557343040'
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_repair_facility:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        response:
+          success: true
+          message: SMS sent
+    - params: {}
+      response:
+        response:
+          success: true
+          message: SMS sent
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: RV
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: RV
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5557343040'
+  max_turns: 25
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- repair_facility
+- rv
+- new_claim
+- ocr_email
+- escalation
+- regression

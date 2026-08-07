@@ -1,0 +1,154 @@
+company_marker: assurantauto
+customer:
+  customer_id: RT-LENDER-002
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a customer, dealer, or repair facility, say
+    "No"
+  - When the agent asks if you are an Assurant employee, a bank/lender, or asks you
+    to describe your role, say you are a lender
+  - If the agent asks what you need help with regarding the contract, say you need
+    a payoff quote because the vehicle loan is being transferred to a new owner
+  - If the agent says it cannot help directly and will connect you to an agent, accept
+    the transfer
+  knowledge: You are a loan officer from Regions Bank calling as a lienholder about
+    a customer's auto service contract. You are not a contract holder, dealer, repair
+    facility, or Assurant employee. You are calling because you need a payoff quote
+    on the contract — the vehicle loan is being transferred to a new owner.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words.
+    Confirmations are single words or short phrases only ("Yes.", "Yeah.", "That's
+    correct."). For open-ended questions about your role, gives a direct fragment
+    of 5-8 words — never full sentences. But when the agent directly asks what you
+    need help with, states your actual reason in one clear short sentence rather than
+    deflecting — you have a real, specific task to accomplish. Businesslike and a
+    little impatient.
+description: "Regression test reproducing production conversations 4206595749-2421297649-2499527157-1773867395\
+  \ and 1618809544-2418479601-3103770141-4137753812, where a self-identified lienholder/lender\
+  \ was escalated immediately with GAIntent=ALLOTHER_QUESTIONS (routing to CS) without\
+  \ ever being asked what they needed. In both production calls the lender was never\
+  \ given a chance to state a reason before ContractHolderIssues' lienholder escalation\
+  \ rule fired. This scenario gives the lender a concrete, statable need (a payoff\
+  \ quote for a loan transfer, which maps to CONTRACTCHANGES/PREM) to verify the agent\
+  \ now asks before escalating and sets GAIntent accordingly instead of defaulting\
+  \ to ALLOTHER_QUESTIONS."
+evaluations:
+- rules:
+  - Agent routes the lender/lienholder caller to the ContractHolderIssues task after
+    they identify their role
+- rules:
+  - Agent does not attempt to look up the contract, or answer coverage or claims questions,
+    on behalf of the lender
+- rules:
+  - Before escalating, the agent asks the lender what they need help with regarding
+    the contract rather than escalating immediately after the lender identifies their
+    role
+- rules:
+  - The caller is escalated to a human agent via escalate_to_agent_from_ivr before
+    the conversation ends
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'CONTRACTCHANGES' rather than 'ALLOTHER_QUESTIONS', reflecting
+    the payoff/loan-transfer need the lender stated
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_routing_lender_caller_states_need
+mock_user:
+  current_timestamp: '2026-08-05'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5558330895'
+    - params: {}
+      response:
+        PhoneNumber: '5558330895'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: 'Contract and cases are not found in GLOW for the given input  ANI : 5558330895'
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_contract_holder:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        success: false
+        message: SMS was not sent - number is not a wireless carrier
+    - params: {}
+      response:
+        success: false
+        message: SMS was not sent - number is not a wireless carrier
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: PREM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: PREM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: ''
+        ContractNumber: ''
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5558330895'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- routing
+- lender
+- contract_holder
+- caller_identification
+- regression

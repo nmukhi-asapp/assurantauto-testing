@@ -1,0 +1,183 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-REGRESSION-VIN-001
+  evaluation_goals: null
+  goals:
+  - When the agent's welcome message asks if you want to get a repair started, say
+    yes
+  - As soon as the agent offers to walk you through the claim steps, say "Agent" instead
+    of answering
+  - When the agent asks if everything is okay with your vehicle and what you need,
+    say "No" without explaining further
+  - If the agent asks you for a claim number, contract number, or VIN, say you don't
+    have it handy and just want to speak to someone — do NOT provide any identifier
+    even if pressed
+  - Accept being transferred once the agent proceeds with the transfer
+  knowledge: You are a contract holder calling about your 2017 Infiniti QX50 (contract
+    AU6RA11921E, VIN JN1BJ0RP2HM386580). Your phone number is already on file with
+    Assurant. You want to speak to a person but don't want to explain why or provide
+    any additional information.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Yes.", "Agent.", "No."). Confirmations are single words or short phrases only.
+    For open-ended questions, gives a direct fragment of 5-8 words — never full sentences,
+    never explanations. Mildly evasive about providing any identifying information,
+    even when the agent explains why it's needed — just wants to be transferred.
+description: "Regression test reproducing production conversation 3809782155-2356023793-2749744669-4137753812,\
+  \ where get_contract_and_claims_data_ivr succeeded during CallerIdentification (full\
+  \ contract and VIN on file) but the agent still asked the caller to read back their\
+  \ VIN character-by-character before escalating — spending roughly a minute collecting\
+  \ a VIN that was already on file, and which the caller ultimately read back digit-for-digit\
+  \ identical to the one already known. ContractHolderIssues' Unified Escalation Protocol\
+  \ Step 1 has an explicit Scenario A (\"API call succeeded → skip identifier collection\
+  \ entirely\") that the agent never engaged with in that conversation. Step 1 now\
+  \ has a mandatory STOP-gate requiring the agent to explicitly state whether the\
+  \ lookup succeeded, and what VIN/ContractNumber are already on file, before it may\
+  \ pick a scenario. This scenario verifies the agent proceeds straight to transfer\
+  \ using the already-known identifiers instead of re-asking the caller for one."
+evaluations:
+- rules:
+  - Agent routes to ContractHolderIssues and the contract lookup succeeds using the
+    caller's phone number
+- rules:
+  - After the caller declines to state a specific need and insists on an agent, the
+    agent delivers the Guardrail 6 deflection message before escalating
+- rules:
+  - The agent does NOT ask the caller for a claim number, contract number, or VIN
+    at any point in this conversation, since the contract was already successfully
+    retrieved by phone number
+- rules:
+  - The agent proceeds to escalate using the VIN or contract number already on file
+    from the successful phone lookup, without requesting any additional identifier
+    from the caller
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The VIN or ContractNumber parameter passed to escalate_to_agent_from_ivr corresponds
+    to the contract already retrieved by phone number, not a value newly collected
+    from the caller in this conversation
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_ch_agent_request_ani_success_no_redundant_identifier
+mock_user:
+  current_timestamp: '2026-07-31'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5045042026'
+    - params: {}
+      response:
+        PhoneNumber: '5045042026'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: JN1BJ0RP2HM386580
+              contractNumber: AU6RA11921E
+              customerFirstName: Morgan
+              customerLastName: Bennett
+              customerEmail: morgan.bennett@test.assurant.com
+              customerAddress1: 357 Hiller Dr
+              customerCity: Biloxi
+              customerCountry: USA
+              customerStateCode: MS
+              customerPostalCode: '39531'
+              vehicleYear: 2017
+              make: INFINITI
+              model: QX50
+              expirationDate: '2027-11-14'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              claims: []
+              tieBackDistance: 40
+              sellingDealerName: Star Chevrolet Inc
+              sellingDealerPhone: '6019284405'
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_contract_holder:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        response:
+          success: true
+          message: SMS sent
+    - params: {}
+      response:
+        response:
+          success: true
+          message: SMS sent
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5045042026'
+  max_turns: 15
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- edge_case
+- human_request
+- ani_lookup_success
+- regression

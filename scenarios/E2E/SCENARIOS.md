@@ -72,6 +72,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 |---|---|---|---|
 | `e2e_journey7_unknown_intent` | contract_holder/journey7_other/scenario_1_unknown_intent.yaml | Vague caller — agent helps identify what they actually need | ✅ run |
 | `e2e_journey7_billing_inquiry` | contract_holder/journey7_other/scenario_2_billing_inquiry.yaml | Customer calling about a billing issue or unexpected charge | ✅ run |
+| `e2e_ch_payment_delivery_method_change` | contract_holder/journey7_other/scenario_payment_delivery_method_change.yaml | KNOWN GAP: CH wants an already-approved reimbursement redirected to direct deposit instead of a mailed check — no journey covers changing payment delivery method; regression basis for prod 0499405229-2419593713-2825172512-0057976937 | |
 
 ### Edge Cases — API / Lookup
 
@@ -115,6 +116,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_edge_case_ch_human_request_steered_to_resolution` | contract_holder/edge_cases/scenario_16_ch_human_request_steered_to_resolution.yaml | CH opens with human request but actual need is claim status → agent handles it without escalating | ✅ run |
 | `e2e_ch_mid_journey_human_request` | contract_holder/edge_cases/scenario_ch_mid_journey_human_request.yaml | CH checks claim status then mid-conversation asks for human without reason → agent probes → rental coverage question is in-scope → answered without escalating | |
 | `e2e_ch_spanish_language_request` | contract_holder/edge_cases/scenario_ch_spanish_language_request.yaml | CH immediately requests Spanish-language support — agent escalates to live agent without attempting English resolution | |
+| `e2e_ch_agent_request_ani_success_no_redundant_identifier` | contract_holder/edge_cases/scenario_ani_success_no_redundant_identifier.yaml | Regression: ANI lookup succeeds (full contract/VIN on file) → CH requests agent without stating a need → agent must NOT re-ask for claim/contract/VIN, must transfer using data already on file (Scenario A skip bug); reproduces prod 3809782155-2356023793-2749744669-4137753812 | |
 
 ---
 
@@ -140,6 +142,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_rf_identifier_type_not_repeated` | repair_facility/scenario_identifier_type_not_repeated.yaml | Regression: RF states identifier type when providing claim/contract/VIN — agent must not re-ask for type after number is given | |
 | `e2e_rf_identifier_loop_agent_transfer` | repair_facility/scenario_rf_identifier_loop_agent_transfer.yaml | RF requests agent — two consecutive identifier lookups fail (VIN then claim number) — agent transfers rather than ending call | |
 | `e2e_rf_profanity_claim_status` | repair_facility/scenario_rf_profanity_claim_status.yaml | RF uses mild profanity out of frustration when told claim is under review — agent must not refuse service, must acknowledge frustration and continue, then escalate | |
+| `e2e_rf_payment_intent_not_reclassified_as_claimstatus` | repair_facility/scenario_rf_payment_intent_not_reclassified_as_claimstatus.yaml | Regression: RF states "Payment" as reason for calling, agent displays claim status data, GAIntent must stay PAYMENT (not re-derived as CLAIMSTATUS) at escalation; reproduces prod 2498599441-2418479601-2577319672-2715840925 | |
 
 ### New Claims / RO Submission
 
@@ -155,6 +158,14 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_rf_coverage_eligibility_before_claim` | repair_facility/scenario_coverage_eligibility_before_claim.yaml | RF asks whether a specific repair is covered before filing a claim | ✅ run |
 | `e2e_rf_new_claim_no_premature_wrap_up` | repair_facility/scenario_new_claim_no_premature_wrap_up.yaml | Regression: agent must not ask "Is there anything else?" or end call while RF is still emailing the RO — must stay on line, wait for case number, then escalate | |
 | `e2e_rf_sms_failure_silent_proceed` | repair_facility/scenario_sms_failure_silent_proceed.yaml | Regression: `send_sms_to_phone` fails (null response) — agent must NOT surface the failure to the caller, must still inform about the self-service portal, and proceed normally to assist | |
+
+### RV Detection
+
+| ID | File | Description | Run |
+|---|---|---|---|
+| `e2e_rf_rv_signal_in_claim_data` | repair_facility/scenario_rf_rv_signal_in_claim_data.yaml | Regression: claim lookup returns unambiguous RV signal (make=JAYCO, specCoveragePlanCode='Exclusionary RV') but agent must still explicitly run the RV Confirmation Check before escalating (STOP-gate); reproduces prod 2771077585-2421101041-2426455800-2715840925 | |
+| `e2e_rf_rv_no_lookup_data_step0_confirmation` | repair_facility/scenario_rf_rv_no_lookup_data_step0_confirmation.yaml | Regression: no claim/contract lookup ever succeeds (ANI-linked RV contracts correctly disregarded, or agent escalates before collecting an identifier) — agent must still ask the RV question via new Step 0; reproduces prod 1129718927-2419200497-2385495800-2715840925 and 1969790230-2418741745-2947204856-2715840925 | |
+| `e2e_rf_new_claim_ocr_email_rv_confirmation` | repair_facility/scenario_rf_new_claim_ocr_email_rv_confirmation.yaml | Regression: New Claim / OCR-email flow never collects a VIN — agent must still ask the RV question via Step 0 before the OCR-email escalation shortcut; reproduces prod 3711332577-2429948401-2281228024-2715840925 | |
 
 ### Encryption / Variable Handling
 
@@ -204,6 +215,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_dealership_contract_modification` | dealership/scenario_6_contract_modification.yaml | Dealership requests contract modification (adding GAP) — escalates | ✅ run |
 | `e2e_dealer_coverage_question_engine_mounts` | dealership/scenario_coverage_question_engine_mounts.yaml | Dealer asks pre-claim coverage question about engine mounts — agent reads termsStructuredText and describes coverage | |
 | `e2e_dealer_last8_vin_sufficient_for_transfer` | dealership/scenario_last8_vin_sufficient_for_transfer.yaml | Dealer starts new claim with last 8 VIN — agent uses it for transfer without requiring full VIN | |
+| `e2e_dealership_cancellation_on_customers_behalf` | dealership/scenario_dealer_cancellation_on_customers_behalf.yaml | Regression: dealer requests cancellation on customer's behalf — DealershipIssues had no cancellation handling at all (GAIntent fell to ALLOTHER_QUESTIONS); agent must suggest contract holder call in, then escalate with GAIntent=CANCELLATION if dealer insists; reproduces prod 0742139945-2421166577-2856436213-1773867395 | |
 
 ### Human Request
 
@@ -228,6 +240,7 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 | `e2e_routing_department_names_approved_only` | routing/department_names_row61.yaml | Agent must only refer to the four approved department names (Claims, Customer Care, Payments, Premiums) | ✅ run |
 | `e2e_routing_ai_disclosure` | routing/scenario_ai_disclosure.yaml | Caller asks if agent is a real person — agent discloses it is AI and continues helping | |
 | `e2e_routing_lender_caller` | routing/scenario_lender_caller.yaml | Lender caller (bank employee) — agent recognizes out-of-scope caller type and handles gracefully without looping on identification | |
+| `e2e_routing_lender_caller_states_need` | routing/scenario_lender_caller_states_need.yaml | Regression: lender states a concrete need (payoff quote for loan transfer) — agent must ask what they need before escalating and set GAIntent=CONTRACTCHANGES, not default to ALLOTHER_QUESTIONS; reproduces prod 4206595749-2421297649-2499527157-1773867395 and 1618809544-2418479601-3103770141-4137753812 | |
 
 ---
 
@@ -243,11 +256,11 @@ All E2E scenarios for the assurant auto IVR agent. `✅ run` = included in `e2e_
 
 | Caller Type | Scenarios |
 |---|---|
-| Contract Holder | 55 |
-| Repair Facility | 26 |
-| Dealership | 18 |
-| Routing | 8 |
+| Contract Holder | 57 |
+| Repair Facility | 30 |
+| Dealership | 19 |
+| Routing | 9 |
 | Employee | 1 |
-| **Total** | **108** |
+| **Total** | **116** |
 
 > Target scenarios (`target/`) are for a separate client and are excluded from this index.

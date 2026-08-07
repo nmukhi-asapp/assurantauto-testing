@@ -1,0 +1,174 @@
+company_marker: assurantauto
+customer:
+  customer_id: DLR-CANCEL-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks whether you are a Contract Holder, Dealership, or Assurant
+    Employee, say you are a Dealer
+  - When asked what you're calling about, say you have a contract question
+  - When asked for an identifier, provide the last 8 characters of the VIN 'L9700409'
+  - Once the agent answers your coverage question, say you need to cancel the customer's
+    contract
+  - If the agent suggests having the contract holder call in instead, insist that
+    you need to process this now on the customer's behalf because they are trading
+    in the vehicle today
+  - Accept being transferred to an agent if offered
+  knowledge: You are calling from a dealership. A customer trading in their 2020 Subaru
+    BRZ (VIN JF1ZCAC16L9700409, last 8 L9700409, contract number FAOR454220) is at
+    your dealership right now and needs their Assurant service contract cancelled
+    as part of the trade-in so the unused premium can be refunded. If asked your caller
+    type, say Dealer.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words
+    ("Dealer.", "Contract question.", "Cancel it."). Confirmations are single words
+    or short phrases only ("Yes.", "Yeah.", "That's correct."). For open-ended questions,
+    gives a direct fragment of 5-8 words — never full sentences, never explanations.
+    Never volunteers context or reasons unless asked directly. Businesslike, mildly
+    impatient — the customer is standing at the counter waiting.
+description: "Regression test reproducing production conversation 0742139945-2421166577-2856436213-1773867395,\
+  \ where a dealership caller asked a coverage question, then said \"Cancel contract\"\
+  \ on the customer's behalf, and the agent escalated with GAIntent=ALLOTHER_QUESTIONS\
+  \ (routing to CLAIM) instead of GAIntent=CANCELLATION (routing to PREM). DealershipIssues\
+  \ previously had no cancellation handling at all — its intent_list had no CANCELLATION\
+  \ option and Step 4 had no Cancellations subsection. This scenario verifies the\
+  \ agent now recognizes a dealer-initiated cancellation request, first suggests the\
+  \ contract holder call in directly, and — when the dealer insists on proceeding\
+  \ now — escalates with GAIntent=CANCELLATION."
+evaluations:
+- rules:
+  - Agent routes to DealershipIssues after the caller identifies as a Dealer
+- rules:
+  - Agent looks up the contract using the VIN provided and answers the coverage question
+    using the contract's terms
+- rules:
+  - When the dealer says they need to cancel the customer's contract, the agent tells
+    the dealer that cancellations generally need to be requested by the contract holder
+    or lienholder directly
+- rules:
+  - When the dealer insists on proceeding on the customer's behalf, the agent proceeds
+    to escalate rather than refusing or ending the call
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'CANCELLATION' rather than 'ALLOTHER_QUESTIONS'
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Selling Dealer'
+id: e2e_dealership_cancellation_on_customers_behalf
+mock_user:
+  current_timestamp: '2026-08-05'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5556505607'
+    - params: {}
+      response:
+        PhoneNumber: '5556505607'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: false
+          errorMessage: 'Contract and cases are not found in GLOW for the given input  ANI : 5556505607'
+    - params:
+        VIN: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: JF1ZCAC16L9700409
+              contractNumber: FAOR454220
+              customerFirstName: Jordan
+              customerLastName: Ellis
+              customerEmail: jordan.ellis@test.assurant.com
+              customerAddress1: 88 Birch Ln
+              customerCity: Redwood City
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '94061'
+              vehicleYear: 2020
+              make: SUBARU
+              model: BRZ
+              expirationDate: '2026-12-08'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              sellingDealerName: Putnam Chrysler Jeep Dodge
+              sellingDealerPhone: '6505585602'
+              termsStructuredText: This Vehicle Service Contract covers mechanical
+                breakdown of the engine, transmission, and drivetrain components after
+                the manufacturer's warranty expires, subject to a $100 deductible per
+                covered repair visit.
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: PREM
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: PREM
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5556505607'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- dealership
+- cancellation
+- contract_modification
+- escalation
+- regression

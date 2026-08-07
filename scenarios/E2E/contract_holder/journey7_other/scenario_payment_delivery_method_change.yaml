@@ -1,0 +1,177 @@
+company_marker: assurantauto
+customer:
+  customer_id: CHI-GAP-PAYMENT-001
+  evaluation_goals: null
+  goals:
+  - When the agent asks what you need help with, say you want your reimbursement
+    sent by direct deposit instead of a mailed check
+  - If the agent apologizes and says it cannot help with that, ask to speak to an
+    agent
+  - Accept being transferred
+  knowledge: You are a contract holder who was already approved for a reimbursement
+    payment. You want Assurant to change how that payment is delivered — direct deposit
+    to your bank account instead of a mailed check — not to check the status of the
+    reimbursement or start a new one.
+  personality: Responds like a real caller on a phone IVR. Extremely terse. When the
+    agent offers specific options, answers with just the matching option in 1-3 words.
+    Confirmations are single words or short phrases only ("Yes.", "Yeah."). For open-ended
+    questions, gives a direct fragment of 5-8 words — never full sentences, never
+    explanations. Mildly frustrated that this seems like a simple request the agent
+    can't handle.
+description: "KNOWN GAP — no instruction fix has been drafted for this yet; this scenario\
+  \ documents the gap so it can be tracked and picked up. Reproduces production conversation\
+  \ 0499405229-2419593713-2825172512-0057976937, where a contract holder asked to\
+  \ change how an already-approved reimbursement is delivered (mailed check → direct\
+  \ deposit). ContractHolderIssues' Journey 7 (Reimbursement Questions) only covers\
+  \ starting a reimbursement, checking its status, or emergency-repair situations\
+  \ — there is no path for changing the delivery method of a payment already in flight.\
+  \ The agent correctly recognized this didn't map to any journey and escalated, but\
+  \ with GAIntent=ALLOTHER_QUESTIONS. NOTE: per the company's own intent → queue mapping,\
+  \ PAYMENT and ALLOTHER_QUESTIONS both route Contract Holder callers to the CS queue\
+  \ — so even classifying this as GAIntent=PAYMENT (the closest existing value) would\
+  \ NOT change the queue outcome under the current mapping. If a PAYMENTS-specific\
+  \ queue destination is actually desired for this scenario (as originally flagged),\
+  \ the queue mapping itself likely needs a new row, not just a GAIntent fix — that's\
+  \ a config decision outside instruction-text changes and should be confirmed before\
+  \ any fix is implemented here."
+evaluations:
+- rules:
+  - Agent asks the customer what they need help with and lets them fully describe
+    the reimbursement delivery-method change request before responding
+- rules:
+  - Agent does not confirm or deny that the delivery method can be changed without
+    first checking whether any instructions cover it
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - GAIntent is set to 'PAYMENT' rather than 'ALLOTHER_QUESTIONS', reflecting that
+    the request concerns an existing payment/reimbursement even though no journey
+    handles the specific delivery-method-change request
+- applicability:
+  - The agent called escalate_to_agent_from_ivr
+  rules:
+  - The GACallerType parameter passed to escalate_to_agent_from_ivr is 'Contract Holder'
+id: e2e_ch_payment_delivery_method_change
+mock_user:
+  current_timestamp: '2026-08-05'
+  description: null
+  id: null
+  mock_responses:
+    decrypt_variables:
+    - params:
+        PhoneNumber: '*'
+      response:
+        PhoneNumber: '5556197695'
+    - params: {}
+      response:
+        PhoneNumber: '5556197695'
+    get_contract_and_claims_data_ivr:
+    - params:
+        PhoneNumber: '*'
+      response:
+        response:
+          success: true
+          contractClaims:
+            contract:
+            - VIN: 1GNSCAKC5HR225574
+              contractNumber: AU6RA11843C
+              customerFirstName: Alex
+              customerLastName: Rivas
+              customerEmail: alex.rivas@test.assurant.com
+              customerAddress1: 3665 Birdy Dr
+              customerCity: La Mesa
+              customerCountry: USA
+              customerStateCode: CA
+              customerPostalCode: '91941'
+              vehicleYear: 2017
+              make: GMC
+              model: ACADIA
+              expirationDate: '2027-05-01'
+              status: Active
+              productName: Service Contract
+              productType: WAR
+              claims:
+              - claimNumber: '50098211'
+                status: Payment Approved
+                createdOn: '2026-07-20'
+                longVerbiageStatus: This claim has been approved for reimbursement
+                  payment.
+    - params: {}
+      response:
+        response:
+          success: false
+    is_repair_facility:
+    - params:
+        PhoneNumber: '*'
+      response:
+        repairFacilityOrSellingDealer: false
+    - params: {}
+      response:
+        repairFacilityOrSellingDealer: false
+    send_sms_contract_holder:
+    - params:
+        PhoneNumber_decrypted: '*'
+      response:
+        response:
+          success: true
+          message: SMS sent
+    - params: {}
+      response:
+        response:
+          success: true
+          message: SMS sent
+    get_hoop_message:
+    - params:
+        callerType: '*'
+        intent: '*'
+        isCSOpen: '*'
+        isClaimsOpen: '*'
+        isPaymentOpen: '*'
+        isPremOpen: '*'
+        isRVOpen: '*'
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    - params: {}
+      response:
+        isOpen: true
+        queue: CS
+        message: ''
+    encrypt_variables:
+    - params:
+        PhoneNumber: '*'
+        VIN: '*'
+        ContractNumber: '*'
+        ClaimNumber: '*'
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    - params: {}
+      response:
+        PhoneNumber: enc_phone
+        VIN: enc_vin
+        ContractNumber: enc_contract
+        ClaimNumber: ''
+    escalate_to_agent_from_ivr:
+    - params: {}
+      response: {}
+name: null
+seed: null
+settings:
+  agent_speaks_first: true
+  input_variables:
+    PhoneNumber: '5556197695'
+  max_turns: 20
+  task_name: CallerIdentification
+simulated_conversations: {}
+tags:
+- e2e
+- contract_holder
+- journey7_other
+- payment
+- known_gap
+- reimbursement
+- escalation

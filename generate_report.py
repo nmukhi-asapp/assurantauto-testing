@@ -460,7 +460,14 @@ def extract_transcript(state: dict) -> list:
             transcript.append({"time": time_str, "speaker": "customer",
                                 "text": _dedupe_text(text)})
 
-    return transcript
+    # Merge consecutive agent turns (filler + response sent before customer replies)
+    merged = []
+    for entry in transcript:
+        if merged and entry["speaker"] == "agent" and merged[-1]["speaker"] == "agent":
+            merged[-1]["text"] += " " + entry["text"]
+        else:
+            merged.append(entry)
+    return merged
 
 
 # ─── Plotly timeline ──────────────────────────────────────────────────────────
